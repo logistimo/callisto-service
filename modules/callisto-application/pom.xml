@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>callisto-application</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <parent>
-        <artifactId>callisto-api</artifactId>
+        <artifactId>callisto-service</artifactId>
         <groupId>com.logistimo</groupId>
-        <version>0.0.1</version>
+        <version>0.1.0</version>
         <relativePath>../../</relativePath>
     </parent>
 
@@ -18,22 +18,22 @@
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>callisto-models</artifactId>
-            <version>0.0.1</version>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>callisto-core</artifactId>
-            <version>0.0.1</version>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>callisto-plugins-mysql</artifactId>
-            <version>0.0.1</version>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.logistimo</groupId>
             <artifactId>callisto-plugins-cassandra</artifactId>
-            <version>0.0.1</version>
+            <version>0.1.0</version>
         </dependency>
     </dependencies>
     <build>
