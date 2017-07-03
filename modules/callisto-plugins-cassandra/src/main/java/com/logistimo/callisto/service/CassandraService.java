@@ -224,8 +224,8 @@ public class CassandraService implements IDataBaseService {
 
   private String constructQuery(String query, Map<String, String> filters) {
     if (filters != null && filters.size() > 0) {
-      for (Map.Entry entry : filters.entrySet()) {
-        query = query.replace(entry.getKey().toString(), filters.get(entry.getKey().toString()));
+      for (Map.Entry<String,String> entry : filters.entrySet()) {
+        query = query.replace(entry.getKey(), entry.getValue());
       }
     }
     return query;
