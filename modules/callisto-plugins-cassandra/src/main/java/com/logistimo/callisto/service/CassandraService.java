@@ -1,22 +1,39 @@
 package com.logistimo.callisto.service;
 
-import com.datastax.driver.core.*;
+import com.google.gson.Gson;
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.Metadata;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
-import com.google.gson.Gson;
 import com.logistimo.callisto.CallistoDataType;
 import com.logistimo.callisto.DataSourceType;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.ServerConfig;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
-/** @author Chandrakant */
+/**
+ * @author Chandrakant
+ */
 @Service(value = "cassandra")
 public class CassandraService implements IDataBaseService {
 
@@ -49,57 +66,30 @@ public class CassandraService implements IDataBaseService {
       Optional<Integer> offset) {
     QueryResults results = new QueryResults();
     try {
-      Session session = getSession(config);
-      if(session==null){
-          return null;
+      Session iSession = getSession(config);
+      if (iSession == null) {
+        logger.warn("Cassandra session is null");
+        return null;
       }
       query = constructQuery(query, filters);
       logger.info("Fetching cassandra results: " + query + filters);
       Statement statement = new SimpleStatement(query);
       offset = Optional.of(offset.orElse(0));
       if (size.isPresent()) {
-        if (offset.get() > DEFAULT_PAGE_SIZE) {
-          statement.setFetchSize(DEFAULT_PAGE_SIZE);
-        } else if (offset.get() > 0) {
-          statement.setFetchSize(offset.get());
-        } else {
-          statement.setFetchSize(size.get());
-        }
+        statement.setFetchSize(getSize(size, offset));
       }
       logger.info("Query Execution started");
-      ResultSet rs = session.execute(statement);
-      if (offset.get() > 0) {
+      ResultSet rs = iSession.execute(statement);
+      if (offset.isPresent() && offset.get() > 0) {
         skipRows(rs, statement, size, offset.get());
       }
-      List<String> headers;
-      List<CallistoDataType> dataTypes;
       ColumnDefinitions columnDefinitions = rs.getColumnDefinitions();
-      headers = new ArrayList<>(columnDefinitions.size());
-      dataTypes = new ArrayList<>(columnDefinitions.size());
-      for (ColumnDefinitions.Definition definition : columnDefinitions) {
-        headers.add(definition.getName());
-        if (integerDataTypes.contains(definition.getType().getName())) {
-          dataTypes.add(CallistoDataType.NUMBER);
-        } else {
-          dataTypes.add(CallistoDataType.STRING);
-        }
-      }
-      results.setHeadings(headers);
-      results.setDataTypes(dataTypes);
+      results = setResultMetaData(results, columnDefinitions);
+      List<String> headers = results.getHeadings();
       for (Row row : rs) {
         List<String> rowVal = new ArrayList<>(headers.size());
         for (int i = 0; i < headers.size(); i++) {
-          if (row.getObject(i) != null) {
-            switch(columnDefinitions.getType(i).getName()){
-              case MAP:
-                rowVal.add(new Gson().toJson(row.getMap(i, String.class, BigDecimal.class)));
-                break;
-              default:
-                rowVal.add(row.getObject(i).toString());
-            }
-          } else {
-            rowVal.add("");
-          }
+          rowVal.add(getRowElement(columnDefinitions, row, i));
         }
         results.addRow(rowVal);
         if (size.isPresent() && results.getRows().size() >= size.get()) {
@@ -113,6 +103,49 @@ public class CassandraService implements IDataBaseService {
     }
     logger.info("Query Execution finished");
     return results;
+  }
+
+  private String getRowElement(ColumnDefinitions columnDefinitions, Row row, int i) {
+    if (row.getObject(i) != null) {
+      switch (columnDefinitions.getType(i).getName()) {
+        case MAP:
+          return new Gson().toJson(row.getMap(i, String.class, BigDecimal.class));
+        default:
+          return row.getObject(i).toString();
+      }
+    } else {
+      return "";
+    }
+  }
+
+  private QueryResults setResultMetaData(QueryResults results,
+                                         ColumnDefinitions columnDefinitions) {
+    List<String> headers = new ArrayList<>(columnDefinitions.size());
+    List<CallistoDataType> dataTypes = new ArrayList<>(columnDefinitions.size());
+    for (ColumnDefinitions.Definition definition : columnDefinitions) {
+      headers.add(definition.getName());
+      if (integerDataTypes.contains(definition.getType().getName())) {
+        dataTypes.add(CallistoDataType.NUMBER);
+      } else {
+        dataTypes.add(CallistoDataType.STRING);
+      }
+    }
+    results.setHeadings(headers);
+    results.setDataTypes(dataTypes);
+    return results;
+  }
+
+  private int getSize(Optional<Integer> size, Optional<Integer> offset) {
+    if (offset.isPresent()) {
+      if (offset.get() > DEFAULT_PAGE_SIZE) {
+        return DEFAULT_PAGE_SIZE;
+      } else if (offset.get() > 0) {
+        return offset.get();
+      }
+    } else if(size.isPresent()) {
+      return size.get();
+    }
+    return DEFAULT_PAGE_SIZE;
   }
 
   private ResultSet skipRows(ResultSet rs, Statement st, Optional<Integer> size, int skip) {
@@ -142,16 +175,18 @@ public class CassandraService implements IDataBaseService {
   }
 
   public Session getSession(ServerConfig serverConfig) {
-    int sHash = new Gson().toJson(serverConfig).hashCode();
-    if (session == null || session.isClosed() || sHash != serverConfigHash) {
-      connect(serverConfig);
+    Integer sHash = new Gson().toJson(serverConfig).hashCode();
+    if (!Objects.equals(serverConfigHash, sHash)) {
+      connect(serverConfig, true);
+    } else if (session == null || session.isClosed()) {
+      connect(serverConfig, false);
     }
     return session;
   }
 
-  private void connect(ServerConfig config) {
+  private void connect(ServerConfig config, boolean reconnect) {
     try {
-      if ((cluster == null || cluster.isClosed())) {
+      if (cluster == null || cluster.isClosed() || reconnect) {
         String username = config.getUsername();
         String password = config.getPassword();
         if (StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(password)) {
@@ -167,14 +202,12 @@ public class CassandraService implements IDataBaseService {
           cluster =
               Cluster.builder()
                   .addContactPoints(config.getHosts().toArray(hostArray))
-                  //.withCredentials(config.getUsername().trim(),config.getPassword().trim())
                   .withPort(config.getPort())
                   .build();
-
         }
-        session = cluster.connect(config.getSchema());
-        serverConfigHash = new Gson().toJson(config).hashCode();
       }
+      session = cluster.connect(config.getSchema());
+      serverConfigHash = new Gson().toJson(config).hashCode();
       Metadata metadata = cluster.getMetadata();
       logger.info(
           "Connected to cluster: "
@@ -191,8 +224,8 @@ public class CassandraService implements IDataBaseService {
 
   private String constructQuery(String query, Map<String, String> filters) {
     if (filters != null && filters.size() > 0) {
-      for (String token : filters.keySet()) {
-        query = query.replace(token, filters.get(token));
+      for (Map.Entry entry : filters.entrySet()) {
+        query = query.replace(entry.getKey().toString(), filters.get(entry.getKey().toString()));
       }
     }
     return query;
