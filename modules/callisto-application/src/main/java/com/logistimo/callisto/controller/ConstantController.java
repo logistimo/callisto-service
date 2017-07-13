@@ -21,31 +21,28 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.controller;
 
-/**
- * @author Mohan Raja
- */
-public enum FunctionType {
-  CSV("csv"),
-  ENCLOSE_CSV("enclosecsv");
-  private String value;
+import com.logistimo.callisto.model.ConstantText;
+import com.logistimo.callisto.service.IConstantService;
+import org.springframework.web.bind.annotation.*;
 
-  FunctionType(String value) {
-    this.value = value;
+import javax.annotation.Resource;
+
+/** Created by chandrakant on 24/05/17. */
+@RestController
+@RequestMapping("/constant")
+public class ConstantController {
+
+  @Resource IConstantService constantService;
+
+  @RequestMapping(value = "/save", method = RequestMethod.PUT)
+  public String saveConstant(@RequestBody ConstantText constant) {
+    return constantService.saveConstant(constant);
   }
 
-  @Override
-  public String toString() {
-    return value;
-  }
-
-  public static FunctionType getFunctionType(String value) {
-    for (FunctionType functionTypes : FunctionType.values()) {
-      if(functionTypes.value.equals(value)) {
-        return functionTypes;
-      }
-    }
-    return null;
+  @RequestMapping(value = "/get", method = RequestMethod.GET)
+  public ConstantText getConstant(@RequestParam(defaultValue = "logistimo") String userId, @RequestParam String constId) {
+    return constantService.readConstant(userId, constId);
   }
 }

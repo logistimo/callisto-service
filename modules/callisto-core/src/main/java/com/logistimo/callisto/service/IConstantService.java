@@ -21,29 +21,14 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.service;
 
-/**
- * @author Mohan Raja
- */
-public class CharacterConstants {
-  public static final String SINGLE_QUOTE = "'";
-  public static final String DOUBLE_QUOTE = "\"";
-  public static final String SINGLE_DOLLAR = "$";
-  public static final String COMMA = ",";
-  public static final String FN_ENCLOSE = "$$";
-  public static final String OPEN_BRACKET = "(";
-  public static final String CLOSE_BRACKET = ")";
-  public static final String DIVIDE = "/";
-  public static final String MULTIPLY = "*";
-  public static final String ADD = "+";
-  public static final String SUBTRACT = "-";
-  public static final String ZERO = "0";
-  public static final String EMPTY = "";
-  public static final String SPACE = " ";
+import com.logistimo.callisto.model.ConstantText;
 
-  private CharacterConstants() {
-    // Constants collection class
-  }
+/** Created by chandrakant on 19/05/17. */
+public interface IConstantService {
 
+  ConstantText readConstant(String userId, String constId);
+
+  String saveConstant(ConstantText constant);
 }

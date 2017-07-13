@@ -21,15 +21,33 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.function;
 
-/**
- * @author Mohan Raja
- */
-public class QueryFunction {
-  public FunctionType type;
-  public String queryID;
-  public Integer size;
-  public Integer offset;
-  public boolean fill;
+/** @author Mohan Raja */
+public enum FunctionType {
+  CSV("csv"),
+  ENCLOSE_CSV("enclosecsv"),
+  CONSTANT("constant"),
+  LINK("link"),
+  DATETIME("datetime"),
+  MATH("math");
+  private String value;
+
+  FunctionType(String value) {
+    this.value = value;
+  }
+
+  @Override
+  public String toString() {
+    return value;
+  }
+
+  public static FunctionType getFunctionType(String value) {
+    for (FunctionType functionTypes : FunctionType.values()) {
+      if (functionTypes.value.equals(value)) {
+        return functionTypes;
+      }
+    }
+    return null;
+  }
 }

@@ -60,16 +60,12 @@ public class MysqlService implements IDataBaseService {
       Optional<Integer> size,
       Optional<Integer> offset) {
     QueryResults results = new QueryResults();
-    Connection con = null;
-    Statement stmt = null;
-    try {
-      con = getConnection(config);
-      stmt = con.createStatement();
+    ResultSet rs = null;
+    try(Connection con = getConnection(config); Statement stmt = con.createStatement()) {
       if (size.isPresent()) {
         query = query.concat(" LIMIT " + offset.orElse(0) + "," + size.get());
       }
-      ResultSet rs = stmt.executeQuery(constructQuery(query, filters));
-
+      rs = stmt.executeQuery(constructQuery(query, filters));
       ResultSetMetaData metaData = rs.getMetaData();
       int columnCount = metaData.getColumnCount();
       List<String> headings = new ArrayList<>(columnCount);
@@ -93,16 +89,13 @@ public class MysqlService implements IDataBaseService {
       }
     } catch (Exception e) {
       logger.error("Error while fetching data from mysql using config id" + config.getId(), e);
-    } finally {
+    } finally{
       try{
-        if(con != null){
-          con.close();
-        }
-        if(stmt != null){
-          stmt.close();
+        if(rs != null){
+          rs.close();
         }
       } catch (SQLException e) {
-        logger.warn("Exception while closing SQL connection", e);
+        logger.warn("Exception in closing SQL resultset", e);
       }
     }
     return results;

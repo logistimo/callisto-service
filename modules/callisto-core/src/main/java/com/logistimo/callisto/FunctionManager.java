@@ -21,17 +21,23 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.model;
+package com.logistimo.callisto;
+
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * @author Mohan Raja
- */
-public class QueryRequestModel {
-  public String userId = "logistimo";
-  public String queryId;
-  public Map<String, String> filters;
-  public Integer size;
-  public Integer offset;
+/** Created by chandrakant on 25/05/17. */
+@Component
+public class FunctionManager {
+
+  Map<String, ICallistoFunction> functions;
+
+  public FunctionManager(Map<String, ICallistoFunction> functions) {
+    this.functions = functions;
+  }
+
+  public ICallistoFunction getFunction(String name) {
+    return functions.get(name);
+  }
 }

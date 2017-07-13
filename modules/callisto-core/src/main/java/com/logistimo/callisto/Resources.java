@@ -39,8 +39,7 @@ public class Resources {
 
   public static Resources get() { return SINGLETON; }
 
-  public ResourceBundle getBundle( String baseName, Locale locale ) throws
-      MissingResourceException {
+  public ResourceBundle getBundle( String baseName, Locale locale ) {
     if ( baseName == null || locale == null ) {
       return null;
     }

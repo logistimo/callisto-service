@@ -24,15 +24,23 @@
 package com.logistimo.callisto.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.ResultManager;
+import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
+import com.logistimo.callisto.service.IConstantService;
 import com.logistimo.callisto.service.IQueryService;
 
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -44,6 +52,9 @@ import java.util.List;
 public class QueryController {
 
   @Resource IQueryService queryService;
+  @Resource IConstantService constantService;
+
+  @Autowired ResultManager resultManager;
 
   @RequestMapping(value = "/save", method = RequestMethod.PUT)
   public String saveQuery(@RequestBody QueryText queryText) {
@@ -56,16 +67,24 @@ public class QueryController {
   }
 
   @RequestMapping(value = "/get", method = RequestMethod.GET)
-  public QueryText getQuery(@RequestParam(defaultValue = "logistimo") String userId, @RequestParam String queryId) {
-    QueryText q = queryService.readQuery(userId, queryId);
-    return q;
+  public QueryText getQuery(
+      @RequestParam(defaultValue = "logistimo") String userId, @RequestParam String queryId) {
+    return queryService.readQuery(userId, queryId);
   }
 
   @RequestMapping(value = "/getdata", method = RequestMethod.POST)
   public String getQueryData(@RequestBody QueryRequestModel model) throws CallistoException {
     QueryResults q =
-        queryService.readData(model.userId, model.queryId, model.filters, model.size, model.offset);
-    if(q != null) {
+        queryService.readData(model);
+    if (StringUtils.isNotEmpty(model.desiredResultId)) {
+      ConstantText constant = constantService.readConstant(model.userId, model.desiredResultId);
+      if (constant != null) {
+        Type type = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
+        LinkedHashMap<String, String> myMap = new Gson().fromJson(constant.getConstant(), type);
+        q = resultManager.getDesiredResult(model, q, myMap);
+      }
+    }
+    if (q != null) {
       q.setDataTypes(null);
     }
     return new Gson().toJson(q);
@@ -78,7 +97,8 @@ public class QueryController {
   }
 
   @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
-  public String deleteQuery(@RequestParam(defaultValue = "logistimo") String userId, @RequestParam String queryId) {
+  public String deleteQuery(
+      @RequestParam(defaultValue = "logistimo") String userId, @RequestParam String queryId) {
     return queryService.deleteQuery(userId, queryId);
   }
 }

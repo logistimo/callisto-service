@@ -21,29 +21,52 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.function;
+
+import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.exception.CallistoException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 /**
- * @author Mohan Raja
+ * Created by chandrakant on 18/05/17.
  */
-public class CharacterConstants {
-  public static final String SINGLE_QUOTE = "'";
-  public static final String DOUBLE_QUOTE = "\"";
-  public static final String SINGLE_DOLLAR = "$";
-  public static final String COMMA = ",";
-  public static final String FN_ENCLOSE = "$$";
-  public static final String OPEN_BRACKET = "(";
-  public static final String CLOSE_BRACKET = ")";
-  public static final String DIVIDE = "/";
-  public static final String MULTIPLY = "*";
-  public static final String ADD = "+";
-  public static final String SUBTRACT = "-";
-  public static final String ZERO = "0";
-  public static final String EMPTY = "";
-  public static final String SPACE = " ";
+@Component(value = "enclosecsv")
+public class EncloseCsvFunction implements ICallistoFunction {
 
-  private CharacterConstants() {
-    // Constants collection class
+  private static String name = "enclosecsv";
+  @Autowired
+  @Qualifier("csv")
+  ICallistoFunction csvFunction;
+
+  public String getEncloseCSV(FunctionParam functionParam) throws CallistoException {
+    return ((CsvFunction) csvFunction).getCSV(functionParam, true);
   }
 
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public String getResult(FunctionParam functionParam) throws CallistoException {
+    return getEncloseCSV(functionParam);
+  }
+
+  @Override
+  public int getArgsLength() {
+    return -1;
+  }
+
+  @Override
+  public int getMinArgsLength() {
+    return 1;
+  }
+
+  @Override
+  public int getMaxArgLength() {
+    return 4;
+  }
 }

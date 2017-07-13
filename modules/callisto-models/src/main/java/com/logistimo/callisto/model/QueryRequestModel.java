@@ -21,29 +21,27 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.model;
 
-/**
- * @author Mohan Raja
- */
-public class CharacterConstants {
-  public static final String SINGLE_QUOTE = "'";
-  public static final String DOUBLE_QUOTE = "\"";
-  public static final String SINGLE_DOLLAR = "$";
-  public static final String COMMA = ",";
-  public static final String FN_ENCLOSE = "$$";
-  public static final String OPEN_BRACKET = "(";
-  public static final String CLOSE_BRACKET = ")";
-  public static final String DIVIDE = "/";
-  public static final String MULTIPLY = "*";
-  public static final String ADD = "+";
-  public static final String SUBTRACT = "-";
-  public static final String ZERO = "0";
-  public static final String EMPTY = "";
-  public static final String SPACE = " ";
+import java.util.Map;
 
-  private CharacterConstants() {
-    // Constants collection class
+/** @author Mohan Raja */
+public class QueryRequestModel {
+  public String userId = "logistimo";
+  public String queryId;
+  public Map<String, String> filters;
+  public String desiredResultId; //constant ID for the desired result i.e. LinkedHashMap
+  public Integer size;
+  public Integer offset;
+
+  public QueryRequestModel copy(){
+    QueryRequestModel newRequestModel = new QueryRequestModel();
+    newRequestModel.userId = String.valueOf(this.userId);
+    newRequestModel.queryId = this.queryId;
+    newRequestModel.filters = this.filters;
+    newRequestModel.desiredResultId = this.desiredResultId;
+    newRequestModel.size = this.size;
+    newRequestModel.offset = this.offset;
+    return newRequestModel;
   }
-
 }

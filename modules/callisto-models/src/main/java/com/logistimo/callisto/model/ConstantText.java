@@ -21,29 +21,31 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * @author Mohan Raja
+ * Created by chandrakant on 18/05/17.
  */
-public class CharacterConstants {
-  public static final String SINGLE_QUOTE = "'";
-  public static final String DOUBLE_QUOTE = "\"";
-  public static final String SINGLE_DOLLAR = "$";
-  public static final String COMMA = ",";
-  public static final String FN_ENCLOSE = "$$";
-  public static final String OPEN_BRACKET = "(";
-  public static final String CLOSE_BRACKET = ")";
-  public static final String DIVIDE = "/";
-  public static final String MULTIPLY = "*";
-  public static final String ADD = "+";
-  public static final String SUBTRACT = "-";
-  public static final String ZERO = "0";
-  public static final String EMPTY = "";
-  public static final String SPACE = " ";
 
-  private CharacterConstants() {
-    // Constants collection class
-  }
+@Document
+public class ConstantText {
+
+    @Id
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("user_id")
+    private String userId = "logistimo";
+
+    @JsonProperty("constant")
+    private String constant;
+
+    public String getConstant(){
+      return constant;
+    }
 
 }
