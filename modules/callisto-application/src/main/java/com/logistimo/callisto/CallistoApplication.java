@@ -25,8 +25,10 @@ package com.logistimo.callisto;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
+@EnableCaching
 public class CallistoApplication {
   public static void main(String[] args) {
     SpringApplication.run(CallistoApplication.class, args);

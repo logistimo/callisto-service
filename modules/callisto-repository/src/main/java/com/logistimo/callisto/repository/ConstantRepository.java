@@ -27,10 +27,12 @@ import com.logistimo.callisto.model.ConstantText;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 /** Created by chandrakant on 18/05/17. */
+@Repository
 public interface ConstantRepository extends MongoRepository<ConstantText, String> {
 
   @Query(value = "{ 'userId': ?0 , 'id': ?1 } ")

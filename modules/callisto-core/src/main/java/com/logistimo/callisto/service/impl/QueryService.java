@@ -152,7 +152,7 @@ public class QueryService implements IQueryService {
           FunctionParam
               functionParam =
               new FunctionParam(request, serverConfig.getEscaping(), rowHeadings);
-          functionParam.setFunction(functionText);
+          functionParam.function = functionText;
           String data = qFunction.getResult(functionParam);
           queryText.setQuery(queryText.getQuery().replace(functionText, data));
         }
@@ -161,9 +161,7 @@ public class QueryService implements IQueryService {
     QueryResults queryResults =
         executeQuery(serverConfig, queryText.getQuery(), request.filters, request.size,
             request.offset);
-    if (rowHeadings.size() > 0) {
-      queryResults.setRowHeadings(rowHeadings);
-    }
+    queryResults.setRowHeadings(rowHeadings);
     return queryResults;
   }
 

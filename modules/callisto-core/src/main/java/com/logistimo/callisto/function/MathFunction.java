@@ -25,7 +25,6 @@ package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ICallistoFunction;
-import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IConstantService;
@@ -41,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import java.util.Stack;
 
 import javax.annotation.Resource;
 
@@ -65,7 +63,7 @@ public class MathFunction implements ICallistoFunction {
   public String getResult(FunctionParam functionParam) throws CallistoException {
     return calculateExpression(
         functionParam.getRequest(),
-        functionParam.getFunction(),
+        functionParam.function,
         functionParam.getResultHeadings(),
         functionParam.getResultRow(),
         constantService,
@@ -111,12 +109,13 @@ public class MathFunction implements ICallistoFunction {
       IConstantService constantService,
       IQueryService queryService)
       throws CallistoException {
+    val = val.replaceAll("\\s+", "");
     if (StringUtils.countMatches(val, CharacterConstants.OPEN_BRACKET)
         != StringUtils.countMatches(val, CharacterConstants.CLOSE_BRACKET)) {
       throw new CallistoException("Q101", val);
     }
     String expression = getParameter(val);
-    expression = replaceVariables(expression, headings, row);
+    expression = FunctionsUtil.replaceVariables(expression, headings, row);
     if (request != null) {
       expression = replaceConstants(request.userId, expression, constantService);
     }
@@ -131,21 +130,6 @@ public class MathFunction implements ICallistoFunction {
     }
     result = !result.contains(".") ? result : result.replaceAll("0*$", "").replaceAll("\\.$", "");
     return result;
-  }
-
-  private static String replaceVariables(String val, List<String> headings, List<String> row)
-      throws CallistoException {
-    List<String> variables = getAllVariables(val);
-    for (int i = 0; i < variables.size(); i++) {
-      int index = ResultManager.variableIndex(variables.get(i), headings);
-      if (index != -1) {
-        val = StringUtils.replace(val, variables.get(i), row.get(index));
-      } else {
-        logger.warn("Unknown variable found in Math function: " + val);
-        throw new CallistoException("Q102", variables.get(i), headings.toString());
-      }
-    }
-    return val;
   }
 
   private static String replaceLinks(
@@ -262,37 +246,12 @@ public class MathFunction implements ICallistoFunction {
     return list;
   }
 
-  public static List<String> getAllVariables(String text) {
-    List<String> matches = new ArrayList<>();
-    try {
-      StringBuilder temp = new StringBuilder();
-      for (int i = 0; i < text.length(); i++) {
-        if (i != text.length() - 1
-            && String.valueOf(text.charAt(i)).equals(CharacterConstants.SINGLE_DOLLAR)
-            && !String.valueOf(text.charAt(i + 1)).equals(CharacterConstants.SINGLE_DOLLAR)) {
-          temp.append(text.charAt(i));
-        } else if (FunctionsUtil.isDelimiter(text.charAt(i)) && temp.length() > 0) {
-          matches.add(temp.toString());
-          temp = new StringBuilder();
-        } else if (temp.length() > 0) {
-          temp.append(text.charAt(i));
-        }
-      }
-      if (temp.length() > 0) {
-        matches.add(temp.toString());
-      }
-    } catch (Exception e) {
-      logger.warn("Exception while getting variable list: " + text, e);
-    }
-    return matches;
-  }
-
   /**
    * Stack based implementation for parsing a arithmetic expression. Alternatively {@link
    * javax.script.ScriptEngine} can also be used.
    *
    * @param expr arithmetic expression to be parsed, should contain only numbers and
-   *                   operations, no parenthesis or variables
+   *             operations, no parenthesis or variables
    * @return calculated value of expression.
    * @throws CallistoException in case Number parsing exceptions
    */
@@ -302,52 +261,14 @@ public class MathFunction implements ICallistoFunction {
         && StringUtils.isNotEmpty(expr));
     try {
       String expression = StringUtils.replace(expr, "-", "+-");
-      Pair<Deque<Double>, Deque<Integer>> stackPair = getValuesOperators(expression);
+      Pair<Deque<Double>, Deque<Integer>> stackPair = getValuesAndOperatorsStack(expression);
       Deque<Double> values = stackPair.getFirst();
       Deque<Integer> operators = stackPair.getSecond();
       Deque<Double> tempValues = new ArrayDeque<>();
       Deque<Integer> tempOperators = new ArrayDeque<>();
       char[] ops = {'/', '*', '+'};
-      int i=-1;
-      while (i < ops.length) {
-        i++;
-        boolean repeat = false;
-        while (!operators.isEmpty()) {
-          Double d1 = values.pop();
-          Double d2 = values.pop();
-          int operation = operators.pop();
-          if (operation == ops[i]) {
-            if (i == 0) {
-              tempValues.push(d1 == 0 ? 0 : d2 / d1);
-              repeat = true;
-              break;
-            } else if (i == 1) {
-              tempValues.push(d2 * d1);
-              repeat = true;
-              break;
-            } else if (i == 2) {
-              tempValues.push(d2 + d1);
-              repeat = true;
-              break;
-            }
-          } else {
-            values.push(d2);
-            tempValues.push(d1);
-            tempOperators.push(operation);
-          }
-        }
-        while (!tempValues.isEmpty()) {
-          values.push(tempValues.pop());
-        }
-        while (!tempOperators.isEmpty()) {
-          operators.push(tempOperators.pop());
-        }
-        if (repeat) {
-          i--;
-        }
-      }
-      assert values.size() == 1;
-      return values.pop();
+      int i = -1;
+      return calculate(values, operators, tempValues, tempOperators, ops, i);
     } catch (NumberFormatException e) {
       throw new CallistoException("Q101", expr);
     } catch (Exception e) {
@@ -356,7 +277,65 @@ public class MathFunction implements ICallistoFunction {
     return null;
   }
 
-  private static Pair<Deque<Double>, Deque<Integer>> getValuesOperators(String expression) {
+  private static Double calculate(Deque<Double> values, Deque<Integer> operators,
+                                  Deque<Double> tempValues, Deque<Integer> tempOperators,
+                                  char[] ops, int i) {
+    while (i++ < ops.length) {
+      boolean repeat = false;
+      while (!operators.isEmpty()) {
+        Double d1 = values.pop();
+        Double d2 = values.pop();
+        int operation = operators.pop();
+        if (operation == ops[i]) {
+          Double d = getValueByOperation(i, d1, d2);
+          if (d != null) {
+            tempValues.push(d);
+            repeat = true;
+            break;
+          }
+        } else {
+          values.push(d2);
+          tempValues.push(d1);
+          tempOperators.push(operation);
+        }
+      }
+      values = refillValues(values, tempValues);
+      operators = refillOperators(operators, tempOperators);
+      if (repeat) {
+        i--;
+      }
+    }
+    assert values.size() == 1;
+    return values.pop();
+  }
+
+  private static Double getValueByOperation(int i, Double d1, Double d2) {
+    if (i == 0) { //divide
+      return d1 == 0 ? 0 : d2 / d1;
+    } else if (i == 1) { //multiply
+      return d2 * d1;
+    } else if (i == 2) { //add
+      return d2 + d1;
+    }
+    return null;
+  }
+
+  private static Deque<Integer> refillOperators(Deque<Integer> operators,
+                                                Deque<Integer> tempOperators) {
+    while (!tempOperators.isEmpty()) {
+      operators.push(tempOperators.pop());
+    }
+    return operators;
+  }
+
+  private static Deque<Double> refillValues(Deque<Double> values, Deque<Double> tempValues) {
+    while (!tempValues.isEmpty()) {
+      values.push(tempValues.pop());
+    }
+    return values;
+  }
+
+  private static Pair<Deque<Double>, Deque<Integer>> getValuesAndOperatorsStack(String expression) {
     Deque<Double> values = new ArrayDeque<>();
     Deque<Integer> operators = new ArrayDeque<>();
     StringBuilder temp = new StringBuilder();

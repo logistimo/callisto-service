@@ -24,10 +24,11 @@
 package com.logistimo.callisto.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
 import com.logistimo.callisto.QueryResults;
-import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.ResultManager;
+import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.function.FunctionsUtil;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
@@ -36,12 +37,19 @@ import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Mohan Raja
@@ -73,16 +81,35 @@ public class QueryController {
   }
 
   @RequestMapping(value = "/getdata", method = RequestMethod.POST)
-  public String getQueryData(@RequestBody QueryRequestModel model) throws CallistoException {
-    QueryResults q =
-        queryService.readData(model);
-    if (StringUtils.isNotEmpty(model.desiredResultId)) {
-      ConstantText constant = constantService.readConstant(model.userId, model.desiredResultId);
-      if (constant != null) {
-        Type type = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
-        LinkedHashMap<String, String> myMap = new Gson().fromJson(constant.getConstant(), type);
-        q = resultManager.getDesiredResult(model, q, myMap);
+  public String getQueryData(@RequestBody QueryRequestModel model, HttpServletRequest request)
+      throws CallistoException {
+    QueryResults q = null;
+    if (StringUtils.isNotEmpty(model.derivedResultsId)) {
+      q = queryService.readData(model);
+      if (q.getRowHeadings() == null) {
+        q.setRowHeadings(model.rowHeadings);
       }
+      ConstantText constant = constantService.readConstant(model.userId, model.derivedResultsId);
+      if (constant != null) {
+        LinkedHashMap<String, String> derivedColumns =
+            resultManager.getResultFormatMap(constant.getConstant(), q);
+        q = resultManager.getDesiredResult(model, q, derivedColumns);
+
+      }
+    } else if (Objects.equals(request.getHeader("Request-Version"), "v2")) {
+      if (model.columnText != null && !model.columnText.isEmpty()) {
+        //expects only one element
+        Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
+        LinkedHashMap<String, String> parsedColumnData = FunctionsUtil.parseColumnText(entry.getValue());
+        model.filters.put(entry.getKey(), FunctionsUtil.extractColumnsCsv(parsedColumnData));
+        q = queryService.readData(model);
+        if (q.getRowHeadings() == null) {
+          q.setRowHeadings(model.rowHeadings);
+        }
+        q = resultManager.getDesiredResult(model, q, parsedColumnData);
+      }
+    } else {
+      q = queryService.readData(model);
     }
     if (q != null) {
       q.setDataTypes(null);

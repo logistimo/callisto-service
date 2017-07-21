@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto.function;
 
+import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.exception.CallistoException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,10 +55,10 @@ public class MathFunctionTest {
   @Test
   public void getAllVariablesTest() {
     String expr = "100+32-42+$abc-$def";
-    List list = MathFunction.getAllVariables(expr);
+    List list = FunctionsUtil.getAllVariables(expr, CharacterConstants.SINGLE_DOLLAR);
     assert (list.get(0).equals("$abc") && list.get(1).equals("$def") && list.size() == 2);
     expr = "$pqr*100+32-42+($abc-$def)/$xyz";
-    list = MathFunction.getAllVariables(expr);
+    list = FunctionsUtil.getAllVariables(expr, CharacterConstants.SINGLE_DOLLAR);
     assertEquals("$pqr", list.get(0));
     assertEquals("$abc", list.get(1));
     assertEquals("$def", list.get(2));

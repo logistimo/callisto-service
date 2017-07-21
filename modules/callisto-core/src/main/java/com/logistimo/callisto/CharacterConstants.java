@@ -29,18 +29,23 @@ package com.logistimo.callisto;
 public class CharacterConstants {
   public static final String SINGLE_QUOTE = "'";
   public static final String DOUBLE_QUOTE = "\"";
-  public static final String SINGLE_DOLLAR = "$";
+  public static final char SINGLE_DOLLAR = '$';
   public static final String COMMA = ",";
   public static final String FN_ENCLOSE = "$$";
   public static final String OPEN_BRACKET = "(";
   public static final String CLOSE_BRACKET = ")";
+  public static final String OPEN_CBRACKET = "{";
+  public static final String CLOSE_CBRACKET = "}";
+  public static final String COLON = ":";
   public static final String DIVIDE = "/";
+  public static final String PIPE = "|";
   public static final String MULTIPLY = "*";
   public static final String ADD = "+";
   public static final String SUBTRACT = "-";
   public static final String ZERO = "0";
   public static final String EMPTY = "";
   public static final String SPACE = " ";
+  public static final String AS = " as ";
 
   private CharacterConstants() {
     // Constants collection class

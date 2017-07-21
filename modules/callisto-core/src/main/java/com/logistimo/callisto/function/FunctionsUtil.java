@@ -24,13 +24,22 @@
 package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.ResultManager;
+import com.logistimo.callisto.exception.CallistoException;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by chandrakant on 22/05/17.
@@ -39,10 +48,9 @@ public class FunctionsUtil {
 
   private static final Logger logger = Logger.getLogger(FunctionsUtil.class);
 
-  private FunctionsUtil(){
+  private FunctionsUtil() {
     // Util class
   }
-
 
   public static boolean isFunction(String value, boolean skipEnclose) {
     String val = StringUtils.trim(value);
@@ -109,11 +117,14 @@ public class FunctionsUtil {
   public static boolean isDelimiter(char c) {
     String s = String.valueOf(c);
     return Objects.equals(s, CharacterConstants.ADD)
+        || Objects.equals(s, CharacterConstants.COMMA)
+        || Objects.equals(s, CharacterConstants.CLOSE_BRACKET)
         || Objects.equals(s, CharacterConstants.DIVIDE)
         || Objects.equals(s, CharacterConstants.MULTIPLY)
-        || Objects.equals(s, CharacterConstants.SINGLE_DOLLAR)
+        || Objects.equals(s, CharacterConstants.SPACE)
+        || Objects.equals(s, CharacterConstants.PIPE)
         || Objects.equals(s, CharacterConstants.SUBTRACT)
-        || Objects.equals(s, CharacterConstants.CLOSE_BRACKET);
+        || c == CharacterConstants.SINGLE_DOLLAR;
   }
 
   private static String getVariable(String text, int startIndex) {
@@ -128,19 +139,24 @@ public class FunctionsUtil {
     return var.toString();
   }
 
+  /**
+   * @param text String to be parsed
+   * @return a list of all the variables and functions in the String. Function uses the fact that
+   * variables are prefixed by '$' and functions are enclosed by '$$'.
+   */
   public static List<String> getAllFunctionsVariables(String text) {
     List<String> matches = new ArrayList<>();
     int sIndex = StringUtils.indexOf(text, CharacterConstants.SINGLE_DOLLAR);
     if (sIndex > -1 && StringUtils.isNotEmpty(text)) {
       int dIndex = text.indexOf(CharacterConstants.FN_ENCLOSE);
       if (dIndex == -1 || dIndex > sIndex) {
-        // variable first
+        // Variable first
         String var = getVariable(text, sIndex);
         matches.add(var);
         matches
             .addAll(getAllFunctionsVariables(StringUtils.substring(text, sIndex + var.length())));
       } else if (dIndex > -1) {
-        // sIndex = dIndex i.e. function first
+        // sIndex = dIndex i.e. Function first
         int index = StringUtils.indexOf(text, CharacterConstants.FN_ENCLOSE, dIndex + 1);
         if (index > -1) {
           matches.add(
@@ -153,5 +169,122 @@ public class FunctionsUtil {
       }
     }
     return matches;
+  }
+
+  /**
+   * @param text      String to be parsed
+   * @param indicator Indicator which is a prefix for all the variables
+   * @return A list of Variables which are prefixed with an indicator in a String
+   */
+  public static List<String> getAllVariables(String text, char indicator) {
+    List<String> matches = new ArrayList<>();
+    try {
+      StringBuilder temp = new StringBuilder();
+      for (int i = 0; i < text.length(); i++) {
+        if (i != text.length() - 1
+            && text.charAt(i) == indicator
+            && text.charAt(i + 1) != indicator && (i == 0 || text.charAt(i - 1) != indicator)) {
+          temp.append(text.charAt(i));
+        } else if (FunctionsUtil.isDelimiter(text.charAt(i)) && temp.length() > 0) {
+          matches.add(temp.toString());
+          temp = new StringBuilder();
+        } else if (temp.length() > 0) {
+          temp.append(text.charAt(i));
+        }
+      }
+      if (temp.length() > 0) {
+        matches.add(temp.toString());
+      }
+    } catch (Exception e) {
+      logger.warn("Exception while getting variable list: " + text, e);
+    }
+    return matches;
+  }
+
+  /**
+   * Given a string to parse and column list and a result row list, the function replaces the
+   * respective column variables from the result row.
+   *
+   * @param val      String for parsing and modification
+   * @param headings List of column names
+   * @param row      List of column results, which is a result row in general
+   * @return String after all the variables are replaced with respective results
+   */
+  public static String replaceVariables(String val, List<String> headings, List<String> row)
+      throws CallistoException {
+    List<String> variables = getAllVariables(val, CharacterConstants.SINGLE_DOLLAR);
+    for (int i = 0; i < variables.size(); i++) {
+      int index = ResultManager.variableIndex(variables.get(i), headings);
+      if (index != -1) {
+        val = StringUtils.replace(val, variables.get(i), row.get(index));
+      } else {
+        if (row.size() == headings.size()) {
+          logger.warn("Unknown variable found in Math function: " + val);
+          throw new CallistoException("Q102", variables.get(i), headings.toString());
+        }
+        val = StringUtils.replace(val, variables.get(i), CharacterConstants.EMPTY);
+      }
+    }
+    return val;
+  }
+
+  /**
+   * parser function to extract key value pair of modified columns from input text
+   *
+   * @param str String to be parsed
+   * @return Map of modified column names and derived values. Values can contain
+   * CallistoFunctions and column references as variables from the original result.
+   */
+  public static LinkedHashMap<String, String> parseColumnText(String str) throws CallistoException {
+    try {
+      String[] splitArr = StringUtils.split(str, CharacterConstants.COMMA);
+      for (int i = 0; i < splitArr.length; i++) {
+        if (i != splitArr.length - 1
+            && numberOfOccurrences(splitArr[i], CharacterConstants.FN_ENCLOSE) % 2 != 0) {
+          splitArr[i + 1] = splitArr[i].concat(splitArr[i + 1]);
+          splitArr[i] = CharacterConstants.EMPTY;
+        }
+      }
+      List<String> columns =
+          Arrays.asList(splitArr).stream().filter(StringUtils::isNotEmpty).collect(
+              Collectors.toList());
+      return columns.stream().collect(Collectors.toMap(s -> {
+        String[] split = s.split(CharacterConstants.AS);
+        return split.length >= 2 ? split[split.length - 1].trim() : s.trim();
+      }, s -> {
+        String[] split = s.split(CharacterConstants.AS);
+        String var = StringUtils.contains(s, CharacterConstants.SINGLE_DOLLAR) ? s.trim()
+            : CharacterConstants.SINGLE_DOLLAR + s.trim();
+        return split.length >= 2 ? StringUtils.join(
+            IntStream.range(0, split.length).filter(i -> i < split.length - 1)
+                .mapToObj(i -> split[i])
+                .collect(Collectors.toList()), CharacterConstants.EMPTY).trim() : var;
+      }, ResultManager.linkedHashMapMerger, LinkedHashMap::new));
+    } catch (Exception e) {
+      logger.error("Exception while parsing column text", e);
+      throw new CallistoException(e);
+    }
+  }
+
+  /**
+   * @param columnData map of derived column names with the respective values
+   * @return a CSV String of all the variables/columns used in the map values.
+   */
+  public static String extractColumnsCsv(Map<String, String> columnData) {
+    Set columns = columnData.entrySet().stream()
+        .flatMap(e -> e.getValue().contains(CharacterConstants.FN_ENCLOSE) ? FunctionsUtil
+            .getAllVariables(e.getValue(), CharacterConstants.SINGLE_DOLLAR).stream()
+            .map(s -> s.substring(1))
+            : new ArrayList<>(Collections.singletonList(e.getKey())).stream())
+        .collect(Collectors.toSet());
+    return StringUtils.join(columns, CharacterConstants.COMMA);
+  }
+
+  /**
+   * @return number of times 'find' occurs in 'str'
+   */
+  private static int numberOfOccurrences(String str, String find) {
+    return (str.length() - StringUtils.replace(str, find, CharacterConstants.EMPTY).length())
+        / find.length();
   }
 }

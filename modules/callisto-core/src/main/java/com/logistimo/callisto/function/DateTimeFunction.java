@@ -59,12 +59,14 @@ public class DateTimeFunction implements ICallistoFunction {
 
   @Override
   public String getResult(FunctionParam functionParam) throws CallistoException {
-    String fn = functionParam.getFunction();
+    String fn = functionParam.function;
     List<String> params = getParam(fn);
     try {
       if (params != null && params.size() >= argsLength) {
         DateTime dateTime =
-            DateTime.parse(params.get(0).trim(), DateTimeFormat.forPattern(params.get(1).trim()));
+            DateTime.parse(FunctionsUtil.replaceVariables(params.get(0).trim(),
+                    functionParam.getResultHeadings(), functionParam.getResultRow()),
+                DateTimeFormat.forPattern(params.get(1).trim()));
         return dateTime.toString(params.get(2));
       } else {
         logger.error("Error in datetime function parameters: " + fn);
@@ -78,6 +80,7 @@ public class DateTimeFunction implements ICallistoFunction {
     return null;
   }
 
+
   public static List<String> getParam(String fn) throws CallistoException {
     String str = StringUtils.substring(fn, fn.indexOf(CharacterConstants.OPEN_BRACKET) + 1,
         fn.lastIndexOf(CharacterConstants.CLOSE_BRACKET));
@@ -89,33 +92,28 @@ public class DateTimeFunction implements ICallistoFunction {
         while (StringUtils.isEmpty(String.valueOf(str.charAt(boundary)).trim())) {
           boundary++;
         }
-        if (Objects
-            .equals(String.valueOf(str.charAt(boundary)), CharacterConstants.SINGLE_QUOTE)) {
-          quote = CharacterConstants.SINGLE_QUOTE;
-        } else {
-          quote = null;
-        }
+        quote =
+            Objects.equals(String.valueOf(str.charAt(boundary)), CharacterConstants.SINGLE_QUOTE)
+                ? CharacterConstants.SINGLE_QUOTE : null;
         if (StringUtils.isNotEmpty(quote)) {
           int quoteEnd = str.indexOf(quote, boundary + 1);
           if (quoteEnd == -1) {
             throw new CallistoException("Q103", fn);
           }
           params.add(StringUtils.substring(str, boundary + 1, quoteEnd));
-          boundary = quoteEnd + 2;
+          boundary = str.indexOf(CharacterConstants.COMMA, quoteEnd) + 1;
         } else {
           int nextComma = str.indexOf(CharacterConstants.COMMA, boundary);
           if (nextComma == -1) {
             nextComma = str.length();
           }
-          params.add(StringUtils.substring(str, boundary, nextComma));
+          params.add(StringUtils.substring(str, boundary, nextComma).trim());
           boundary = nextComma + 1;
         }
       }
-    } catch (StringIndexOutOfBoundsException ignored) {
-      logger.error("Syntax error in datetime function: " + fn);
-      throw new CallistoException("Q103", fn);
     } catch (Exception e) {
-      logger.error("Error in parsing parameter of datetime function: " + fn, e);
+      logger.error("Exception while parsing parameters of datetime function: " + fn, e);
+      throw new CallistoException("Q103", fn);
     }
     return params;
   }

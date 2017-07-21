@@ -56,7 +56,7 @@ public class CsvFunction implements ICallistoFunction {
     StringBuilder csv = new StringBuilder();
     QueryFunction
         function =
-        QueryFunction.getQueryFunction(param.getFunction(), param.getQueryRequestModel().filters);
+        QueryFunction.getQueryFunction(param.function, param.getQueryRequestModel().filters);
     QueryResults results =
         queryService.readData(getNewQueryRequestModel(param, function));
     for (List<String> strings : results.getRows()) {

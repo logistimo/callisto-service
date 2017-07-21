@@ -23,6 +23,9 @@
 
 package com.logistimo.callisto;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.FunctionsUtil;
@@ -31,12 +34,18 @@ import com.logistimo.callisto.model.QueryRequestModel;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Created by chandrakant on 19/05/17.
@@ -48,57 +57,115 @@ public class ResultManager {
 
   @Autowired private FunctionManager functionManager;
 
+  public static BinaryOperator<String> linkedHashMapMerger = (u, v) -> {
+    throw new IllegalStateException(String.format("Duplicate key %s", u));
+  };
+
+  /**
+   * @param request          QueryRequestModel by user
+   * @param rs               QueryResults returned by running the query
+   * @param derivedColumnMap Map of derived column names and values
+   * @return Derived QueryResults using original QueryResults and derivedColumnMap
+   */
   public QueryResults getDesiredResult(
       QueryRequestModel request,
-      QueryResults results,
-      Map<String, String> desiredResultFormat)
+      QueryResults rs,
+      LinkedHashMap<String, String> derivedColumnMap)
       throws CallistoException {
-    List<String> headings = results.getHeadings();
-    QueryResults dResult = new QueryResults();
-    dResult.setHeadings(new ArrayList<>(desiredResultFormat.keySet()));
+    List<String> headings = rs.getHeadings();
+    if (derivedColumnMap == null || derivedColumnMap.isEmpty()) {
+      return rs;
+    }
+    derivedColumnMap =
+        derivedColumnMap.entrySet().stream().collect(Collectors
+            .toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
+                linkedHashMapMerger, LinkedHashMap::new));
+    //TODO: mechanism to identify which column is for rowHeadings,
+    QueryResults results = fillResult(rs, request.rowHeadings, 0);
+    QueryResults derivedResults = new QueryResults();
+    derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
+    derivedResults.setRowHeadings(results.getRowHeadings());
     if (results.getHeadings() != null && results.getRows() != null) {
+      Map<String, List<String>>
+          functionsVarsMap =
+          derivedColumnMap.entrySet().stream()
+              .map(e -> Pair.of(e.getKey(), FunctionsUtil.getAllFunctionsVariables(e.getValue())))
+              .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
       for (List row : results.getRows()) {
-        List<String> dRow = new ArrayList<>(dResult.getHeadings().size());
-        for (Map.Entry<String, String> entry : desiredResultFormat.entrySet()) {
+        List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
+        for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String r =
-              parseDesiredValue(request,
-                  entry.getValue()
-                      .replaceAll("\\s+", "")
-                      .replaceAll("\n", "")
-                      .replaceAll("\t", ""),
-                  headings,
-                  row);
+              parseDesiredValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
+                  headings, row);
           dRow.add(r);
         }
-        dResult.addRow(dRow);
+        derivedResults.addRow(dRow);
       }
     }
-    return dResult;
+    return derivedResults;
   }
 
-  private String parseDesiredValue(
-      QueryRequestModel request, String str, List<String> headings, List<String> row)
+  /**
+   * @param results QueryResults to be filled
+   * @param index   index of rowHeading element
+   * @return QueryResults after filling dummy rows for the all absent rowHeading elements
+   */
+  private static QueryResults fillResult(QueryResults results, List<String> rowHeadings,
+                                         Integer index) {
+    if (rowHeadings != null) {
+      Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
+      for (List row : results.getRows()) {
+        rowHeadingsSet.remove(row.get(index));
+      }
+      for (String heading : rowHeadings) {
+        List<String> nRow = new ArrayList<>(index + 1);
+        for (int i = 0; i < index; i++) {
+          nRow.add(CharacterConstants.EMPTY);
+        }
+        nRow.add(heading);
+        results.addRow(nRow);
+      }
+    }
+    return results;
+  }
+
+  /**
+   * Function to parse a expression which can contain all CallistoFunctions and Variables
+   *
+   * @param request  QueryRequestModel by the User
+   * @param str      expression to be parsed
+   * @param headings result headings i.e. column names
+   * @param row      result row, respective to column names
+   * @return String after replacing all the CallistoFunctions and Variables
+   */
+  public String parseDesiredValue(
+      QueryRequestModel request, String str, List<String> functionsVars, List<String> headings,
+      List<String> row)
       throws CallistoException {
     int index;
-    List<String> fnVars = FunctionsUtil.getAllFunctionsVariables(str);
-    for (int i = 0; i < fnVars.size(); i++) {
-      if ((index = variableIndex(fnVars.get(i), headings)) > -1) {
-        str = str.replace(fnVars.get(i), row.get(index));
-      } else if (FunctionsUtil.isFunction(fnVars.get(i), false)) {
-        String functionType = FunctionsUtil.getFunctionType(fnVars.get(i));
+    for (int i = 0; i < functionsVars.size(); i++) {
+      if ((index = variableIndex(functionsVars.get(i), headings)) > -1) {
+        if (index > row.size() - 1) {
+          return CharacterConstants.EMPTY;
+        }
+        str = StringUtils.replaceOnce(str, functionsVars.get(i), row.get(index));
+      } else if (FunctionsUtil.isFunction(functionsVars.get(i), false)) {
+        String functionType = FunctionsUtil.getFunctionType(functionsVars.get(i));
         if (functionType != null) {
           ICallistoFunction function = functionManager.getFunction(functionType);
           if (function == null) {
-            throw new CallistoException("Q001", fnVars.get(i));
+            throw new CallistoException("Q001", functionsVars.get(i));
           }
-          FunctionParam functionParam = new FunctionParam(request, headings, row, fnVars.get(i));
-          str = str.replace(fnVars.get(i), function.getResult(functionParam));
+          FunctionParam
+              functionParam =
+              new FunctionParam(request, headings, row, functionsVars.get(i));
+          str =
+              StringUtils.replaceOnce(str, functionsVars.get(i), function.getResult(functionParam));
         } else {
-          throw new CallistoException("Q001", fnVars.get(i));
+          throw new CallistoException("Q001", functionsVars.get(i));
         }
       }
     }
-    str = StringUtils.replace(str, CharacterConstants.ADD, CharacterConstants.EMPTY);
     str = StringUtils.replace(str, CharacterConstants.DOUBLE_QUOTE, CharacterConstants.EMPTY);
     str = StringUtils.replace(str, CharacterConstants.SINGLE_QUOTE, CharacterConstants.EMPTY);
     return str;
@@ -113,13 +180,39 @@ public class ResultManager {
   public static int variableIndex(String val, List<String> headings) {
     int index = -1;
     if (headings != null
-        && val.startsWith(CharacterConstants.SINGLE_DOLLAR)
+        && val.startsWith(String.valueOf(CharacterConstants.SINGLE_DOLLAR))
         && !val.contains(CharacterConstants.FN_ENCLOSE)) {
-      index = headings.indexOf(StringUtils.substring(val, 1));
+      for (int i = 0; i < headings.size(); i++) {
+        String column = headings.get(i);
+        if (column.equalsIgnoreCase(val.substring(1))) {
+          index = i;
+          break;
+        }
+      }
       if (index == -1) {
-        logger.error("Variable " + val + " not found in heading of QueryResult");
+        logger.error(
+            "Variable " + val + " not found in heading of QueryResult " + headings.toString());
       }
     }
     return index;
+  }
+
+  /**
+   * function to parse DerivedColumn map from a String and add the existing columns as they are
+   * @param results original QueryResults
+   * @return parsed Map
+   */
+  public LinkedHashMap<String, String> getResultFormatMap(String strToParse, QueryResults results) {
+    Type type = new TypeToken<LinkedHashMap<String, String>>() {
+    }.getType();
+    LinkedHashMap<String, String> filterMap = null;
+    if (results != null && results.getHeadings() != null) {
+      filterMap =
+          results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.SINGLE_DOLLAR + s))
+              .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
+                  linkedHashMapMerger, LinkedHashMap::new));
+      filterMap.putAll(new Gson().fromJson(strToParse, type));
+    }
+    return filterMap;
   }
 }

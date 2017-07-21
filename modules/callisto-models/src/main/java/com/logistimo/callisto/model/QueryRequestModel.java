@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto.model;
 
+import java.util.List;
 import java.util.Map;
 
 /** @author Mohan Raja */
@@ -30,8 +31,10 @@ public class QueryRequestModel {
   public String userId = "logistimo";
   public String queryId;
   public Map<String, String> filters;
-  public String desiredResultId; //constant ID for the desired result i.e. LinkedHashMap
+  public String derivedResultsId; //constant ID for the desired result i.e. LinkedHashMap
+  public Map<String,String> columnText;
   public Integer size;
+  public List<String> rowHeadings;
   public Integer offset;
 
   public QueryRequestModel copy(){
@@ -39,7 +42,8 @@ public class QueryRequestModel {
     newRequestModel.userId = String.valueOf(this.userId);
     newRequestModel.queryId = this.queryId;
     newRequestModel.filters = this.filters;
-    newRequestModel.desiredResultId = this.desiredResultId;
+    newRequestModel.rowHeadings = this.rowHeadings;
+    newRequestModel.derivedResultsId = this.derivedResultsId;
     newRequestModel.size = this.size;
     newRequestModel.offset = this.offset;
     return newRequestModel;

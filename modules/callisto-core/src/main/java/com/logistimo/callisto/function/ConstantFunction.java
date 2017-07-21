@@ -49,7 +49,7 @@ public class ConstantFunction implements ICallistoFunction {
 
   @Override
   public String getResult(FunctionParam functionParam) throws CallistoException {
-    String param = getParameter(functionParam.getFunction());
+    String param = getParameter(functionParam.function);
     return constantService.readConstant(functionParam.getRequest().userId, param).getConstant();
   }
 

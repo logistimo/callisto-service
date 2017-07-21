@@ -29,13 +29,13 @@ import com.logistimo.callisto.function.FunctionParam;
 /** Created by chandrakant on 25/05/17. */
 public interface ICallistoFunction {
 
-  public String getName();
+  String getName();
 
-  public String getResult(FunctionParam functionParam) throws CallistoException;
+  String getResult(FunctionParam functionParam) throws CallistoException;
 
-  public int getArgsLength();
+  int getArgsLength();
 
-  public int getMinArgsLength();
+  int getMinArgsLength();
 
-  public int getMaxArgLength();
+  int getMaxArgLength();
 }

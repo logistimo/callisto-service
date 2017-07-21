@@ -57,11 +57,11 @@ public class ResultManagerTest {
     results.addRow(Arrays.asList("another result of abc", "49", "123"));
     results.addRow(Arrays.asList("seriously?", "24", "340"));
     LinkedHashMap<String, String> desiredResultFormat = new LinkedHashMap<>();
-    desiredResultFormat.put("Display format of abc", "$abc + $def");
+    desiredResultFormat.put("Display format of abc", "$abc $def $$math(100/(2.5*2))$$");
     desiredResultFormat.put("Modified 2nd column", "$$math($pqr/$def)$$");
     QueryResults newResult = resultManager.getDesiredResult(request, results, desiredResultFormat);
-    assertEquals(newResult.getRows().get(0).get(0), "result of abc125");
-    assertEquals(newResult.getRows().get(0).get(1), "2");
+    assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
+    assertEquals("2", newResult.getRows().get(0).get(1));
   }
 
 }

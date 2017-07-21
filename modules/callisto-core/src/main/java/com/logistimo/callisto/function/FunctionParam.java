@@ -36,7 +36,7 @@ public class FunctionParam {
   private List<String> resultHeadings;
   private List<String> resultRow;
   private List<String> rowHeadings; // row headings of QueryResult
-  private String function;
+  public String function;
   private boolean forceEnclose;
   private String escaping;
 
@@ -72,14 +72,6 @@ public class FunctionParam {
 
   public void setResultRow(List<String> resultRow) {
     this.resultRow = resultRow;
-  }
-
-  public String getFunction() {
-    return function;
-  }
-
-  public void setFunction(String function) {
-    this.function = function;
   }
 
   public List<String> getResultHeadings() {

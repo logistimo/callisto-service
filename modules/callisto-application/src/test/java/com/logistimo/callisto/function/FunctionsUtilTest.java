@@ -23,12 +23,15 @@
 
 package com.logistimo.callisto.function;
 
+import com.logistimo.callisto.exception.CallistoException;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -73,5 +76,12 @@ public class FunctionsUtilTest {
     assertEquals("$fidget", fnVars.get(1));
     assertEquals("$def", fnVars.get(2));
     assertEquals("$$link(abc)$$", fnVars.get(3));
+  }
+
+  @Test
+  public void parseColumnTextTest() throws CallistoException {
+    String str = "$$topx($abc,3)$$ as abc, $$math(($def*100)/$time)$$, $$datetime($time,'YYYY-MM', YYYY-MM-dd)$$ as newtime";
+    Map<String,String> columns = FunctionsUtil.parseColumnText(str);
+    assertEquals(3,columns.size());
   }
 }
