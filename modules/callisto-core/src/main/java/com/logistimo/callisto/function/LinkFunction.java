@@ -131,21 +131,24 @@ public class LinkFunction implements ICallistoFunction {
       return filterMap.entrySet().stream().map(e -> {
         if (StringUtils.contains(e.getValue(),
             CharacterConstants.SINGLE_DOLLAR)) {
-          try {
-            e.setValue(
-                FunctionsUtil.replaceVariables(e.getValue(), functionParam.getResultHeadings(),
-                    functionParam.getResultRow()));
-          } catch (CallistoException e1) {
-            logger.error(
-                "Error while getting result for link function: " + functionParam.function,
-                e1);
-          }
+          e = getModifiedEntry(e, functionParam);
         }
         return e;
       }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     } catch (Exception e) {
       throw new CallistoException(e);
     }
+  }
+
+  private Map.Entry getModifiedEntry(Map.Entry<String,String> e, FunctionParam functionParam){
+    try {
+      e.setValue(FunctionsUtil.replaceVariables(e.getValue(), functionParam.getResultHeadings(),
+              functionParam.getResultRow()));
+    } catch (CallistoException e1) {
+      logger.error(
+          "Error while getting result for link function: " + functionParam.function, e1);
+    }
+    return e;
   }
 
   @Override
