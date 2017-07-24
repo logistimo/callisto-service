@@ -49,22 +49,22 @@ import java.util.Objects;
 public class DateTimeFunction implements ICallistoFunction {
 
   private static final Logger logger = Logger.getLogger(DateTimeFunction.class);
-  private static String name = "datetime";
-  private static Integer argsLength = 3;
+  private static final String NAME = "datetime";
+  private static final Integer ARGS_LENGTH = 3;
 
   @Override
   public String getName() {
-    return name;
+    return NAME;
   }
 
   @Override
   public String getResult(FunctionParam functionParam) throws CallistoException {
     String fn = functionParam.function;
-    List<String> params = getParam(fn);
+    List<String> params = getParameters(fn);
     try {
-      if (params != null && params.size() >= argsLength) {
+      if (params != null && params.size() >= ARGS_LENGTH) {
         DateTime dateTime =
-            DateTime.parse(FunctionsUtil.replaceVariables(params.get(0).trim(),
+            DateTime.parse(FunctionUtil.replaceVariables(params.get(0).trim(),
                     functionParam.getResultHeadings(), functionParam.getResultRow()),
                 DateTimeFormat.forPattern(params.get(1).trim()));
         return dateTime.toString(params.get(2));
@@ -81,14 +81,14 @@ public class DateTimeFunction implements ICallistoFunction {
   }
 
 
-  public static List<String> getParam(String fn) throws CallistoException {
+  public static List<String> getParameters(String fn) throws CallistoException {
     String str = StringUtils.substring(fn, fn.indexOf(CharacterConstants.OPEN_BRACKET) + 1,
         fn.lastIndexOf(CharacterConstants.CLOSE_BRACKET));
     List<String> params = new ArrayList<>();
     String quote;
     int boundary = 0;
     try {
-      for (int i = 0; i < argsLength; i++) {
+      for (int i = 0; i < ARGS_LENGTH; i++) {
         while (StringUtils.isEmpty(String.valueOf(str.charAt(boundary)).trim())) {
           boundary++;
         }
@@ -120,7 +120,7 @@ public class DateTimeFunction implements ICallistoFunction {
 
   @Override
   public int getArgsLength() {
-    return argsLength;
+    return ARGS_LENGTH;
   }
 
   @Override

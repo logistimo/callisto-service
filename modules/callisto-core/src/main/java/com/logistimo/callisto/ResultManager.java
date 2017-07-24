@@ -28,7 +28,7 @@ import com.google.gson.reflect.TypeToken;
 
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionParam;
-import com.logistimo.callisto.function.FunctionsUtil;
+import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -89,7 +90,7 @@ public class ResultManager {
       Map<String, List<String>>
           functionsVarsMap =
           derivedColumnMap.entrySet().stream()
-              .map(e -> Pair.of(e.getKey(), FunctionsUtil.getAllFunctionsVariables(e.getValue())))
+              .map(e -> Pair.of(e.getKey(), FunctionUtil.getAllFunctionsAndVariables(e.getValue())))
               .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
       for (List row : results.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
@@ -118,12 +119,10 @@ public class ResultManager {
         rowHeadingsSet.remove(row.get(index));
       }
       for (String heading : rowHeadings) {
-        List<String> nRow = new ArrayList<>(index + 1);
-        for (int i = 0; i < index; i++) {
-          nRow.add(CharacterConstants.EMPTY);
-        }
-        nRow.add(heading);
-        results.addRow(nRow);
+        String[] nRow = new String[index + 1];
+        Arrays.fill(nRow, CharacterConstants.EMPTY);
+        nRow[index] = heading;
+        results.addRow(Arrays.asList(nRow));
       }
     }
     return results;
@@ -149,8 +148,8 @@ public class ResultManager {
           return CharacterConstants.EMPTY;
         }
         str = StringUtils.replaceOnce(str, functionsVars.get(i), row.get(index));
-      } else if (FunctionsUtil.isFunction(functionsVars.get(i), false)) {
-        String functionType = FunctionsUtil.getFunctionType(functionsVars.get(i));
+      } else if (FunctionUtil.isFunction(functionsVars.get(i), false)) {
+        String functionType = FunctionUtil.getFunctionType(functionsVars.get(i));
         if (functionType != null) {
           ICallistoFunction function = functionManager.getFunction(functionType);
           if (function == null) {
@@ -178,23 +177,19 @@ public class ResultManager {
    * otherwise -1
    */
   public static int variableIndex(String val, List<String> headings) {
-    int index = -1;
     if (headings != null
-        && val.startsWith(String.valueOf(CharacterConstants.SINGLE_DOLLAR))
+        && val.startsWith(String.valueOf(CharacterConstants.DOLLAR))
         && !val.contains(CharacterConstants.FN_ENCLOSE)) {
       for (int i = 0; i < headings.size(); i++) {
         String column = headings.get(i);
         if (column.equalsIgnoreCase(val.substring(1))) {
-          index = i;
-          break;
+          return i;
         }
       }
-      if (index == -1) {
-        logger.error(
-            "Variable " + val + " not found in heading of QueryResult " + headings.toString());
-      }
+      logger
+          .error("Variable " + val + " not found in heading of QueryResult " + headings.toString());
     }
-    return index;
+    return -1;
   }
 
   /**
@@ -206,13 +201,14 @@ public class ResultManager {
     Type type = new TypeToken<LinkedHashMap<String, String>>() {
     }.getType();
     LinkedHashMap<String, String> filterMap = null;
-    if (results != null && results.getHeadings() != null) {
-      filterMap =
-          results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.SINGLE_DOLLAR + s))
-              .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
-                  linkedHashMapMerger, LinkedHashMap::new));
-      filterMap.putAll(new Gson().fromJson(strToParse, type));
+    if (results == null || results.getHeadings() == null) {
+      return null;
     }
+    filterMap =
+        results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
+            .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
+                linkedHashMapMerger, LinkedHashMap::new));
+    filterMap.putAll(new Gson().fromJson(strToParse, type));
     return filterMap;
   }
 }

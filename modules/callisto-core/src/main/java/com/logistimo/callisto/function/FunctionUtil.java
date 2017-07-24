@@ -44,17 +44,17 @@ import java.util.stream.IntStream;
 /**
  * Created by chandrakant on 22/05/17.
  */
-public class FunctionsUtil {
+public class FunctionUtil {
 
-  private static final Logger logger = Logger.getLogger(FunctionsUtil.class);
+  private static final Logger logger = Logger.getLogger(FunctionUtil.class);
 
-  private FunctionsUtil() {
+  private FunctionUtil() {
     // Util class
   }
 
   public static boolean isFunction(String value, boolean skipEnclose) {
     String val = StringUtils.trim(value);
-    if (skipEnclose || FunctionsUtil.functionSyntaxValid(val)) {
+    if (skipEnclose || FunctionUtil.validateSyntax(val)) {
       int fnStart = StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET);
       int fnEnd = StringUtils.indexOf(val, CharacterConstants.CLOSE_BRACKET);
       if (fnStart != -1
@@ -89,7 +89,7 @@ public class FunctionsUtil {
     return null;
   }
 
-  public static boolean functionSyntaxValid(String val) {
+  public static boolean validateSyntax(String val) {
     return (StringUtils.startsWith(val, CharacterConstants.FN_ENCLOSE)
         && StringUtils.endsWith(val, CharacterConstants.FN_ENCLOSE));
   }
@@ -124,7 +124,7 @@ public class FunctionsUtil {
         || Objects.equals(s, CharacterConstants.SPACE)
         || Objects.equals(s, CharacterConstants.PIPE)
         || Objects.equals(s, CharacterConstants.SUBTRACT)
-        || c == CharacterConstants.SINGLE_DOLLAR;
+        || c == CharacterConstants.DOLLAR;
   }
 
   private static String getVariable(String text, int startIndex) {
@@ -144,9 +144,9 @@ public class FunctionsUtil {
    * @return a list of all the variables and functions in the String. Function uses the fact that
    * variables are prefixed by '$' and functions are enclosed by '$$'.
    */
-  public static List<String> getAllFunctionsVariables(String text) {
+  public static List<String> getAllFunctionsAndVariables(String text) {
     List<String> matches = new ArrayList<>();
-    int sIndex = StringUtils.indexOf(text, CharacterConstants.SINGLE_DOLLAR);
+    int sIndex = StringUtils.indexOf(text, CharacterConstants.DOLLAR);
     if (sIndex > -1 && StringUtils.isNotEmpty(text)) {
       int dIndex = text.indexOf(CharacterConstants.FN_ENCLOSE);
       if (dIndex == -1 || dIndex > sIndex) {
@@ -154,14 +154,14 @@ public class FunctionsUtil {
         String var = getVariable(text, sIndex);
         matches.add(var);
         matches
-            .addAll(getAllFunctionsVariables(StringUtils.substring(text, sIndex + var.length())));
+            .addAll(getAllFunctionsAndVariables(StringUtils.substring(text, sIndex + var.length())));
       } else if (dIndex > -1) {
         // sIndex = dIndex i.e. Function first
         int index = StringUtils.indexOf(text, CharacterConstants.FN_ENCLOSE, dIndex + 1);
         if (index > -1) {
           matches.add(
               StringUtils.substring(text, dIndex, index + CharacterConstants.FN_ENCLOSE.length()));
-          matches.addAll(getAllFunctionsVariables(
+          matches.addAll(getAllFunctionsAndVariables(
               StringUtils.substring(text, index + CharacterConstants.FN_ENCLOSE.length())));
         } else {
           logger.warn("Error in getAllFunctionsVariable: " + text);
@@ -185,7 +185,7 @@ public class FunctionsUtil {
             && text.charAt(i) == indicator
             && text.charAt(i + 1) != indicator && (i == 0 || text.charAt(i - 1) != indicator)) {
           temp.append(text.charAt(i));
-        } else if (FunctionsUtil.isDelimiter(text.charAt(i)) && temp.length() > 0) {
+        } else if (FunctionUtil.isDelimiter(text.charAt(i)) && temp.length() > 0) {
           matches.add(temp.toString());
           temp = new StringBuilder();
         } else if (temp.length() > 0) {
@@ -212,7 +212,7 @@ public class FunctionsUtil {
    */
   public static String replaceVariables(String val, List<String> headings, List<String> row)
       throws CallistoException {
-    List<String> variables = getAllVariables(val, CharacterConstants.SINGLE_DOLLAR);
+    List<String> variables = getAllVariables(val, CharacterConstants.DOLLAR);
     for (int i = 0; i < variables.size(); i++) {
       int index = ResultManager.variableIndex(variables.get(i), headings);
       if (index != -1) {
@@ -253,8 +253,8 @@ public class FunctionsUtil {
         return split.length >= 2 ? split[split.length - 1].trim() : s.trim();
       }, s -> {
         String[] split = s.split(CharacterConstants.AS);
-        String var = StringUtils.contains(s, CharacterConstants.SINGLE_DOLLAR) ? s.trim()
-            : CharacterConstants.SINGLE_DOLLAR + s.trim();
+        String var = StringUtils.contains(s, CharacterConstants.DOLLAR) ? s.trim()
+            : CharacterConstants.DOLLAR + s.trim();
         return split.length >= 2 ? StringUtils.join(
             IntStream.range(0, split.length).filter(i -> i < split.length - 1)
                 .mapToObj(i -> split[i])
@@ -272,8 +272,8 @@ public class FunctionsUtil {
    */
   public static String extractColumnsCsv(Map<String, String> columnData) {
     Set columns = columnData.entrySet().stream()
-        .flatMap(e -> e.getValue().contains(CharacterConstants.FN_ENCLOSE) ? FunctionsUtil
-            .getAllVariables(e.getValue(), CharacterConstants.SINGLE_DOLLAR).stream()
+        .flatMap(e -> e.getValue().contains(CharacterConstants.FN_ENCLOSE) ? FunctionUtil
+            .getAllVariables(e.getValue(), CharacterConstants.DOLLAR).stream()
             .map(s -> s.substring(1))
             : new ArrayList<>(Collections.singletonList(e.getKey())).stream())
         .collect(Collectors.toSet());

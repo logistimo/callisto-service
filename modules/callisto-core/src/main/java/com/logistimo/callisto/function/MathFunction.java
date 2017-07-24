@@ -28,10 +28,11 @@ import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IConstantService;
-import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -50,13 +51,16 @@ import javax.annotation.Resource;
 public class MathFunction implements ICallistoFunction {
 
   private static final Logger logger = Logger.getLogger(MathFunction.class);
-  private static String name = "math";
+  private static final String NAME = "math";
   @Resource IConstantService constantService;
-  @Resource IQueryService queryService;
+
+  @Autowired
+  @Qualifier("link")
+  ICallistoFunction linkFunction;
 
   @Override
   public String getName() {
-    return name;
+    return NAME;
   }
 
   @Override
@@ -67,7 +71,7 @@ public class MathFunction implements ICallistoFunction {
         functionParam.getResultHeadings(),
         functionParam.getResultRow(),
         constantService,
-        queryService);
+        linkFunction);
   }
 
   @Override
@@ -98,7 +102,7 @@ public class MathFunction implements ICallistoFunction {
    *                        otherwise returns null. Math function supports Link and ConstantText functions as variables in
    *                        the parameter.
    * @param constantService instance of IConstantService for constant function
-   * @param queryService    instance of IQueryService for Link function
+   * @param linkFunction    instance of ICallistoFunction for Link function
    * @return calculated value of the expression
    */
   public static String calculateExpression(
@@ -107,7 +111,8 @@ public class MathFunction implements ICallistoFunction {
       List<String> headings,
       List<String> row,
       IConstantService constantService,
-      IQueryService queryService)
+      ICallistoFunction linkFunction
+  )
       throws CallistoException {
     val = val.replaceAll("\\s+", "");
     if (StringUtils.countMatches(val, CharacterConstants.OPEN_BRACKET)
@@ -115,11 +120,11 @@ public class MathFunction implements ICallistoFunction {
       throw new CallistoException("Q101", val);
     }
     String expression = getParameter(val);
-    expression = FunctionsUtil.replaceVariables(expression, headings, row);
+    expression = FunctionUtil.replaceVariables(expression, headings, row);
     if (request != null) {
       expression = replaceConstants(request.userId, expression, constantService);
     }
-    expression = replaceLinks(request, expression, queryService);
+    expression = replaceLinks(request, headings, row, expression, linkFunction);
     String result =
         String.valueOf(
             getParenthesisValue(
@@ -128,12 +133,17 @@ public class MathFunction implements ICallistoFunction {
       logger.warn("getParenthesisValue returned NULL for expression: " + expression);
       result = "0";
     }
-    result = !result.contains(".") ? result : result.replaceAll("0*$", "").replaceAll("\\.$", "");
+    result = removeTrailingZeros(result);
     return result;
   }
 
+  public static String removeTrailingZeros(String num){
+    return !num.contains(".") ? num : num.replaceAll("0*$", "").replaceAll("\\.$", "");
+  }
+
   private static String replaceLinks(
-      QueryRequestModel request, String val, IQueryService queryService)
+      QueryRequestModel request, List<String> headings, List<String> row, String val,
+      ICallistoFunction linkFunction)
       throws CallistoException {
     try {
       int linkCount =
@@ -144,18 +154,20 @@ public class MathFunction implements ICallistoFunction {
         int sIndex =
             val.indexOf(FunctionType.LINK.toString() + CharacterConstants.OPEN_BRACKET, after);
         if (sIndex != 0 && Objects.equals(
-            String.valueOf(val.charAt(sIndex - 1)), CharacterConstants.SINGLE_DOLLAR)) {
+            String.valueOf(val.charAt(sIndex - 1)), CharacterConstants.DOLLAR)) {
           throw new CallistoException("Q001", val);
         }
         //TODO if Link function supports '(' inside parameters in future then eIndex needs to be changed
         int eIndex = val.indexOf(CharacterConstants.CLOSE_BRACKET, after);
         after = eIndex + 1;
+        FunctionParam param =
+            new FunctionParam(request, headings, row,
+                val.substring(sIndex - FunctionType.LINK.toString().length(), eIndex + 1));
         val =
             StringUtils.replace(
                 val,
                 val.substring(sIndex - FunctionType.LINK.toString().length(), eIndex + 1),
-                LinkFunction.getLink(
-                    request, val.substring(sIndex, eIndex + 1), queryService));
+                linkFunction.getResult(param));
       }
     } catch (Exception e) {
       logger.warn("Error while replacing links in expression :" + val);
@@ -174,7 +186,7 @@ public class MathFunction implements ICallistoFunction {
         int sIndex =
             val.indexOf(FunctionType.CONSTANT.toString() + CharacterConstants.OPEN_BRACKET, after);
         if (sIndex != 0 && Objects.equals(
-            String.valueOf(val.charAt(sIndex - 1)), CharacterConstants.SINGLE_DOLLAR)) {
+            String.valueOf(val.charAt(sIndex - 1)), CharacterConstants.DOLLAR)) {
           throw new CallistoException("Q001", val);
         }
         int eIndex = val.indexOf(CharacterConstants.CLOSE_BRACKET, after);

@@ -23,12 +23,14 @@
 
 package com.logistimo.callisto;
 
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
-/** Created by chandrakant on 25/05/17. */
-@Component
+/**
+ * Created by chandrakant on 25/05/17.
+ */
+@Configuration
 public class FunctionManager {
 
   Map<String, ICallistoFunction> functions;

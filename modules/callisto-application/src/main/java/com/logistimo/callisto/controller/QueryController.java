@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.function.FunctionsUtil;
+import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
@@ -99,9 +99,11 @@ public class QueryController {
     } else if (Objects.equals(request.getHeader("Request-Version"), "v2")) {
       if (model.columnText != null && !model.columnText.isEmpty()) {
         //expects only one element
-        Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
-        LinkedHashMap<String, String> parsedColumnData = FunctionsUtil.parseColumnText(entry.getValue());
-        model.filters.put(entry.getKey(), FunctionsUtil.extractColumnsCsv(parsedColumnData));
+        Map.Entry<String, String> entry =
+            (Map.Entry<String, String>) model.columnText.entrySet().iterator().next();
+        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
+            .parseColumnText(entry.getValue());
+        model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
         q = queryService.readData(model);
         if (q.getRowHeadings() == null) {
           q.setRowHeadings(model.rowHeadings);

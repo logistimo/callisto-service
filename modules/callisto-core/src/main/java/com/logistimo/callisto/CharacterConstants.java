@@ -29,7 +29,7 @@ package com.logistimo.callisto;
 public class CharacterConstants {
   public static final String SINGLE_QUOTE = "'";
   public static final String DOUBLE_QUOTE = "\"";
-  public static final char SINGLE_DOLLAR = '$';
+  public static final char DOLLAR = '$';
   public static final String COMMA = ",";
   public static final String FN_ENCLOSE = "$$";
   public static final String OPEN_BRACKET = "(";

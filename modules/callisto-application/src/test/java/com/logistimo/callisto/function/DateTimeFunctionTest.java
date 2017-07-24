@@ -26,9 +26,7 @@ package com.logistimo.callisto.function;
 import com.logistimo.callisto.CallistoApplication;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.ICallistoFunction;
-import com.mysql.jdbc.StringUtils;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +52,7 @@ public class DateTimeFunctionTest {
   @Test
   public void getParamTest() throws CallistoException {
     String arg = "datetime(2017-10,YYYY-MM,YYYY-MM-dd)";
-    List args = DateTimeFunction.getParam(arg);
+    List args = DateTimeFunction.getParameters(arg);
     assertEquals("2017-10", args.get(0));
     FunctionParam param = new FunctionParam();
     param.function=(arg);
@@ -71,19 +69,19 @@ public class DateTimeFunctionTest {
     assertEquals("2017-10, 01", dateTime.getResult(param));
 
     arg = "datetime(2017-10, 'YYYY-,MM' , ' YYYY-MM DD')";
-    args = DateTimeFunction.getParam(arg);
+    args = DateTimeFunction.getParameters(arg);
     assertEquals("2017-10", args.get(0));
     assertEquals("YYYY-,MM", args.get(1));
     assertEquals(" YYYY-MM DD", args.get(2));
 
     arg = "datetime(2017-10  ,YYYY-MM,'YYYY, MM, DD')";
-    args = DateTimeFunction.getParam(arg);
+    args = DateTimeFunction.getParameters(arg);
     assertEquals("2017-10", args.get(0));
     assertEquals("YYYY-MM", args.get(1));
     assertEquals("YYYY, MM, DD", args.get(2));
 
     arg = "datetime(2017-10, 'YYYY-MM', 'yyy,,y,:mm')";
-    args = DateTimeFunction.getParam(arg);
+    args = DateTimeFunction.getParameters(arg);
     assertEquals("2017-10", args.get(0));
     assertEquals("YYYY-MM", args.get(1));
     assertEquals("yyy,,y,:mm", args.get(2));

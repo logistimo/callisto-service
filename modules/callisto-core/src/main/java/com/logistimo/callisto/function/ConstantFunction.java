@@ -35,16 +35,16 @@ import org.springframework.stereotype.Component;
 @Component(value = "constant")
 public class ConstantFunction implements ICallistoFunction {
 
-  private static String name = "constant";
-  private static Integer argsLength = 1;
-  private static Integer minArgsLength = argsLength;
-  private static Integer maxArgsLength = argsLength;
+  private static final String NAME = "constant";
+  private static final Integer ARGS_LENGTH = 1;
+  private static final Integer MIN_ARGS_LENGTH = 1;
+  private static final Integer MAX_ARGS_LENGTH = 1;
 
   @Autowired IConstantService constantService;
 
   @Override
   public String getName() {
-    return name;
+    return NAME;
   }
 
   @Override
@@ -55,17 +55,17 @@ public class ConstantFunction implements ICallistoFunction {
 
   @Override
   public int getArgsLength() {
-    return argsLength;
+    return ARGS_LENGTH;
   }
 
   @Override
   public int getMinArgsLength() {
-    return minArgsLength;
+    return MIN_ARGS_LENGTH;
   }
 
   @Override
   public int getMaxArgLength() {
-    return maxArgsLength;
+    return MAX_ARGS_LENGTH;
   }
 
   public static String getParameter(String value) {

@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 @Component(value = "enclosecsv")
 public class EncloseCsvFunction implements ICallistoFunction {
 
-  private static String name = "enclosecsv";
+  private static final String NAME = "enclosecsv";
   @Autowired
   @Qualifier("csv")
   ICallistoFunction csvFunction;
@@ -47,7 +47,7 @@ public class EncloseCsvFunction implements ICallistoFunction {
 
   @Override
   public String getName() {
-    return name;
+    return NAME;
   }
 
   @Override

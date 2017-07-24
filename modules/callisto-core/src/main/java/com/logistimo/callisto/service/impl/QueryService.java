@@ -29,7 +29,7 @@ import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionParam;
-import com.logistimo.callisto.function.FunctionsUtil;
+import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
 import com.logistimo.callisto.model.ServerConfig;
@@ -142,13 +142,13 @@ public class QueryService implements IQueryService {
     ServerConfig
         serverConfig =
         userService.readServerConfig(request.userId, queryText.getServerId());
-    List<String> functions = FunctionsUtil.getAllFunctions(queryText.getQuery());
+    List<String> functions = FunctionUtil.getAllFunctions(queryText.getQuery());
     if (!functions.isEmpty()) {
       for (String functionText : functions) {
-        if (FunctionsUtil.isFunction(functionText, false)) {
+        if (FunctionUtil.isFunction(functionText, false)) {
           ICallistoFunction
               qFunction =
-              functionManager.getFunction(FunctionsUtil.getFunctionType(functionText));
+              functionManager.getFunction(FunctionUtil.getFunctionType(functionText));
           FunctionParam
               functionParam =
               new FunctionParam(request, serverConfig.getEscaping(), rowHeadings);

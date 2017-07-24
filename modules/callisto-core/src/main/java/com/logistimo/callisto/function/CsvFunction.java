@@ -44,13 +44,20 @@ import javax.annotation.Resource;
 @Component(value = "csv")
 public class CsvFunction implements ICallistoFunction {
 
-  private static String name = "csv";
+  private static final String NAME = "csv";
   @Resource IQueryService queryService;
 
   public String getCSV(FunctionParam param) throws CallistoException {
     return getCSV(param, false);
   }
 
+  /**
+   *
+   * @param param FunctionParam wrapper to contain function, queryRequstModel and query escaping String
+   * @param forceEnclose true if results have to be enclosed with single quotes
+   * @return a csv of results returned by the query
+   * @throws CallistoException
+   */
   public String getCSV(FunctionParam param, boolean forceEnclose)
       throws CallistoException {
     StringBuilder csv = new StringBuilder();
@@ -58,17 +65,19 @@ public class CsvFunction implements ICallistoFunction {
         function =
         QueryFunction.getQueryFunction(param.function, param.getQueryRequestModel().filters);
     QueryResults results =
-        queryService.readData(getNewQueryRequestModel(param, function));
+        queryService.readData(buildQueryRequestModel(param, function));
     for (List<String> strings : results.getRows()) {
       if (!forceEnclose
           && results.getDataTypes() != null
           && CallistoDataType.NUMBER.equals(results.getDataTypes().get(0))) {
         csv.append(strings.get(0)).append(CharacterConstants.COMMA);
       } else {
-        String enclosing = CharacterConstants.SINGLE_QUOTE;
+        String enclosing;
         if (strings.get(0).contains(CharacterConstants.SINGLE_QUOTE)
             && StringUtils.isNotEmpty(param.getEscaping())) {
           enclosing = param.getEscaping();
+        }else{
+          enclosing = CharacterConstants.SINGLE_QUOTE;
         }
         csv.append(enclosing)
             .append(strings.get(0))
@@ -87,20 +96,20 @@ public class CsvFunction implements ICallistoFunction {
     return csv.toString();
   }
 
-  private QueryRequestModel getNewQueryRequestModel(FunctionParam functionParam,
-                                                    QueryFunction newFunction) {
+  private QueryRequestModel buildQueryRequestModel(FunctionParam functionParam,
+                                                   QueryFunction function) {
     QueryRequestModel nestedQueryResultModel = new QueryRequestModel();
     nestedQueryResultModel.userId = functionParam.getQueryRequestModel().userId;
-    nestedQueryResultModel.queryId = newFunction.queryID;
+    nestedQueryResultModel.queryId = function.queryID;
     nestedQueryResultModel.filters = functionParam.getQueryRequestModel().filters;
-    nestedQueryResultModel.offset = newFunction.offset;
-    nestedQueryResultModel.size = newFunction.size;
+    nestedQueryResultModel.offset = function.offset;
+    nestedQueryResultModel.size = function.size;
     return nestedQueryResultModel;
   }
 
   @Override
   public String getName() {
-    return name;
+    return NAME;
   }
 
   @Override

@@ -25,12 +25,15 @@ package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.model.QueryRequestModel;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -50,15 +53,24 @@ public class MathFunctionTest {
     ans = MathFunction.getExpressionValue(expr);
     assert ans != null;
     assertEquals(267.0494192724952, ans.doubleValue(), 0);
+    expr = "34.45000";
+    expr = MathFunction.removeTrailingZeros(expr);
+    assertEquals("34.45", expr);
+    expr = "34.7";
+    expr = MathFunction.removeTrailingZeros(expr);
+    assertEquals("34.7", expr);
+    expr = "34.7000200";
+    expr = MathFunction.removeTrailingZeros(expr);
+    assertEquals("34.70002", expr);
   }
 
   @Test
   public void getAllVariablesTest() {
     String expr = "100+32-42+$abc-$def";
-    List list = FunctionsUtil.getAllVariables(expr, CharacterConstants.SINGLE_DOLLAR);
+    List list = FunctionUtil.getAllVariables(expr, CharacterConstants.DOLLAR);
     assert (list.get(0).equals("$abc") && list.get(1).equals("$def") && list.size() == 2);
     expr = "$pqr*100+32-42+($abc-$def)/$xyz";
-    list = FunctionsUtil.getAllVariables(expr, CharacterConstants.SINGLE_DOLLAR);
+    list = FunctionUtil.getAllVariables(expr, CharacterConstants.DOLLAR);
     assertEquals("$pqr", list.get(0));
     assertEquals("$abc", list.get(1));
     assertEquals("$def", list.get(2));

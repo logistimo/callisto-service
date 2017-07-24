@@ -53,7 +53,7 @@ import javax.annotation.Resource;
 public class LinkFunction implements ICallistoFunction {
 
   private static final Logger logger = Logger.getLogger(LinkFunction.class);
-  private static String name = "link";
+  private static final String NAME = "link";
   @Resource IQueryService queryService;
 
   public static List<String> getParameter(String value) {
@@ -64,63 +64,50 @@ public class LinkFunction implements ICallistoFunction {
     String[] csv = StringUtils.split(val, CharacterConstants.COMMA);
     List<String> params = new ArrayList<>(2);
     params.add(csv[0]);
-    StringBuilder linkFilters = new StringBuilder();
-    for (int i = 1; i < csv.length; i++) {
-      linkFilters.append(csv[i]);
+    if (csv.length > 1) {
+      params.add(StringUtils.substring(val, csv[0].length() + 1));
     }
-    params.add(linkFilters.toString());
     return params;
   }
 
-  public static String getLink(
-      QueryRequestModel request, String val, IQueryService queryService)
-      throws CallistoException {
-    String queryId = getParameter(val).get(0); // first parameter, queryId
-    QueryResults rs = queryService.readData(getNewQueryRequestModel(request, queryId));
-    if (rs.getRows().size() == 1 && rs.getRows().get(0).size() == 1) {
-      return rs.getRows().get(0).get(0);
-    } else {
-      logger.warn("Expected result size from Link function "
-          + val + " is 1. Actual result: " + rs.toString());
-    }
-    return null;
-  }
-
-  private static QueryRequestModel getNewQueryRequestModel(QueryRequestModel request,
-                                                           String queryId) {
-    QueryRequestModel newQueryRequestModel = request.copy();
+  private static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
+                                                          String queryId) {
+    QueryRequestModel newQueryRequestModel = request.clone();
     newQueryRequestModel.queryId = queryId;
     return newQueryRequestModel;
   }
 
   @Override
   public String getName() {
-    return name;
+    return NAME;
   }
 
   @Override
   public String getResult(FunctionParam functionParam) throws CallistoException {
     List<String> params = getParameter(functionParam.function);
     String queryId = params.get(0); // first parameter, queryId
-    String linkFilters = params.get(1); //second parameter, filters
-    Type type = new TypeToken<HashMap<String, String>>() {
-    }.getType();
-    Map linkFiltersMap = getLinkFilterMap(functionParam, linkFilters, type);
+    Map linkFiltersMap = null;
+    if (params.size() > 1) {
+      String linkFilters = params.get(1); //second parameter, filters
+      Type type = new TypeToken<HashMap<String, String>>() {
+      }.getType();
+      linkFiltersMap = getLinkFilterMap(functionParam, linkFilters, type);
+    }
     return getResult(functionParam, queryId, linkFiltersMap);
   }
 
-  private String getResult(FunctionParam functionParam, String queryId,
-                           Map<String, String> linkFiltersMap)
+  private String getResult(FunctionParam functionParam, String queryId, Map linkFiltersMap)
       throws CallistoException {
-    functionParam.getQueryRequestModel().filters.putAll(linkFiltersMap);
+    if (linkFiltersMap != null && !linkFiltersMap.isEmpty()) {
+      functionParam.getQueryRequestModel().filters.putAll(linkFiltersMap);
+    }
     QueryResults rs = queryService
-        .readData(getNewQueryRequestModel(functionParam.getQueryRequestModel(), queryId));
+        .readData(buildQueryRequestModel(functionParam.getQueryRequestModel(), queryId));
     if (rs.getRows().size() == 1 && rs.getRows().get(0).size() == 1) {
       return rs.getRows().get(0).get(0);
-    } else {
-      logger.warn("Expected result size from Link function " + functionParam.function
-          + " is 1. Actual result: " + rs.toString());
     }
+    logger.warn("Expected result size from Link function " + functionParam.function
+        + " is 1. Actual result: " + rs.toString());
     return null;
   }
 
@@ -129,8 +116,7 @@ public class LinkFunction implements ICallistoFunction {
     try {
       HashMap<String, String> filterMap = new Gson().fromJson(linkFilters, type);
       return filterMap.entrySet().stream().map(e -> {
-        if (StringUtils.contains(e.getValue(),
-            CharacterConstants.SINGLE_DOLLAR)) {
+        if (StringUtils.contains(e.getValue(), CharacterConstants.DOLLAR)) {
           e = getModifiedEntry(e, functionParam);
         }
         return e;
@@ -140,10 +126,10 @@ public class LinkFunction implements ICallistoFunction {
     }
   }
 
-  private Map.Entry getModifiedEntry(Map.Entry<String,String> e, FunctionParam functionParam){
+  private Map.Entry getModifiedEntry(Map.Entry<String, String> e, FunctionParam functionParam) {
     try {
-      e.setValue(FunctionsUtil.replaceVariables(e.getValue(), functionParam.getResultHeadings(),
-              functionParam.getResultRow()));
+      e.setValue(FunctionUtil.replaceVariables(e.getValue(), functionParam.getResultHeadings(),
+          functionParam.getResultRow()));
     } catch (CallistoException e1) {
       logger.error(
           "Error while getting result for link function: " + functionParam.function, e1);

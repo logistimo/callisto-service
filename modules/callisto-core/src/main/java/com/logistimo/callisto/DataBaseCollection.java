@@ -24,13 +24,15 @@
 package com.logistimo.callisto;
 
 import com.logistimo.callisto.service.IDataBaseService;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/** @author Mohan Raja */
-@Service
+/**
+ * @author Mohan Raja
+ */
+@Configuration
 public class DataBaseCollection {
 
   private Map<String, IDataBaseService> databaseServices;

@@ -38,13 +38,13 @@ import static org.junit.Assert.assertEquals;
 /** Created by chandrakant on 26/05/17. */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class FunctionsUtilTest {
+public class FunctionUtilTest {
 
   @Test
   public void getAllFunctionsVariablesTest() {
     String str = "$abc + $$link(100+100)$$ + $$link(abc)$$";
     str = str.replaceAll("\\s+", "");
-    List fnVars = FunctionsUtil.getAllFunctionsVariables(str);
+    List fnVars = FunctionUtil.getAllFunctionsAndVariables(str);
     assertEquals(3, fnVars.size());
     assertEquals("$abc", fnVars.get(0));
     assertEquals("$$link(100+100)$$", fnVars.get(1));
@@ -52,7 +52,7 @@ public class FunctionsUtilTest {
 
     str = "$abc + $$link(100+100)$$ + $def + $$link(abc)$$";
     str = str.replaceAll("\\s+", "");
-    fnVars = FunctionsUtil.getAllFunctionsVariables(str);
+    fnVars = FunctionUtil.getAllFunctionsAndVariables(str);
     assertEquals(4, fnVars.size());
     assertEquals("$abc", fnVars.get(0));
     assertEquals("$$link(100+100)$$", fnVars.get(1));
@@ -61,7 +61,7 @@ public class FunctionsUtilTest {
 
     str = "$abc + $$link(100+100)$$ + $def + $$link(abc)$$";
     str = str.replaceAll("\\s+", "");
-    fnVars = FunctionsUtil.getAllFunctionsVariables(str);
+    fnVars = FunctionUtil.getAllFunctionsAndVariables(str);
     assertEquals(4, fnVars.size());
     assertEquals("$abc", fnVars.get(0));
     assertEquals("$$link(100+100)$$", fnVars.get(1));
@@ -70,7 +70,7 @@ public class FunctionsUtilTest {
 
     str = " $$link(idk)$$$fidget + $def$$link(abc)$$ ";
     str = str.replaceAll("\\s+", "");
-    fnVars = FunctionsUtil.getAllFunctionsVariables(str);
+    fnVars = FunctionUtil.getAllFunctionsAndVariables(str);
     assertEquals(4, fnVars.size());
     assertEquals("$$link(idk)$$", fnVars.get(0));
     assertEquals("$fidget", fnVars.get(1));
@@ -81,7 +81,7 @@ public class FunctionsUtilTest {
   @Test
   public void parseColumnTextTest() throws CallistoException {
     String str = "$$topx($abc,3)$$ as abc, $$math(($def*100)/$time)$$, $$datetime($time,'YYYY-MM', YYYY-MM-dd)$$ as newtime";
-    Map<String,String> columns = FunctionsUtil.parseColumnText(str);
+    Map<String,String> columns = FunctionUtil.parseColumnText(str);
     assertEquals(3,columns.size());
   }
 }
