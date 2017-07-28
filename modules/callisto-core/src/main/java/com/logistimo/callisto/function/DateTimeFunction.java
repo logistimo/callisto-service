@@ -62,15 +62,14 @@ public class DateTimeFunction implements ICallistoFunction {
     String fn = functionParam.function;
     List<String> params = getParameters(fn);
     try {
-      if (params != null && params.size() >= ARGS_LENGTH) {
-        DateTime dateTime =
-            DateTime.parse(FunctionUtil.replaceVariables(params.get(0).trim(),
-                    functionParam.getResultHeadings(), functionParam.getResultRow()),
-                DateTimeFormat.forPattern(params.get(1).trim()));
-        return dateTime.toString(params.get(2));
-      } else {
-        logger.error("Error in datetime function parameters: " + fn);
+      if (params == null || params.size() < ARGS_LENGTH) {
+        throw new CallistoException("Q103", fn);
       }
+      DateTime dateTime =
+          DateTime.parse(FunctionUtil.replaceVariables(params.get(0).trim(),
+                  functionParam.getResultHeadings(), functionParam.getResultRow()),
+              DateTimeFormat.forPattern(params.get(1).trim()));
+      return dateTime.toString(params.get(2));
     } catch (IllegalArgumentException e) {
       logger.error("Joda: error in parsing datetime function arguments: " + fn, e);
       throw new CallistoException("Q103", fn);
@@ -89,7 +88,7 @@ public class DateTimeFunction implements ICallistoFunction {
     int boundary = 0;
     try {
       for (int i = 0; i < ARGS_LENGTH; i++) {
-        while (StringUtils.isEmpty(String.valueOf(str.charAt(boundary)).trim())) {
+        while (StringUtils.isBlank(String.valueOf(str.charAt(boundary)))) {
           boundary++;
         }
         quote =

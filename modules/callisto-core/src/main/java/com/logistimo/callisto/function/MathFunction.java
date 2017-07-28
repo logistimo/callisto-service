@@ -137,8 +137,10 @@ public class MathFunction implements ICallistoFunction {
     return result;
   }
 
-  public static String removeTrailingZeros(String num){
-    return !num.contains(".") ? num : num.replaceAll("0*$", "").replaceAll("\\.$", "");
+  public static String removeTrailingZeros(String num) {
+    return !num.contains(CharacterConstants.DOT) ? num
+        : num.replaceAll("0*$", CharacterConstants.EMPTY)
+            .replaceAll("\\.$", CharacterConstants.EMPTY);
   }
 
   private static String replaceLinks(
@@ -276,11 +278,7 @@ public class MathFunction implements ICallistoFunction {
       Pair<Deque<Double>, Deque<Integer>> stackPair = getValuesAndOperatorsStack(expression);
       Deque<Double> values = stackPair.getFirst();
       Deque<Integer> operators = stackPair.getSecond();
-      Deque<Double> tempValues = new ArrayDeque<>();
-      Deque<Integer> tempOperators = new ArrayDeque<>();
-      char[] ops = {'/', '*', '+'};
-      int i = -1;
-      return calculate(values, operators, tempValues, tempOperators, ops, i);
+      return calculate(values, operators);
     } catch (NumberFormatException e) {
       throw new CallistoException("Q101", expr);
     } catch (Exception e) {
@@ -289,9 +287,11 @@ public class MathFunction implements ICallistoFunction {
     return null;
   }
 
-  private static Double calculate(Deque<Double> values, Deque<Integer> operators,
-                                  Deque<Double> tempValues, Deque<Integer> tempOperators,
-                                  char[] ops, int i) {
+  private static Double calculate(Deque<Double> values, Deque<Integer> operators) {
+    Deque<Double> tempValues = new ArrayDeque<>();
+    Deque<Integer> tempOperators = new ArrayDeque<>();
+    char[] ops = {'/', '*', '+'};
+    int i = -1;
     while (i++ < ops.length) {
       boolean repeat = false;
       while (!operators.isEmpty()) {
@@ -311,8 +311,8 @@ public class MathFunction implements ICallistoFunction {
           tempOperators.push(operation);
         }
       }
-      values = refillValues(values, tempValues);
-      operators = refillOperators(operators, tempOperators);
+      values = refill(values, tempValues);
+      operators = refill(operators, tempOperators);
       if (repeat) {
         i--;
       }
@@ -322,29 +322,23 @@ public class MathFunction implements ICallistoFunction {
   }
 
   private static Double getValueByOperation(int i, Double d1, Double d2) {
-    if (i == 0) { //divide
-      return d1 == 0 ? 0 : d2 / d1;
-    } else if (i == 1) { //multiply
-      return d2 * d1;
-    } else if (i == 2) { //add
-      return d2 + d1;
+    switch (i) {
+      case 0: // divide
+        return d1 == 0 ? 0 : d2 / d1;
+      case 1: // multiply
+        return d2 * d1;
+      case 2: // addition
+        return d2 + d1;
+      default:
+        return null;
     }
-    return null;
   }
 
-  private static Deque<Integer> refillOperators(Deque<Integer> operators,
-                                                Deque<Integer> tempOperators) {
-    while (!tempOperators.isEmpty()) {
-      operators.push(tempOperators.pop());
+  private static <T> Deque<T> refill(Deque<T> d1, Deque<T> d2) {
+    while (!d2.isEmpty()) {
+      d1.push(d2.pop());
     }
-    return operators;
-  }
-
-  private static Deque<Double> refillValues(Deque<Double> values, Deque<Double> tempValues) {
-    while (!tempValues.isEmpty()) {
-      values.push(tempValues.pop());
-    }
-    return values;
+    return d1;
   }
 
   private static Pair<Deque<Double>, Deque<Integer>> getValuesAndOperatorsStack(String expression) {

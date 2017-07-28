@@ -36,10 +36,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Created by chandrakant on 22/05/17.
@@ -47,6 +48,12 @@ import java.util.stream.IntStream;
 public class FunctionUtil {
 
   private static final Logger logger = Logger.getLogger(FunctionUtil.class);
+  private static final String[]
+      delimiters =
+      {CharacterConstants.ADD, CharacterConstants.COMMA, CharacterConstants.CLOSE_BRACKET,
+          CharacterConstants.DIVIDE, CharacterConstants.MULTIPLY, CharacterConstants.SPACE,
+          CharacterConstants.PIPE, CharacterConstants.SUBTRACT,
+          String.valueOf(CharacterConstants.DOLLAR)};
 
   private FunctionUtil() {
     // Util class
@@ -116,27 +123,18 @@ public class FunctionUtil {
 
   public static boolean isDelimiter(char c) {
     String s = String.valueOf(c);
-    return Objects.equals(s, CharacterConstants.ADD)
-        || Objects.equals(s, CharacterConstants.COMMA)
-        || Objects.equals(s, CharacterConstants.CLOSE_BRACKET)
-        || Objects.equals(s, CharacterConstants.DIVIDE)
-        || Objects.equals(s, CharacterConstants.MULTIPLY)
-        || Objects.equals(s, CharacterConstants.SPACE)
-        || Objects.equals(s, CharacterConstants.PIPE)
-        || Objects.equals(s, CharacterConstants.SUBTRACT)
-        || c == CharacterConstants.DOLLAR;
+    return Stream.of(delimiters).anyMatch(s::equals);
   }
 
   private static String getVariable(String text, int startIndex) {
-    StringBuilder var = new StringBuilder();
-    int index;
-    for (index = startIndex; index < text.length(); index++) {
-      if (index > startIndex && isDelimiter(text.charAt(index))) {
-        break;
-      }
-      var.append(text.charAt(index));
+    OptionalInt index =
+        Stream.of(delimiters).mapToInt(s -> StringUtils.indexOf(text, s, startIndex + 1))
+            .map(i -> i == -1 ? Integer.MAX_VALUE : i).min();
+    if (index.isPresent() && index.getAsInt() != Integer.MAX_VALUE) {
+      return StringUtils.substring(text, startIndex, index.getAsInt());
+    } else {
+      return StringUtils.substring(text, startIndex);
     }
-    return var.toString();
   }
 
   /**
@@ -240,8 +238,8 @@ public class FunctionUtil {
       String[] splitArr = StringUtils.split(str, CharacterConstants.COMMA);
       for (int i = 0; i < splitArr.length; i++) {
         if (i != splitArr.length - 1
-            && numberOfOccurrences(splitArr[i], CharacterConstants.FN_ENCLOSE) % 2 != 0) {
-          splitArr[i + 1] = splitArr[i].concat(splitArr[i + 1]);
+            && StringUtils.countMatches(splitArr[i], CharacterConstants.FN_ENCLOSE) % 2 != 0) {
+          splitArr[i + 1] = splitArr[i].concat(CharacterConstants.COMMA).concat(splitArr[i + 1]);
           splitArr[i] = CharacterConstants.EMPTY;
         }
       }
@@ -278,13 +276,5 @@ public class FunctionUtil {
             : new ArrayList<>(Collections.singletonList(e.getKey())).stream())
         .collect(Collectors.toSet());
     return StringUtils.join(columns, CharacterConstants.COMMA);
-  }
-
-  /**
-   * @return number of times 'find' occurs in 'str'
-   */
-  private static int numberOfOccurrences(String str, String find) {
-    return (str.length() - StringUtils.replace(str, find, CharacterConstants.EMPTY).length())
-        / find.length();
   }
 }

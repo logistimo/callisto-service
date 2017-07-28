@@ -44,6 +44,7 @@ public class CharacterConstants {
   public static final String SUBTRACT = "-";
   public static final String ZERO = "0";
   public static final String EMPTY = "";
+  public static final String DOT = ".";
   public static final String SPACE = " ";
   public static final String AS = " as ";
 

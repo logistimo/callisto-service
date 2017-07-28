@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import io.netty.util.internal.chmv8.ConcurrentHashMapV8;
+
 import static org.junit.Assert.assertEquals;
 
 /** Created by chandrakant on 26/05/17. */
@@ -62,6 +64,19 @@ public class ResultManagerTest {
     QueryResults newResult = resultManager.getDesiredResult(request, results, desiredResultFormat);
     assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
     assertEquals("2", newResult.getRows().get(0).get(1));
+  }
+
+
+  @Test
+  public void getVariableTest() throws CallistoException {
+    String text = "$did | $abc | $hello+$$math( 2*$did)$$ |$abc ";
+    List list = FunctionUtil.getAllFunctionsAndVariables(text);
+    assertEquals(5, list.size());
+    assertEquals("$did", list.get(0));
+    assertEquals("$abc", list.get(1));
+    assertEquals("$hello", list.get(2));
+    assertEquals("$$math( 2*$did)$$", list.get(3));
+    assertEquals("$abc", list.get(4));
   }
 
 }

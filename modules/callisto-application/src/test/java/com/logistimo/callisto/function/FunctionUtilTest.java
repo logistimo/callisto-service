@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -80,8 +81,15 @@ public class FunctionUtilTest {
 
   @Test
   public void parseColumnTextTest() throws CallistoException {
-    String str = "$$topx($abc,3)$$ as abc, $$math(($def*100)/$time)$$, $$datetime($time,'YYYY-MM', YYYY-MM-dd)$$ as newtime";
+    String str = " $$topx($abc,3)$$ as abc , $$math(($def*100)/$time)$$, $$datetime($time,'YYYY-MM'  , YYYY-MM-dd)$$ as newtime ";
     Map<String,String> columns = FunctionUtil.parseColumnText(str);
     assertEquals(3,columns.size());
+    List<Map.Entry> entries = new ArrayList<>(columns.entrySet());
+    assertEquals("abc",entries.get(0).getKey());
+    assertEquals("$$topx($abc,3)$$",entries.get(0).getValue());
+    assertEquals("$$math(($def*100)/$time)$$",entries.get(1).getKey());
+    assertEquals("$$math(($def*100)/$time)$$",entries.get(1).getValue());
+    assertEquals("newtime",entries.get(2).getKey());
+    assertEquals("$$datetime($time,'YYYY-MM'  , YYYY-MM-dd)$$", entries.get(2).getValue());
   }
 }

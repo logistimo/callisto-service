@@ -198,12 +198,12 @@ public class ResultManager {
    * @return parsed Map
    */
   public LinkedHashMap<String, String> getResultFormatMap(String strToParse, QueryResults results) {
-    Type type = new TypeToken<LinkedHashMap<String, String>>() {
-    }.getType();
-    LinkedHashMap<String, String> filterMap = null;
     if (results == null || results.getHeadings() == null) {
       return null;
     }
+    Type type = new TypeToken<LinkedHashMap<String, String>>() {
+    }.getType();
+    LinkedHashMap<String, String> filterMap;
     filterMap =
         results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
             .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
