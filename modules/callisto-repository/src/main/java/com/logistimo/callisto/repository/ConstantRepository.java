@@ -21,16 +21,20 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.repository;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
+import com.logistimo.callisto.model.ConstantText;
 
-@SpringBootApplication
-@EnableCaching
-public class CallistoApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(CallistoApplication.class, args);
-  }
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+/** Created by chandrakant on 18/05/17. */
+@Repository
+public interface ConstantRepository extends MongoRepository<ConstantText, String> {
+
+  @Query(value = "{ 'userId': ?0 , 'id': ?1 } ")
+  List<ConstantText> readConstant(String userId, String constId);
 }

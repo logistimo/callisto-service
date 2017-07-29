@@ -21,16 +21,31 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.model;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@SpringBootApplication
-@EnableCaching
-public class CallistoApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(CallistoApplication.class, args);
-  }
+/**
+ * Created by chandrakant on 18/05/17.
+ */
+
+@Document
+public class ConstantText {
+
+    @Id
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("user_id")
+    private String userId = "logistimo";
+
+    @JsonProperty("constant")
+    private String constant;
+
+    public String getConstant(){
+      return constant;
+    }
+
 }

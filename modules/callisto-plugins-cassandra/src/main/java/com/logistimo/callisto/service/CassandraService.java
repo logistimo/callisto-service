@@ -94,9 +94,9 @@ public class CassandraService implements IDataBaseService {
         logger.warn("Cassandra session is null");
         return null;
       }
-      query = constructQuery(query, filters);
-      logger.info("Fetching cassandra results: " + query + filters);
-      Statement statement = new SimpleStatement(query);
+      String finalQuery = constructQuery(query, filters);
+      logger.info("Fetching cassandra results: " + finalQuery + filters);
+      Statement statement = new SimpleStatement(finalQuery);
       offset = Optional.of(offset.orElse(0));
       if (size.isPresent()) {
         statement.setFetchSize(getSize(size, offset));

@@ -21,15 +21,36 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.model;
 
-/**
- * @author Mohan Raja
- */
-public class QueryFunction {
-  public FunctionType type;
-  public String queryID;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/** @author Mohan Raja */
+public class QueryRequestModel implements Cloneable {
+  public String userId = "logistimo";
+  public String queryId;
+  public Map<String, String> filters;
+  public String derivedResultsId; //constant ID for the desired result i.e. LinkedHashMap
+  public Map<String,String> columnText;
   public Integer size;
+  public List<String> rowHeadings;
   public Integer offset;
-  public boolean fill;
+
+  @Override
+  public QueryRequestModel clone(){
+    QueryRequestModel newRequestModel = new QueryRequestModel();
+    newRequestModel.userId = String.valueOf(this.userId);
+    newRequestModel.queryId = this.queryId;
+    newRequestModel.filters = (Map)((HashMap)this.filters).clone();
+    newRequestModel.columnText = (Map)((HashMap)this.columnText).clone();
+    newRequestModel.rowHeadings = (List)((ArrayList)this.rowHeadings).clone();
+    newRequestModel.derivedResultsId = this.derivedResultsId;
+    newRequestModel.size = this.size;
+    newRequestModel.offset = this.offset;
+    return newRequestModel;
+  }
+
 }

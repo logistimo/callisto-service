@@ -25,10 +25,10 @@ package com.logistimo.callisto.service;
 
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.QueryResults;
+import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
 
 import java.util.List;
-import java.util.Map;
 
 /** @author Chandrakant */
 public interface IQueryService {
@@ -41,7 +41,7 @@ public interface IQueryService {
 
   List<String> readQueryIds(String userId);
 
-  QueryResults readData(String userId, String queryId, Map<String, String> filters, Integer size, Integer offset)
+  QueryResults readData(QueryRequestModel requestModel)
       throws CallistoException;
 
   String deleteQuery(String userId, String queryId);

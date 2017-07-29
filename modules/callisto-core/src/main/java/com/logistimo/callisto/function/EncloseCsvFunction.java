@@ -21,16 +21,52 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.function;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
+import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.exception.CallistoException;
 
-@SpringBootApplication
-@EnableCaching
-public class CallistoApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(CallistoApplication.class, args);
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+/**
+ * Created by chandrakant on 18/05/17.
+ */
+@Component(value = "enclosecsv")
+public class EncloseCsvFunction implements ICallistoFunction {
+
+  private static final String NAME = "enclosecsv";
+  @Autowired
+  @Qualifier("csv")
+  ICallistoFunction csvFunction;
+
+  public String getEncloseCSV(FunctionParam functionParam) throws CallistoException {
+    return ((CsvFunction) csvFunction).getCSV(functionParam, true);
+  }
+
+  @Override
+  public String getName() {
+    return NAME;
+  }
+
+  @Override
+  public String getResult(FunctionParam functionParam) throws CallistoException {
+    return getEncloseCSV(functionParam);
+  }
+
+  @Override
+  public int getArgsLength() {
+    return -1;
+  }
+
+  @Override
+  public int getMinArgsLength() {
+    return 1;
+  }
+
+  @Override
+  public int getMaxArgLength() {
+    return 4;
   }
 }

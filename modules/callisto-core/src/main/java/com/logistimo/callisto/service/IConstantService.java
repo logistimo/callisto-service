@@ -21,16 +21,14 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.service;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
+import com.logistimo.callisto.model.ConstantText;
 
-@SpringBootApplication
-@EnableCaching
-public class CallistoApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(CallistoApplication.class, args);
-  }
+/** Created by chandrakant on 19/05/17. */
+public interface IConstantService {
+
+  ConstantText readConstant(String userId, String constId);
+
+  String saveConstant(ConstantText constant);
 }

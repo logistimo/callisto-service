@@ -21,16 +21,28 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.controller;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
+import com.logistimo.callisto.model.ConstantText;
+import com.logistimo.callisto.service.IConstantService;
+import org.springframework.web.bind.annotation.*;
 
-@SpringBootApplication
-@EnableCaching
-public class CallistoApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(CallistoApplication.class, args);
+import javax.annotation.Resource;
+
+/** Created by chandrakant on 24/05/17. */
+@RestController
+@RequestMapping("/constant")
+public class ConstantController {
+
+  @Resource IConstantService constantService;
+
+  @RequestMapping(value = "/save", method = RequestMethod.PUT)
+  public String saveConstant(@RequestBody ConstantText constant) {
+    return constantService.saveConstant(constant);
+  }
+
+  @RequestMapping(value = "/get", method = RequestMethod.GET)
+  public ConstantText getConstant(@RequestParam(defaultValue = "logistimo") String userId, @RequestParam String constId) {
+    return constantService.readConstant(userId, constId);
   }
 }

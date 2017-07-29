@@ -23,14 +23,19 @@
 
 package com.logistimo.callisto;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
+import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.function.FunctionParam;
 
-@SpringBootApplication
-@EnableCaching
-public class CallistoApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(CallistoApplication.class, args);
-  }
+/** Created by chandrakant on 25/05/17. */
+public interface ICallistoFunction {
+
+  String getName();
+
+  String getResult(FunctionParam functionParam) throws CallistoException;
+
+  int getArgsLength();
+
+  int getMinArgsLength();
+
+  int getMaxArgLength();
 }

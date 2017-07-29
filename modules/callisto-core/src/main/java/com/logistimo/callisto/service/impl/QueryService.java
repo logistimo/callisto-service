@@ -23,14 +23,20 @@
 
 package com.logistimo.callisto.service.impl;
 
-import com.logistimo.callisto.*;
+import com.logistimo.callisto.DataBaseCollection;
+import com.logistimo.callisto.FunctionManager;
+import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.function.FunctionParam;
+import com.logistimo.callisto.function.FunctionUtil;
+import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
 import com.logistimo.callisto.model.ServerConfig;
 import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
-import org.apache.commons.lang.StringUtils;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -55,12 +61,13 @@ public class QueryService implements IQueryService {
   @Autowired private UserService userService;
 
   @Autowired private DataBaseCollection dataBaseCollection;
+  @Autowired private FunctionManager functionManager;
 
   public String saveQuery(QueryText q) {
     String res = "failure";
     try {
       List<QueryText> existing = queryRepository.readQuery(q.getUserId(), q.getQueryId());
-      if (existing == null || existing.size() == 0) {
+      if (existing == null || existing.isEmpty()) {
         queryRepository.save(q);
         res = "Query saved successfully";
       } else {
@@ -100,7 +107,7 @@ public class QueryService implements IQueryService {
   public QueryText readQuery(String userId, String queryId) {
     try {
       List<QueryText> queryList = queryRepository.readQuery(userId, queryId, new PageRequest(0, 1));
-      if (queryList != null && queryList.size() > 0) {
+      if (queryList != null && !queryList.isEmpty()) {
         return queryList.get(0);
       }
     } catch (Exception e) {
@@ -124,98 +131,38 @@ public class QueryService implements IQueryService {
   }
 
   @Override
-  public QueryResults readData(
-      String userId, String queryId, Map<String, String> filters, Integer size, Integer offset)
+  public QueryResults readData(QueryRequestModel request)
       throws CallistoException {
-    QueryText queryText = readQuery(userId, queryId);
-    List<String> rowHeadings = null;
+    QueryText queryText = readQuery(request.userId, request.queryId);
+    List<String> rowHeadings = new ArrayList<>();
     if (queryText == null) {
-      logger.warn("Query " + queryId + " not found for user " + userId);
+      logger.warn("Query " + request.queryId + " not found for user " + request.userId);
       return null;
     }
-    ServerConfig serverConfig = userService.readServerConfig(userId, queryText.getServerId());
-    List<String> functions = getAllFunctions(queryText.getQuery());
-    if (functions.size() > 0) {
+    ServerConfig
+        serverConfig =
+        userService.readServerConfig(request.userId, queryText.getServerId());
+    List<String> functions = FunctionUtil.getAllFunctions(queryText.getQuery());
+    if (!functions.isEmpty()) {
       for (String functionText : functions) {
-        QueryFunction function = getQueryFunction(functionText, filters);
-        QueryResults results =
-            readData(userId, function.queryID, filters, function.size, function.offset);
-        if (results == null || results.getRows() == null || results.getRows().size()==0) {
-          logger.warn("Got no results from function with query id " + function.queryID);
-          return null;
-        }
-        if (FunctionType.CSV.equals(function.type)) {
-          String data = getCSV(results, serverConfig.getEscaping());
+        if (FunctionUtil.isFunction(functionText, false)) {
+          ICallistoFunction
+              qFunction =
+              functionManager.getFunction(FunctionUtil.getFunctionType(functionText));
+          FunctionParam
+              functionParam =
+              new FunctionParam(request, serverConfig.getEscaping(), rowHeadings);
+          functionParam.function = functionText;
+          String data = qFunction.getResult(functionParam);
           queryText.setQuery(queryText.getQuery().replace(functionText, data));
-        } else if (FunctionType.ENCLOSE_CSV.equals(function.type)) {
-          String data = getEncloseCSV(results, serverConfig.getEscaping());
-          queryText.setQuery(queryText.getQuery().replace(functionText, data));
-        }
-        if (function.fill) {
-          rowHeadings = new ArrayList<>(results.getRows().size());
-          for (List<String> rows : results.getRows()) {
-            if (StringUtils.isNotEmpty(rows.get(0))) rowHeadings.add(rows.get(0));
-          }
         }
       }
     }
     QueryResults queryResults =
-        executeQuery(serverConfig, queryText.getQuery(), filters, size, offset);
-    if (rowHeadings != null) {
-      queryResults.setRowHeadings(rowHeadings);
-    }
+        executeQuery(serverConfig, queryText.getQuery(), request.filters, request.size,
+            request.offset);
+    queryResults.setRowHeadings(rowHeadings);
     return queryResults;
-  }
-
-  private String getEncloseCSV(QueryResults results, String escaping) {
-    return getCSV(results, true, escaping);
-  }
-
-  private QueryFunction getQueryFunction(String functionText, Map<String, String> filters)
-      throws CallistoException {
-    QueryFunction function = new QueryFunction();
-    int index = functionText.indexOf(CharacterConstants.OPEN_BRACKET);
-    if (index == -1) {
-      logger.warn("Invalid function found. " + function);
-      throw new CallistoException("Q001", functionText);
-    }
-    String[] functionParams;
-    function.type =
-        FunctionType.getFunctionType(
-            functionText.substring(CharacterConstants.FN_ENCLOSE.length(), index).trim());
-    functionParams =
-        functionText
-            .substring(index + 1, functionText.indexOf(CharacterConstants.CLOSE_BRACKET))
-            .trim()
-            .split(CharacterConstants.COMMA);
-    if (functionParams.length >= 1) {
-      String qId = functionParams[0].trim();
-      if(filters.containsKey(qId)){
-          function.queryID = filters.get(qId);
-      }else{
-          function.queryID = qId;
-      }
-    }
-    if (functionParams.length >= 2) {
-      String size = functionParams[1].trim();
-      if (filters.containsKey(size)) {
-        function.size = Integer.parseInt(filters.get(size));
-      } else {
-        function.size = Integer.parseInt(size);
-      }
-    }
-    if (functionParams.length >= 3) {
-      String offset = functionParams[2].trim();
-      if (filters.containsKey(offset)) {
-        function.offset = Integer.parseInt(filters.get(offset));
-      } else {
-        function.offset = Integer.parseInt(offset);
-      }
-    }
-    if (functionParams.length >= 4) {
-      function.fill = Boolean.parseBoolean(functionParams[3].trim());
-    }
-    return function;
   }
 
   private QueryResults executeQuery(
@@ -228,52 +175,5 @@ public class QueryService implements IQueryService {
         dataBaseCollection.getDataBaseService(serverConfig.getType());
     return dataBaseService.fetchRows(
         serverConfig, query, filters, Optional.ofNullable(size), Optional.ofNullable(offset));
-  }
-
-  private List<String> getAllFunctions(String text) {
-    return getAllFunctions(text, 0);
-  }
-
-  private List<String> getAllFunctions(String text, int start) {
-    List<String> matches = new ArrayList<>();
-    if (text.contains(CharacterConstants.FN_ENCLOSE)) {
-      int ss = text.indexOf(CharacterConstants.FN_ENCLOSE, start);
-      int se =
-          text.indexOf(CharacterConstants.FN_ENCLOSE, ss + 1)
-              + CharacterConstants.FN_ENCLOSE.length();
-      String subStr = text.substring(ss, se);
-      matches.add(subStr);
-      if (text.indexOf(CharacterConstants.FN_ENCLOSE, se + 1) >= 0) {
-        matches.addAll(getAllFunctions(text, se + 1));
-      }
-    }
-    return matches;
-  }
-
-  private String getCSV(QueryResults results, String escaping) {
-    return getCSV(results, false, escaping);
-  }
-
-  private String getCSV(QueryResults results, boolean forceEnclose, String escaping) {
-    StringBuilder csv = new StringBuilder();
-    for (List<String> strings : results.getRows()) {
-      if (!forceEnclose
-          && results.getDataTypes() != null
-          && CallistoDataType.NUMBER.equals(results.getDataTypes().get(0))) {
-        csv.append(strings.get(0)).append(CharacterConstants.COMMA);
-      } else {
-        String enclosing = CharacterConstants.SINGLE_QUOTE;
-        if (strings.get(0).contains(CharacterConstants.SINGLE_QUOTE)
-            && StringUtils.isNotEmpty(escaping)) {
-          enclosing = escaping;
-        }
-        csv.append(enclosing)
-            .append(strings.get(0))
-            .append(enclosing)
-            .append(CharacterConstants.COMMA);
-      }
-    }
-    csv.setLength(csv.length() - 1);
-    return csv.toString();
   }
 }

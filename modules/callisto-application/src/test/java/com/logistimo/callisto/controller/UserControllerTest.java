@@ -51,17 +51,7 @@ public class UserControllerTest {
   @Autowired private MockMvc mvc;
 
   @Test
-  public void aDeleteUser() throws Exception {
-    mvc.perform(
-            MockMvcRequestBuilders.delete("/user/delete")
-                .param("userId", "ck_test")
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isOk())
-        .andExpect(content().string("success"));
-  }
-
-  @Test
-  public void bCreateUser() throws Exception {
+  public void aCreateUser() throws Exception {
     mvc.perform(
             MockMvcRequestBuilders.post("/user/register")
                 .content(
@@ -89,7 +79,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void cUpdateUser() throws Exception {
+  public void bUpdateUser() throws Exception {
     mvc.perform(
             MockMvcRequestBuilders.post("/user/update")
                 .content(
@@ -130,7 +120,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void dReadUser() throws Exception {
+  public void cReadUser() throws Exception {
     MvcResult result =
         mvc.perform(
                 MockMvcRequestBuilders.get("/user/get")
@@ -142,4 +132,15 @@ public class UserControllerTest {
         new JsonParser().parse(result.getResponse().getContentAsString()).getAsJsonObject();
     Assert.assertEquals("ck_test", json.get("user_id").getAsString());
   }
+
+  @Test
+  public void dDeleteUser() throws Exception {
+    mvc.perform(
+        MockMvcRequestBuilders.delete("/user/delete")
+            .param("userId", "ck_test")
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isOk())
+        .andExpect(content().string("success"));
+  }
+
 }

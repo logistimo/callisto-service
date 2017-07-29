@@ -65,6 +65,8 @@ public class QueryResults {
   }
 
   public void setRowHeadings(List<String> rowHeadings) {
-    this.rowHeadings = rowHeadings;
+    if(rowHeadings != null && !rowHeadings.isEmpty()){
+      this.rowHeadings = rowHeadings;
+    }
   }
 }
