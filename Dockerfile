@@ -1,5 +1,5 @@
 FROM docker.logistimo.com:8082/logi-tomcat:8.5
-MAINTAINER naren <naren@logistimo.com>
+MAINTAINER dockers@logistimo.com
 
 EXPOSE 9080
 
@@ -25,6 +25,7 @@ ADD modules/${APP_NAME}/target/${APP_NAME}-${APP_VERSION}.jar $TOMCAT_HOME/webap
 
 ADD jmx_prometheus_javaagent-0.7.jar $TOMCAT_HOME/
 ADD jmx_exporter.json $TOMCAT_HOME/
+ADD logistimo-callisto-functions/target/*.jar $TOMCAT_HOME/lib/
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
