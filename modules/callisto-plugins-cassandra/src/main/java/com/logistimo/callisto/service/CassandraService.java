@@ -46,7 +46,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +64,7 @@ public class CassandraService implements IDataBaseService {
   private Cluster cluster;
   private Session session;
   private Integer serverConfigHash;
-  private static final List<DataType.Name> integerDataTypes =
+  private static final List<DataType.Name> numericDataTypes =
       new ArrayList<>(
           Arrays.asList(
               DataType.bigint().getName(),
@@ -132,7 +131,10 @@ public class CassandraService implements IDataBaseService {
     if (row.getObject(i) != null) {
       switch (columnDefinitions.getType(i).getName()) {
         case MAP:
-          return new Gson().toJson(row.getMap(i, String.class, BigDecimal.class));
+          return new Gson().toJson(row.getMap(i, DataStaxUtil.DATA_TYPE_MAPPING.get(
+                  columnDefinitions.getType(i).getTypeArguments().get(0).getName()),
+              DataStaxUtil.DATA_TYPE_MAPPING
+                  .get(columnDefinitions.getType(i).getTypeArguments().get(1).getName())));
         default:
           return row.getObject(i).toString();
       }
@@ -147,7 +149,7 @@ public class CassandraService implements IDataBaseService {
     List<CallistoDataType> dataTypes = new ArrayList<>(columnDefinitions.size());
     for (ColumnDefinitions.Definition definition : columnDefinitions) {
       headers.add(definition.getName());
-      if (integerDataTypes.contains(definition.getType().getName())) {
+      if (numericDataTypes.contains(definition.getType().getName())) {
         dataTypes.add(CallistoDataType.NUMBER);
       } else {
         dataTypes.add(CallistoDataType.STRING);
@@ -165,7 +167,7 @@ public class CassandraService implements IDataBaseService {
       } else if (offset.get() > 0) {
         return offset.get();
       }
-    } else if(size.isPresent()) {
+    } else if (size.isPresent()) {
       return size.get();
     }
     return DEFAULT_PAGE_SIZE;
@@ -247,7 +249,7 @@ public class CassandraService implements IDataBaseService {
 
   private String constructQuery(String query, Map<String, String> filters) {
     if (filters != null && filters.size() > 0) {
-      for (Map.Entry<String,String> entry : filters.entrySet()) {
+      for (Map.Entry<String, String> entry : filters.entrySet()) {
         query = query.replace(entry.getKey(), entry.getValue());
       }
     }
