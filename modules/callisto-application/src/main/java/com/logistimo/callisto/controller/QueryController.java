@@ -96,11 +96,10 @@ public class QueryController {
         q = resultManager.getDesiredResult(model, q, derivedColumns);
 
       }
-    } else if (Objects.equals(request.getHeader("Request-Version"), "v2")) {
+    } else if (Objects.equals(request.getHeader("X-app-version"), "v2")) {
       if (model.columnText != null && !model.columnText.isEmpty()) {
         //expects only one element
-        Map.Entry<String, String> entry =
-            (Map.Entry<String, String>) model.columnText.entrySet().iterator().next();
+        Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
         LinkedHashMap<String, String> parsedColumnData = FunctionUtil
             .parseColumnText(entry.getValue());
         model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
