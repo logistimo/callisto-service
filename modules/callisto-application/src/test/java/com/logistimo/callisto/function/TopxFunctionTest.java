@@ -26,6 +26,7 @@ package com.logistimo.callisto.function;
 import com.logistimo.callisto.CallistoApplication;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.model.QueryRequestModel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -52,8 +54,13 @@ public class TopxFunctionTest {
 
   @Test
   public void TopxTest() throws CallistoException {
-    String arg = "$$topx($map,3,2)$$";
+    String arg = "$$topx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
+    QueryRequestModel model = new QueryRequestModel();
+    model.filters = new HashMap<>();
+    model.filters.put("TOKEN_SIZE", "3");
+    model.filters.put("TOKEN_OFFSET", "2");
     FunctionParam fParam= new FunctionParam();
+    fParam.setQueryRequestModel(model);
     fParam.function = arg;
     fParam.setResultHeadings(Arrays.asList("abc","def","map","seriously?"));
     fParam.setResultRow(Arrays.asList("IDK", "None",
@@ -62,11 +69,15 @@ public class TopxFunctionTest {
     String nMap = topx.getResult(fParam);
     assertEquals("{\"key2\":10,\"key6\":12,\"key7\":14}", nMap);
     //-------------------------------------//
-    fParam.function = "$$topx($map,3,0)$$";
+    fParam.function = "$$topx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
+    model.filters.put("TOKEN_SIZE", "3");
+    model.filters.put("TOKEN_OFFSET", "0");
     nMap = topx.getResult(fParam);
     assertEquals("{\"key4\":2,\"key3\":8,\"key2\":10}",nMap);
     //-------------------------------------//
-    fParam.function = "$$topx($map,2,10)$$";
+    fParam.function = "$$topx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
+    model.filters.put("TOKEN_SIZE", "2");
+    model.filters.put("TOKEN_OFFSET", "10");
     nMap = topx.getResult(fParam);
     assertEquals("{}",nMap);
   }
