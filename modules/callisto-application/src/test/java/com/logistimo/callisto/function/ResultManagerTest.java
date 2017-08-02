@@ -36,6 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -49,8 +50,11 @@ public class ResultManagerTest {
   @Autowired ResultManager resultManager;
 
   @Test
-  public void getDesiredResultTest() throws CallistoException {
+  public void getDerivedResultTest() throws CallistoException {
     QueryRequestModel request = new QueryRequestModel();
+    request.filters = new HashMap<>();
+    request.filters.put("TOKEN_SIZE", "5");
+    request.filters.put("TOKEN_OFFSET", "4");
     QueryResults results = new QueryResults();
     List<String> headings = Arrays.asList("abc", "def", "pqr", "mapc");
     results.setHeadings(headings);
@@ -63,7 +67,7 @@ public class ResultManagerTest {
     LinkedHashMap<String, String> desiredResultFormat = new LinkedHashMap<>();
     desiredResultFormat.put("Display format of abc", "$abc $def $$math(100/(2.5*2))$$");
     desiredResultFormat.put("Modified 2nd column", "$$math($pqr/$def)$$");
-    desiredResultFormat.put("Modified map", "$$topx($mapc,5,4)$$");
+    desiredResultFormat.put("Modified map", "$$topx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
     QueryResults newResult = resultManager.getDesiredResult(request, results, desiredResultFormat);
     assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
     assertEquals("2", newResult.getRows().get(0).get(1));

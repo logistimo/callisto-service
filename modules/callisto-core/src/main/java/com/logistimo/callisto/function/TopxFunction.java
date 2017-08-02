@@ -67,8 +67,8 @@ public class TopxFunction implements ICallistoFunction {
     String mapStr = FunctionUtil.replaceVariables(params.get(0).trim(),
         functionParam.getResultHeadings(), functionParam.getResultRow());
     Map<String, Long> map;
-    Long size;
-    Long offset;
+    Integer size;
+    Integer offset;
     try{
       map = new Gson().fromJson(mapStr, new TypeToken<Map<String, Long>>() {
       }.getType());
@@ -76,8 +76,10 @@ public class TopxFunction implements ICallistoFunction {
       throw new CallistoException("Q104", mapStr);
     }
     try{
-      size = Long.valueOf(params.get(1).trim());
-      offset = Long.valueOf(params.get(2).trim());
+      size =
+          Integer.valueOf(functionParam.getQueryRequestModel().filters.get(params.get(1).trim()));
+      offset =
+          Integer.valueOf(functionParam.getQueryRequestModel().filters.get(params.get(2).trim()));
     } catch (NumberFormatException e){
       throw new CallistoException("Q105", params.get(1)+CharacterConstants.COMMA+params.get(2));
     }
