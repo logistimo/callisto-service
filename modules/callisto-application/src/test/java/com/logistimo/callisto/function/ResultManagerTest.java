@@ -24,10 +24,11 @@
 package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CallistoApplication;
-import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
+import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import io.netty.util.internal.chmv8.ConcurrentHashMapV8;
 
 import static org.junit.Assert.assertEquals;
 
@@ -53,17 +52,22 @@ public class ResultManagerTest {
   public void getDesiredResultTest() throws CallistoException {
     QueryRequestModel request = new QueryRequestModel();
     QueryResults results = new QueryResults();
-    List<String> headings = Arrays.asList("abc", "def", "pqr");
+    List<String> headings = Arrays.asList("abc", "def", "pqr", "mapc");
     results.setHeadings(headings);
-    results.addRow(Arrays.asList("result of abc", "125", "250"));
-    results.addRow(Arrays.asList("another result of abc", "49", "123"));
-    results.addRow(Arrays.asList("seriously?", "24", "340"));
+    results.addRow(Arrays.asList("result of abc", "125", "250",
+        "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
+    results.addRow(Arrays.asList("another result of abc", "49", "123",
+        "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
+    results.addRow(Arrays.asList("seriously?", "24", "340",
+        "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
     LinkedHashMap<String, String> desiredResultFormat = new LinkedHashMap<>();
     desiredResultFormat.put("Display format of abc", "$abc $def $$math(100/(2.5*2))$$");
     desiredResultFormat.put("Modified 2nd column", "$$math($pqr/$def)$$");
+    desiredResultFormat.put("Modified map", "$$topx($mapc,5,4)$$");
     QueryResults newResult = resultManager.getDesiredResult(request, results, desiredResultFormat);
     assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
     assertEquals("2", newResult.getRows().get(0).get(1));
+    assertEquals("{key7:14,key8:17,key9:20,key1:23,key5:25}", newResult.getRows().get(0).get(2));
   }
 
 
