@@ -34,32 +34,33 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
- * Created by chandrakant on 02/08/17.
- * TopxFunction defines a function to modify a map to return top (compared by value) x entries
+ * Created by chandrakant on 04/08/17.
+ * BottomxFunction defines a function to modify a map to return bottom (compared by value) x entries
  * Accpets 3 parameters, variable name (type = map), size of the resulting map and offset
  */
-@Component(value = "topx")
-public class TopxFunction implements ICallistoFunction {
+@Component(value = "bottomx")
+public class BottomxFunction implements ICallistoFunction {
 
-  private static final String NAME = "topx";
-  @Override
-  public String getName() {
-    return NAME;
-  }
+  private static final String NAME = "bottomx";
 
-  private List<String> getParameters(String fn){
+  private List<String> getParameters(String fn) {
     String str = StringUtils.substring(fn, fn.indexOf(CharacterConstants.OPEN_BRACKET) + 1,
         fn.lastIndexOf(CharacterConstants.CLOSE_BRACKET));
     String[] arr = StringUtils.split(str, CharacterConstants.COMMA);
-    return  Arrays.asList(StringUtils.join(arr, CharacterConstants.COMMA, 0, arr.length - 2),
+    return Arrays.asList(StringUtils.join(arr, CharacterConstants.COMMA, 0, arr.length - 2),
         arr[arr.length - 2], arr[arr.length - 1]);
+  }
+
+  @Override
+  public String getName() {
+    return NAME;
   }
 
   @Override
@@ -70,25 +71,23 @@ public class TopxFunction implements ICallistoFunction {
     Map<String, Long> map;
     Integer size;
     Integer offset;
-    try{
+    try {
       map = new Gson().fromJson(mapStr, new TypeToken<Map<String, Long>>() {
       }.getType());
-    }catch (Exception e){
+    } catch (Exception e) {
       throw new CallistoException("Q104", mapStr);
     }
-    try{
+    try {
       size =
           Integer.valueOf(functionParam.getQueryRequestModel().filters.get(params.get(1).trim()));
       offset =
           Integer.valueOf(functionParam.getQueryRequestModel().filters.get(params.get(2).trim()));
-    } catch (NumberFormatException e){
-      throw new CallistoException("Q105", params.get(1)+CharacterConstants.COMMA+params.get(2));
+    } catch (NumberFormatException e) {
+      throw new CallistoException("Q105", params.get(1) + CharacterConstants.COMMA + params.get(2));
     }
-    Map sortedMap =
-        map.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).skip(
-            offset).limit(size)
-            .collect(Collectors
-                .toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
+    Map sortedMap = map.entrySet().stream()
+        .sorted(Entry.comparingByValue()).skip(offset).limit(size).collect(Collectors
+            .toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
     return new Gson().toJson(sortedMap);
   }
 
