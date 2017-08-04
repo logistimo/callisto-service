@@ -214,7 +214,11 @@ public class FunctionUtil {
     for (int i = 0; i < variables.size(); i++) {
       int index = ResultManager.variableIndex(variables.get(i), headings);
       if (index != -1) {
-        val = StringUtils.replace(val, variables.get(i), row.get(index));
+        if(StringUtils.isNotEmpty(row.get(index))){
+          val = StringUtils.replace(val, variables.get(i), row.get(index));
+        }else{
+          val = StringUtils.replace(val, variables.get(i), CharacterConstants.EMPTY);
+        }
       } else {
         if (row.size() == headings.size()) {
           logger.warn("Unknown variable found in Math function: " + val);

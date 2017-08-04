@@ -72,8 +72,12 @@ public class BottomxFunction implements ICallistoFunction {
     Integer size;
     Integer offset;
     try {
-      map = new Gson().fromJson(mapStr, new TypeToken<Map<String, Long>>() {
-      }.getType());
+      if(StringUtils.isNotEmpty(mapStr)){
+        map = new Gson().fromJson(mapStr, new TypeToken<Map<String, Long>>() {
+        }.getType());
+      } else{
+        map = new LinkedHashMap<>();
+      }
     } catch (Exception e) {
       throw new CallistoException("Q104", mapStr);
     }
