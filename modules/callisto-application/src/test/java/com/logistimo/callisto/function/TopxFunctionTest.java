@@ -52,9 +52,13 @@ public class TopxFunctionTest {
   @Qualifier("topx")
   ICallistoFunction topx;
 
+  @Autowired
+  @Qualifier("bottomx")
+  ICallistoFunction bottomx;
+
   @Test
   public void TopxTest() throws CallistoException {
-    String arg = "$$topx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
+    String arg = "$$bottomx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
     QueryRequestModel model = new QueryRequestModel();
     model.filters = new HashMap<>();
     model.filters.put("TOKEN_SIZE", "3");
@@ -66,20 +70,27 @@ public class TopxFunctionTest {
     fParam.setResultRow(Arrays.asList("IDK", "None",
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}",
         "seriously?"));
-    String nMap = topx.getResult(fParam);
+    String nMap = bottomx.getResult(fParam);
     assertEquals("{\"key2\":10,\"key6\":12,\"key7\":14}", nMap);
+    //-------------------------------------//
+    fParam.function = "$$bottomx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
+    model.filters.put("TOKEN_SIZE", "3");
+    model.filters.put("TOKEN_OFFSET", "0");
+    nMap = bottomx.getResult(fParam);
+    assertEquals("{\"key4\":2,\"key3\":8,\"key2\":10}",nMap);
+    //-------------------------------------//
+    fParam.function = "$$bottomx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
+    model.filters.put("TOKEN_SIZE", "2");
+    model.filters.put("TOKEN_OFFSET", "10");
+    nMap = bottomx.getResult(fParam);
+    assertEquals("{}",nMap);
+
     //-------------------------------------//
     fParam.function = "$$topx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
     model.filters.put("TOKEN_SIZE", "3");
-    model.filters.put("TOKEN_OFFSET", "0");
+    model.filters.put("TOKEN_OFFSET", "1");
     nMap = topx.getResult(fParam);
-    assertEquals("{\"key4\":2,\"key3\":8,\"key2\":10}",nMap);
-    //-------------------------------------//
-    fParam.function = "$$topx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
-    model.filters.put("TOKEN_SIZE", "2");
-    model.filters.put("TOKEN_OFFSET", "10");
-    nMap = topx.getResult(fParam);
-    assertEquals("{}",nMap);
+    assertEquals("{\"key1\":23,\"key9\":20,\"key8\":17}",nMap);
   }
 
 }
