@@ -44,9 +44,11 @@ public class QueryRequestModel implements Cloneable {
     QueryRequestModel newRequestModel = new QueryRequestModel();
     newRequestModel.userId = String.valueOf(this.userId);
     newRequestModel.queryId = this.queryId;
-    newRequestModel.filters = (Map)((HashMap)this.filters).clone();
-    newRequestModel.columnText = (Map)((HashMap)this.columnText).clone();
-    newRequestModel.rowHeadings = (List)((ArrayList)this.rowHeadings).clone();
+    newRequestModel.filters = this.filters == null ? null : (Map) ((HashMap) this.filters).clone();
+    newRequestModel.columnText =
+        this.columnText == null ? null : (Map) ((HashMap) this.columnText).clone();
+    newRequestModel.rowHeadings =
+        this.rowHeadings == null ? null : (List) ((ArrayList) this.rowHeadings).clone();
     newRequestModel.derivedResultsId = this.derivedResultsId;
     newRequestModel.size = this.size;
     newRequestModel.offset = this.offset;
