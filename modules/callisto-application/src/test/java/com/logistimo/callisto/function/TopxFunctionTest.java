@@ -91,6 +91,17 @@ public class TopxFunctionTest {
     model.filters.put("TOKEN_OFFSET", "1");
     nMap = topx.getResult(fParam);
     assertEquals("{\"key1\":23,\"key9\":20,\"key8\":17}",nMap);
+    //-------------------------------------//
+    fParam.setResultRow(Arrays.asList("IDK", "None",
+        "{\"key6\":12,\"key7\":10,\"key3\":10,\"key9\":10,\"key5\":8,\"key2\":10,\"key1\":10,\"key8\":10,\"key4\":10}",
+        "seriously?"));
+    model.filters.put("TOKEN_OFFSET", "0");
+    nMap = topx.getResult(fParam);
+    assertEquals("{\"key6\":12,\"key1\":10,\"key2\":10}", nMap);
+
+    nMap = bottomx.getResult(fParam);
+    assertEquals("{\"key5\":8,\"key9\":10,\"key8\":10}", nMap);
+
   }
 
 }

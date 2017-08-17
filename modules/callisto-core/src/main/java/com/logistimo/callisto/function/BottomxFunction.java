@@ -38,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -90,9 +91,20 @@ public class BottomxFunction implements ICallistoFunction {
       throw new CallistoException("Q105", params.get(1) + CharacterConstants.COMMA + params.get(2));
     }
     Map sortedMap = map.entrySet().stream()
-        .sorted(Entry.comparingByValue()).skip(offset).limit(size).collect(Collectors
+        .sorted(this::compareEntry)
+        .skip(offset)
+        .limit(size)
+        .collect(Collectors
             .toMap(Entry::getKey, Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
     return new Gson().toJson(sortedMap);
+  }
+
+  private int compareEntry(Map.Entry<String, Long> e1, Map.Entry<String, Long> e2) {
+    if(Objects.equals(e1.getValue(), e2.getValue())){
+      return e2.getKey().compareTo(e1.getKey());
+    }else{
+      return Long.compare(e1.getValue(),e2.getValue());
+    }
   }
 
   @Override

@@ -34,10 +34,10 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -89,11 +89,21 @@ public class TopxFunction implements ICallistoFunction {
       throw new CallistoException("Q105", params.get(1)+CharacterConstants.COMMA+params.get(2));
     }
     Map sortedMap =
-        map.entrySet().stream().sorted(Collections.reverseOrder(Map.Entry.comparingByValue())).skip(
-            offset).limit(size)
-            .collect(Collectors
-                .toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
+        map.entrySet().stream()
+            .sorted(this::compareEntry)
+            .skip(offset)
+            .limit(size)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1,
+                LinkedHashMap::new));
     return new Gson().toJson(sortedMap);
+  }
+
+  private int compareEntry(Map.Entry<String, Long> e1, Map.Entry<String, Long> e2) {
+    if(Objects.equals(e1.getValue(),e2.getValue())){
+      return e1.getKey().compareTo(e2.getKey());
+    }else{
+      return Long.compare(e2.getValue(),e1.getValue());
+    }
   }
 
   @Override
