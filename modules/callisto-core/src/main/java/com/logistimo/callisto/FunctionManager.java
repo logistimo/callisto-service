@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
@@ -35,7 +36,8 @@ public class FunctionManager {
 
   Map<String, ICallistoFunction> functions;
 
-  public FunctionManager(Map<String, ICallistoFunction> functions) {
+  @Autowired
+  public void setFunctions(Map<String, ICallistoFunction> functions) {
     this.functions = functions;
   }
 
