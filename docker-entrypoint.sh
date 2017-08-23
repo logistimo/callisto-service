@@ -5,7 +5,7 @@ spring.data.mongodb.host=$MONGODB_HOST
 spring.data.mongodb.port=$MONGODB_PORT
 spring.data.mongodb.database=$CALLISTO_DATABASE"
 
-exec java -cp $TOMCAT_HOME/webapps/callisto-application-0.2.0-SNAPSHOT.jar \
+exec java -cp $TOMCAT_HOME/webapps/*.jar \
 	-Dloader.path=$TOMCAT_HOME/lib/* \
 	-Dserver.port=$SERVER_PORT \
 	-Dspring.data.mongodb.host=$MONGODB_HOST \
