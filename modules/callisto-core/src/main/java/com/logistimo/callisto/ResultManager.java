@@ -115,8 +115,10 @@ public class ResultManager {
                                          Integer index) {
     if (rowHeadings != null) {
       Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
-      for (List row : results.getRows()) {
-        rowHeadingsSet.remove(row.get(index));
+      if (results != null && results.getRows() != null) {
+        for (List row : results.getRows()) {
+          rowHeadingsSet.remove(row.get(index));
+        }
       }
       for (String heading : rowHeadings) {
         String[] nRow = new String[index + 1];

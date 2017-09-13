@@ -103,12 +103,12 @@ public class LinkFunction implements ICallistoFunction {
     }
     QueryResults rs = queryService
         .readData(buildQueryRequestModel(functionParam.getQueryRequestModel(), queryId));
-    if (rs.getRows().size() == 1 && rs.getRows().get(0).size() == 1) {
+    if (rs.getRows() != null && rs.getRows().size() == 1 && rs.getRows().get(0).size() == 1) {
       return rs.getRows().get(0).get(0);
     }
     logger.warn("Expected result size from Link function " + functionParam.function
         + " is 1. Actual result: " + rs.toString());
-    return null;
+    return CharacterConstants.EMPTY;
   }
 
   private Map getLinkFilterMap(FunctionParam functionParam, String linkFilters, Type type)
