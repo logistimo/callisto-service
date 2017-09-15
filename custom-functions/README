@@ -1,0 +1,5 @@
+INSTRUCTIONS TO INCLUDE CUSTOM FUCNTIONS
+-----------------------------------------
+
+Docker build will include all jar files put in this folder.
+If you have custom/extension functions for Callisto, build and put in this directory.

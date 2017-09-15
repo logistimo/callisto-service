@@ -1,5 +1,5 @@
-FROM docker.logistimo.com:8082/logi-tomcat:8.5
-MAINTAINER naren <naren@logistimo.com>
+FROM openjdk:8-jre
+MAINTAINER dockers@logistimo.com
 
 EXPOSE 9080
 
@@ -8,7 +8,9 @@ EXPOSE 9088
 ARG APP_NAME
 ARG APP_VERSION
 
-ENV TOMCAT_HOME /usr/local/tomcat 
+RUN mkdir -p /opt/callisto/lib && mkdir -p /opt/callisto/jmx
+
+ENV CALLISTO_HOME /opt/callisto
 
 ENV JAVA_AGENT_PORT 9088
 
@@ -17,14 +19,14 @@ ENV SERVER_PORT=9080 \
         MONGODB_PORT=27017 \
         CALLISTO_DATABASE=callisto	
 
-VOLUME $TOMCAT_HOME/logs
+VOLUME $CALLISTO_HOME/logs
 
-RUN rm -rf $TOMCAT_HOME/webapps/* 
+ADD modules/${APP_NAME}/target/${APP_NAME}-${APP_VERSION}.jar $CALLISTO_HOME/
 
-ADD modules/${APP_NAME}/target/${APP_NAME}-${APP_VERSION}.jar $TOMCAT_HOME/webapps/
+ADD jmx_prometheus_javaagent-0.7.jar $CALLISTO_HOME/jmx/
+ADD jmx_exporter.json $CALLISTO_HOME/jmx/
 
-ADD jmx_prometheus_javaagent-0.7.jar $TOMCAT_HOME/
-ADD jmx_exporter.json $TOMCAT_HOME/
+ADD custom-functions/*.jar $CALLISTO_HOME/lib/
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
