@@ -10,6 +10,6 @@ exec java -cp $CALLISTO_HOME/*.jar \
 	-Dserver.port=$SERVER_PORT \
 	-Dspring.data.mongodb.host=$MONGODB_HOST \
 	-Dspring.data.mongodb.port=$MONGODB_PORT \
-	-javaagent:$CALLISTO_HOME/jmx_prometheus_javaagent-0.7.jar=$JAVA_AGENT_PORT:$CALLISTO_HOME/jmx_exporter.json \
+	-javaagent:$CALLISTO_HOME/jmx/jmx_prometheus_javaagent-0.7.jar=$JAVA_AGENT_PORT:$CALLISTO_HOME/jmx/jmx_exporter.json \
 	-Dspring.data.mongodb.database=$CALLISTO_DATABASE \
 	-Dloader.main=com.logistimo.callisto.CallistoApplication org.springframework.boot.loader.PropertiesLauncher

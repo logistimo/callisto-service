@@ -8,7 +8,7 @@ EXPOSE 9088
 ARG APP_NAME
 ARG APP_VERSION
 
-RUN mkdir -p /opt/callisto/lib
+RUN mkdir -p /opt/callisto/lib && mkdir -p /opt/callisto/jmx
 
 ENV CALLISTO_HOME /opt/callisto
 
@@ -23,8 +23,9 @@ VOLUME $CALLISTO_HOME/logs
 
 ADD modules/${APP_NAME}/target/${APP_NAME}-${APP_VERSION}.jar $CALLISTO_HOME/
 
-ADD jmx_prometheus_javaagent-0.7.jar $CALLISTO_HOME/
-ADD jmx_exporter.json $CALLISTO_HOME/
+ADD jmx_prometheus_javaagent-0.7.jar $CALLISTO_HOME/jmx/
+ADD jmx_exporter.json $CALLISTO_HOME/jmx/
+
 ADD custom-functions/*.jar $CALLISTO_HOME/lib/
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
