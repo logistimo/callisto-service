@@ -26,7 +26,7 @@ ADD modules/${APP_NAME}/target/${APP_NAME}-${APP_VERSION}.jar $CALLISTO_HOME/
 ADD jmx_prometheus_javaagent-0.7.jar $CALLISTO_HOME/jmx/
 ADD jmx_exporter.json $CALLISTO_HOME/jmx/
 
-ADD custom-functions/*.jar $CALLISTO_HOME/lib/
+ADD custom-functions/* $CALLISTO_HOME/lib/
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
