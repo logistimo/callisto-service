@@ -16,7 +16,7 @@ Please visit [www.logistimo.com](www.logistimo.com) for further details
 Latest Release
 ------------------
 
-The most recent release is Logistimo [0.1](https://github.com/logistimo/callisto-api/tree/2.4.0), released on 2017 May 13th.
+The most recent release is Logistimo [0.2](https://github.com/logistimo/callisto-service/tree/v0.2.0), released on 2017 May 13th.
 
 How to use Logistimo
 -------------------------
