@@ -66,33 +66,35 @@ public class CsvFunction implements ICallistoFunction {
         QueryFunction.getQueryFunction(param.function, param.getQueryRequestModel().filters);
     QueryResults results =
         queryService.readData(buildQueryRequestModel(param, function));
-    for (List<String> strings : results.getRows()) {
-      if (!forceEnclose
-          && results.getDataTypes() != null
-          && CallistoDataType.NUMBER.equals(results.getDataTypes().get(0))) {
-        csv.append(strings.get(0)).append(CharacterConstants.COMMA);
-      } else {
-        String enclosing;
-        if (strings.get(0).contains(CharacterConstants.SINGLE_QUOTE)
-            && StringUtils.isNotEmpty(param.getEscaping())) {
-          enclosing = param.getEscaping();
-        }else{
-          enclosing = CharacterConstants.SINGLE_QUOTE;
-        }
-        csv.append(enclosing)
-            .append(strings.get(0))
-            .append(enclosing)
-            .append(CharacterConstants.COMMA);
-      }
-    }
-    if (function.fill) {
-      for (List<String> rows : results.getRows()) {
-        if (StringUtils.isNotEmpty(rows.get(0))) {
-          param.getRowHeadings().add(rows.get(0));
+    if (results != null && results.getRows() != null) {
+      for (List<String> strings : results.getRows()) {
+        if (!forceEnclose
+            && results.getDataTypes() != null
+            && CallistoDataType.NUMBER.equals(results.getDataTypes().get(0))) {
+          csv.append(strings.get(0)).append(CharacterConstants.COMMA);
+        } else {
+          String enclosing;
+          if (strings.get(0).contains(CharacterConstants.SINGLE_QUOTE)
+              && StringUtils.isNotEmpty(param.getEscaping())) {
+            enclosing = param.getEscaping();
+          } else {
+            enclosing = CharacterConstants.SINGLE_QUOTE;
+          }
+          csv.append(enclosing)
+              .append(strings.get(0))
+              .append(enclosing)
+              .append(CharacterConstants.COMMA);
         }
       }
     }
-    csv.setLength(csv.length() - 1);
+    if (csv.length() > 0 && csv.charAt(csv.length() - 1) == CharacterConstants.COMMA_CHAR) {
+      csv.setLength(csv.length() - 1);
+    }
+
+    if (function.fill && results != null && results.getRows() != null) {
+      results.getRows().stream().filter(rows -> StringUtils.isNotEmpty(rows.get(0)))
+          .forEach(rows -> param.getRowHeadings().add(rows.get(0)));
+    }
     return csv.toString();
   }
 
