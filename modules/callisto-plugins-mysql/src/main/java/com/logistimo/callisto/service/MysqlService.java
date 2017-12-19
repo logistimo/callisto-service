@@ -65,7 +65,9 @@ public class MysqlService implements IDataBaseService {
       if (size.isPresent()) {
         query = query.concat(" LIMIT " + offset.orElse(0) + "," + size.get());
       }
-      rs = stmt.executeQuery(constructQuery(query, filters));
+      String finalQuery = constructQuery(query, filters);
+      logger.info("Fetching mysql results: " + finalQuery);
+      rs = stmt.executeQuery(finalQuery);
       ResultSetMetaData metaData = rs.getMetaData();
       int columnCount = metaData.getColumnCount();
       List<String> headings = new ArrayList<>(columnCount);

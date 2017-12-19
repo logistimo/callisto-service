@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 /**
  * Created by chandrakant on 02/08/17.
  * TopxFunction defines a function to modify a map to return top (compared by value) x entries
- * Accpets 3 parameters, variable name (type = map), size of the resulting map and offset
+ * Accepts 3 parameters, variable name (type = map), size of the resulting map and offset
  */
 @Component(value = "topx")
 public class TopxFunction implements ICallistoFunction {

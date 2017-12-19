@@ -94,7 +94,8 @@ public class CassandraService implements IDataBaseService {
         return null;
       }
       String finalQuery = constructQuery(query, filters);
-      logger.info("Fetching cassandra results: " + finalQuery + filters);
+      logger.info("Fetching cassandra results: " + finalQuery);
+      logger.info("Cassandra query filters: " + filters);
       Statement statement = new SimpleStatement(finalQuery);
       offset = Optional.of(offset.orElse(0));
       if (size.isPresent()) {
