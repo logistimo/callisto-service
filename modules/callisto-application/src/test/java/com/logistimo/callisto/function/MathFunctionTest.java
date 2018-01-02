@@ -112,21 +112,21 @@ public class MathFunctionTest {
     str =
         MathFunction.calculateExpression(
             null, expr, Arrays.asList(headings), Arrays.asList(row), null, null);
-    assertEquals("3496.073094867807", str);
+    assertEquals("3496.07309", str);
     expr = "$$math(100*(($var1+41.2)/($var3/720)))$$";
     str =
         MathFunction.calculateExpression(
             null, expr, Arrays.asList(headings), Arrays.asList(row), null, null);
-    assertEquals("108.88413685847588", str);
+    assertEquals("108.88414", str);
     expr = "$$math((42.453/30*321)*(342.4*(21138.4/2493)+24))$$";
     str =
         MathFunction.calculateExpression(
             null, expr, Arrays.asList(headings), Arrays.asList(row), null, null);
-    assertEquals("1329692.2561498338", str);
+    assertEquals("1329692.25615", str);
     expr = "$$math(((42.453/30*321)*(342.4*(21138.4/$var1)+24))/1000)$$";
     str =
         MathFunction.calculateExpression(
             null, expr, Arrays.asList(headings), Arrays.asList(row), null, null);
-    assertEquals("22607.082563350767", str);
+    assertEquals("22607.08256", str);
   }
 }

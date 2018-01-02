@@ -52,7 +52,7 @@ public class FunctionUtil {
       delimiters =
       {CharacterConstants.ADD, CharacterConstants.COMMA, CharacterConstants.CLOSE_BRACKET,
           CharacterConstants.DIVIDE, CharacterConstants.MULTIPLY, CharacterConstants.SPACE,
-          CharacterConstants.PIPE, CharacterConstants.SUBTRACT,
+          CharacterConstants.PIPE, CharacterConstants.SUBTRACT, CharacterConstants.CLOSE_CBRACKET,
           String.valueOf(CharacterConstants.DOLLAR)};
 
   private FunctionUtil() {
@@ -217,6 +217,8 @@ public class FunctionUtil {
         if(StringUtils.isNotEmpty(row.get(index))){
           val = StringUtils.replace(val, variables.get(i), row.get(index));
         }else{
+          logger.error("Variable "+variables.get(i)+" not found in results. So replacing "
+                       + "with empty character in expression: " + val);
           val = StringUtils.replace(val, variables.get(i), CharacterConstants.EMPTY);
         }
       } else {
@@ -277,7 +279,7 @@ public class FunctionUtil {
         .flatMap(e -> e.getValue().contains(CharacterConstants.FN_ENCLOSE) ? FunctionUtil
             .getAllVariables(e.getValue(), CharacterConstants.DOLLAR).stream()
             .map(s -> s.substring(1))
-            : new ArrayList<>(Collections.singletonList(e.getKey())).stream())
+            : new ArrayList<>(Collections.singletonList(e.getValue().substring(1))).stream())
         .collect(Collectors.toSet());
     return StringUtils.join(columns, CharacterConstants.COMMA);
   }

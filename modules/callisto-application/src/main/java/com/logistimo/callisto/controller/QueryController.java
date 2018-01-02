@@ -37,12 +37,17 @@ import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +69,21 @@ public class QueryController {
 
   @Autowired ResultManager resultManager;
 
+  @RequestMapping(value = "/all", method = RequestMethod.GET)
+  public List<String> getQueriesLike(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
+                                     Pageable pageable, @RequestParam(defaultValue = "logistimo")
+                                     String userId) {
+    return queryService.readQueryIds(userId, null, pageable);
+  }
+
+  @RequestMapping(value = "/all/{like}", method = RequestMethod.GET)
+  public List<String> getQueriesLikePaginated(@PathVariable String like, @RequestParam
+      (defaultValue = "logistimo") String userId,
+                                              @PageableDefault(page = 0, size = Integer.MAX_VALUE)
+                                              Pageable pageable) {
+    return queryService.readQueryIds(userId, like, pageable);
+  }
+
   @RequestMapping(value = "/save", method = RequestMethod.PUT)
   public String saveQuery(@RequestBody QueryText queryText) {
     return queryService.saveQuery(queryText);
@@ -74,27 +94,26 @@ public class QueryController {
     return queryService.updateQuery(queryText);
   }
 
-  @RequestMapping(value = "/get", method = RequestMethod.GET)
+  @RequestMapping(value = "/get/{queryId}", method = RequestMethod.GET)
   public QueryText getQuery(
-      @RequestParam(defaultValue = "logistimo") String userId, @RequestParam String queryId) {
+      @RequestParam(defaultValue = "logistimo") String userId, @PathVariable String queryId) {
     return queryService.readQuery(userId, queryId);
   }
 
   @RequestMapping(value = "/getdata", method = RequestMethod.POST)
   public String getQueryData(@RequestBody QueryRequestModel model, HttpServletRequest request)
       throws CallistoException {
-    QueryResults q = null;
+    QueryResults results = null;
     if (StringUtils.isNotEmpty(model.derivedResultsId)) {
-      q = queryService.readData(model);
-      if (q.getRowHeadings() == null) {
-        q.setRowHeadings(model.rowHeadings);
+      results = queryService.readData(model);
+      if (results.getRowHeadings() == null) {
+        results.setRowHeadings(model.rowHeadings);
       }
       ConstantText constant = constantService.readConstant(model.userId, model.derivedResultsId);
       if (constant != null) {
         LinkedHashMap<String, String> derivedColumns =
-            resultManager.getResultFormatMap(constant.getConstant(), q);
-        q = resultManager.getDesiredResult(model, q, derivedColumns);
-
+            resultManager.getResultFormatMap(constant.getConstant(), results);
+        results = resultManager.getDesiredResult(model, results, derivedColumns);
       }
     } else if (Objects.equals(request.getHeader("X-app-version"), "v2")) {
       if (model.columnText != null && !model.columnText.isEmpty()) {
@@ -103,25 +122,45 @@ public class QueryController {
         LinkedHashMap<String, String> parsedColumnData = FunctionUtil
             .parseColumnText(entry.getValue());
         model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
-        q = queryService.readData(model);
-        if (q.getRowHeadings() == null) {
-          q.setRowHeadings(model.rowHeadings);
+        results = queryService.readData(model);
+        if (results.getRowHeadings() == null) {
+          results.setRowHeadings(model.rowHeadings);
         }
-        q = resultManager.getDesiredResult(model, q, parsedColumnData);
+        results = resultManager.getDesiredResult(model, results, parsedColumnData);
       }
     } else {
-      q = queryService.readData(model);
+      results = queryService.readData(model);
     }
-    if (q != null) {
-      q.setDataTypes(null);
+    if (results != null) {
+      results.setDataTypes(null);
     }
-    return new Gson().toJson(q);
+    return new Gson().toJson(results);
   }
 
-  @RequestMapping(value = "/getids", method = RequestMethod.GET)
-  public String getAllQueryIds(@RequestParam(defaultValue = "logistimo") String userId) {
-    List<String> queryIds = queryService.readQueryIds(userId);
-    return new Gson().toJson(queryIds);
+  @RequestMapping(value = "/run", method = RequestMethod.POST)
+  public QueryResults runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)
+      throws CallistoException {
+    QueryResults results = null;
+    if (Objects.equals(request.getHeader("X-app-version"), "v2")) {
+      if (model.columnText != null && !model.columnText.isEmpty()) {
+        //expects only one element
+        Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
+        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
+            .parseColumnText(entry.getValue());
+        if(model.filters == null) {
+          model.filters = new HashMap<>();
+        }
+        model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
+        results = queryService.readData(model);
+        if (results.getRowHeadings() == null) {
+          results.setRowHeadings(model.rowHeadings);
+        }
+        results = resultManager.getDesiredResult(model, results, parsedColumnData);
+      }
+    } else if (model.query != null) {
+      results = queryService.readData(model);
+    }
+    return results;
   }
 
   @RequestMapping(value = "/delete", method = RequestMethod.DELETE)

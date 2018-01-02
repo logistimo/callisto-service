@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.text.DecimalFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -121,14 +122,15 @@ public class MathFunction implements ICallistoFunction {
     }
     String expression = getParameter(val);
     expression = FunctionUtil.replaceVariables(expression, headings, row);
+    if(StringUtils.isEmpty(expression)){
+      return CharacterConstants.EMPTY;
+    }
     if (request != null) {
       expression = replaceConstants(request.userId, expression, constantService);
     }
     expression = replaceLinks(request, headings, row, expression, linkFunction);
-    String result =
-        String.valueOf(
-            getParenthesisValue(
-                CharacterConstants.OPEN_BRACKET + expression + CharacterConstants.CLOSE_BRACKET));
+    String result = new DecimalFormat("#.#####").format(getParenthesisValue(
+        CharacterConstants.OPEN_BRACKET + expression + CharacterConstants.CLOSE_BRACKET));
     if (Objects.equals(result, "null")) {
       logger.warn("getParenthesisValue returned NULL for expression: " + expression);
       result = "0";
@@ -155,8 +157,7 @@ public class MathFunction implements ICallistoFunction {
       for (int i = 0; i < linkCount; i++) {
         int sIndex =
             val.indexOf(FunctionType.LINK.toString() + CharacterConstants.OPEN_BRACKET, after);
-        if (sIndex != 0 && Objects.equals(
-            String.valueOf(val.charAt(sIndex - 1)), CharacterConstants.DOLLAR)) {
+        if (sIndex != 0 && val.charAt(sIndex - 1) == CharacterConstants.DOLLAR) {
           throw new CallistoException("Q001", val);
         }
         //TODO if Link function supports '(' inside parameters in future then eIndex needs to be changed
@@ -187,8 +188,7 @@ public class MathFunction implements ICallistoFunction {
       for (int i = 0; i < constantCount; i++) {
         int sIndex =
             val.indexOf(FunctionType.CONSTANT.toString() + CharacterConstants.OPEN_BRACKET, after);
-        if (sIndex != 0 && Objects.equals(
-            String.valueOf(val.charAt(sIndex - 1)), CharacterConstants.DOLLAR)) {
+        if (sIndex != 0 && val.charAt(sIndex - 1) == CharacterConstants.DOLLAR) {
           throw new CallistoException("Q001", val);
         }
         int eIndex = val.indexOf(CharacterConstants.CLOSE_BRACKET, after);
@@ -280,7 +280,7 @@ public class MathFunction implements ICallistoFunction {
       Deque<Integer> operators = stackPair.getSecond();
       return calculate(values, operators);
     } catch (NumberFormatException e) {
-      throw new CallistoException("Q101", expr);
+      logger.warn("Invalid arithmetic expression: " + expr);
     } catch (Exception e) {
       logger.error("Exception in getExpressionValue()", e);
     }

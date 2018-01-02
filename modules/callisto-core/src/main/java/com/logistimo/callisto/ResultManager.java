@@ -34,6 +34,7 @@ import com.logistimo.callisto.model.QueryRequestModel;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +69,7 @@ public class ResultManager {
    * @param derivedColumnMap Map of derived column names and values
    * @return Derived QueryResults using original QueryResults and derivedColumnMap
    */
+  @CacheEvict(allEntries = true,value = {"links"})
   public QueryResults getDesiredResult(
       QueryRequestModel request,
       QueryResults rs,

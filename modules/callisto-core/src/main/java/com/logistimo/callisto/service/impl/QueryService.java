@@ -37,9 +37,12 @@ import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -106,9 +109,9 @@ public class QueryService implements IQueryService {
 
   public QueryText readQuery(String userId, String queryId) {
     try {
-      List<QueryText> queryList = queryRepository.readQuery(userId, queryId, new PageRequest(0, 1));
-      if (queryList != null && !queryList.isEmpty()) {
-        return queryList.get(0);
+      Page<QueryText> queryList = queryRepository.readQuery(userId, queryId, new PageRequest(0, 1));
+      if (queryList != null && queryList.hasContent()) {
+        return queryList.iterator().next();
       }
     } catch (Exception e) {
       logger.error("Error while reading query for userId " + userId + " and queryId " + queryId, e);
@@ -116,10 +119,24 @@ public class QueryService implements IQueryService {
     return null;
   }
 
-  public List<String> readQueryIds(String userId) {
+  @Override
+  public List<String> readQueryIds(String userId, String like, Pageable pageable) {
     List<String> queryIds = null;
     try {
-      List<QueryText> queryList = queryRepository.readQueryIds(userId);
+      List<QueryText> queryList;
+      String likeRegex = "";
+      if(StringUtils.isNotEmpty(like)){
+        likeRegex = like;
+      }
+      if(StringUtils.isNotEmpty(like) && pageable != null) {
+        queryList = queryRepository.readQueryIds(userId, likeRegex, pageable);
+      } else if (StringUtils.isNotEmpty(like)) {
+        queryList = queryRepository.readQueryIds(userId, likeRegex);
+      } else if(pageable != null) {
+        queryList = queryRepository.readQueryIds(userId, pageable);
+      } else {
+        queryList = queryRepository.readQueryIds(userId);
+      }
       queryIds = new ArrayList<>(queryList.size());
       for (QueryText queryText : queryList) {
         queryIds.add(queryText.getQueryId());
@@ -133,7 +150,7 @@ public class QueryService implements IQueryService {
   @Override
   public QueryResults readData(QueryRequestModel request)
       throws CallistoException {
-    QueryText queryText = readQuery(request.userId, request.queryId);
+    QueryText queryText = getQueryText(request);
     List<String> rowHeadings = new ArrayList<>();
     if (queryText == null) {
       logger.warn("Query " + request.queryId + " not found for user " + request.userId);
@@ -163,6 +180,16 @@ public class QueryService implements IQueryService {
             request.offset);
     queryResults.setRowHeadings(rowHeadings);
     return queryResults;
+  }
+
+  private QueryText getQueryText(QueryRequestModel request) {
+    QueryText queryText = null;
+    if (StringUtils.isNotEmpty(request.queryId)) {
+      queryText = readQuery(request.userId, request.queryId);
+    } else if (request.query != null) {
+      queryText = request.query;
+    }
+    return queryText;
   }
 
   private QueryResults executeQuery(

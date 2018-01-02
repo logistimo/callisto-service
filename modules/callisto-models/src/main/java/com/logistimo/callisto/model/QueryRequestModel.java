@@ -34,6 +34,7 @@ import java.util.Map;
 public class QueryRequestModel implements Cloneable {
   public String userId = "logistimo";
   public String queryId;
+  public QueryText query;
   public Map<String, String> filters;
   public String derivedResultsId; //constant ID for the desired result i.e. LinkedHashMap
   public Map<String, String> columnText;
@@ -46,7 +47,9 @@ public class QueryRequestModel implements Cloneable {
     QueryRequestModel newRequestModel = new QueryRequestModel();
     newRequestModel.userId = String.valueOf(this.userId);
     newRequestModel.queryId = this.queryId;
-    newRequestModel.filters = this.filters == null ? null : (Map) ((HashMap) this.filters).clone();
+    newRequestModel.filters = this.filters == null ? null : (Map) ((HashMap) this
+        .filters)
+        .clone();
     newRequestModel.columnText =
         this.columnText == null ? null : (Map) ((HashMap) this.columnText).clone();
     newRequestModel.rowHeadings =

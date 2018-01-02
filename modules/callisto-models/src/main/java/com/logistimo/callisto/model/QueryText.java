@@ -26,6 +26,7 @@ package com.logistimo.callisto.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -40,11 +41,15 @@ public class QueryText {
   @JsonProperty("user_id")
   private String userId = "logistimo";
 
+  @Indexed
   @JsonProperty("query_id")
   private String queryId;
 
   @JsonProperty("query")
   private String query;
+
+  @JsonProperty("columns")
+  private String columns;
 
   @JsonProperty("server_id")
   private String serverId;
@@ -87,5 +92,13 @@ public class QueryText {
 
   public void setServerId(String serverId) {
     this.serverId = serverId;
+  }
+
+  public String getColumns() {
+    return columns;
+  }
+
+  public void setColumns(String columns) {
+    this.columns = columns;
   }
 }

@@ -28,13 +28,14 @@ import com.google.gson.reflect.TypeToken;
 
 import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ICallistoFunction;
-import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IQueryService;
+import com.logistimo.callisto.util.CacheUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -55,6 +56,7 @@ public class LinkFunction implements ICallistoFunction {
   private static final Logger logger = Logger.getLogger(LinkFunction.class);
   private static final String NAME = "link";
   @Resource IQueryService queryService;
+  @Autowired CacheUtil cacheUtil;
 
   public static List<String> getParameter(String value) {
     String val = value.trim();
@@ -70,8 +72,7 @@ public class LinkFunction implements ICallistoFunction {
     return params;
   }
 
-  private static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
-                                                          String queryId) {
+  public QueryRequestModel buildQueryRequestModel(QueryRequestModel request, String queryId) {
     QueryRequestModel newQueryRequestModel = request.clone();
     newQueryRequestModel.queryId = queryId;
     return newQueryRequestModel;
@@ -93,22 +94,8 @@ public class LinkFunction implements ICallistoFunction {
       }.getType();
       linkFiltersMap = getLinkFilterMap(functionParam, linkFilters, type);
     }
-    return getResult(functionParam, queryId, linkFiltersMap);
-  }
-
-  private String getResult(FunctionParam functionParam, String queryId, Map linkFiltersMap)
-      throws CallistoException {
-    if (linkFiltersMap != null && !linkFiltersMap.isEmpty()) {
-      functionParam.getQueryRequestModel().filters.putAll(linkFiltersMap);
-    }
-    QueryResults rs = queryService
-        .readData(buildQueryRequestModel(functionParam.getQueryRequestModel(), queryId));
-    if (rs.getRows() != null && rs.getRows().size() == 1 && rs.getRows().get(0).size() == 1) {
-      return rs.getRows().get(0).get(0);
-    }
-    logger.warn("Expected result size from Link function " + functionParam.function
-        + " is 1. Actual result: " + rs.toString());
-    return CharacterConstants.EMPTY;
+    return cacheUtil.getLinkResult(this, functionParam, queryId, linkFiltersMap, queryService,
+        (queryId + String.valueOf(linkFiltersMap)).hashCode());
   }
 
   private Map getLinkFilterMap(FunctionParam functionParam, String linkFilters, Type type)
