@@ -27,6 +27,7 @@ import com.google.gson.Gson;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.Metadata;
 import com.datastax.driver.core.ResultSet;
@@ -97,6 +98,7 @@ public class CassandraService implements IDataBaseService {
       logger.info("Fetching cassandra results: " + finalQuery);
       logger.info("Cassandra query filters: " + filters);
       Statement statement = new SimpleStatement(finalQuery);
+      statement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
       offset = Optional.of(offset.orElse(0));
       if (size.isPresent()) {
         statement.setFetchSize(getSize(size, offset));
