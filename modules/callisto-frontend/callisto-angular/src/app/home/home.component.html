@@ -1,0 +1,35 @@
+<div>
+    <div class="container">
+        <!--<div class="row mt-5 pt-5">
+            <form class="col-sm-12 text-center">
+
+                <button class="btn btn-cyan pull-right" type="run"
+                        (click)="runQuery($event, queryTextModel)">Run
+                </button>
+                &lt;!&ndash;<button class="btn btn-secondary pull-right" type="save"
+                       (click)="saveQuery($event, queryModel, colsModel, dbsModel.id)">Save</button>&ndash;&gt;
+                <button class="btn btn-blue-grey pull-right" type="save"
+                        (click)="saveModal.show();copyQueryModel()">Save
+                </button>
+            </form>
+        </div>-->
+
+        <div class="main-form-container">
+            <mat-form-field>
+                <input matInput placeholder="Type query here" [(ngModel)]="queryTextModel.query">
+            </mat-form-field>
+
+            <mat-form-field>
+                <input matInput placeholder="Columns"  [(ngModel)]="queryTextModel.columns">
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-select placeholder="Datasource">
+                    <mat-option *ngFor="let db of serverConfigs" value={{db.id}}>{{db.name}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        Result:
+        <div id="output"></div>
+    </div>
+</div>
