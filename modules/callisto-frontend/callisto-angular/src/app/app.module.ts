@@ -36,7 +36,6 @@ import { AppNavbarComponent } from './app-navbar/app-navbar.component';
         BrowserAnimationsModule,
         FormsModule,
         HttpClientModule,
-        RequestOptions,
         HttpModule,
 
         MatCheckboxModule,
