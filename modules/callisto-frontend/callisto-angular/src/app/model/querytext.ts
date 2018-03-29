@@ -5,16 +5,16 @@ export class QueryText {
     columns:string;
     server_id:string;
 
-    constructor() {
+    constructor(query:string, server_id:string) {
         this.query_id = '';
         this.user_id = 'logistimo';
-        this.query = '';
+        this.query = query;
         this.columns = '';
-        this.server_id = '';
+        this.server_id = server_id;
     }
 
     clone() {
-        var q = new QueryText();
+        var q = new QueryText(this.query, this.server_id);
         q.query_id = this.query_id;
         q.user_id = this.user_id;
         q.query = this.query;

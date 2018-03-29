@@ -1,12 +1,21 @@
 import { Component, OnInit, ElementRef, Inject, AfterViewInit } from '@angular/core';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
+import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
+import {Observable} from 'rxjs/Observable'
+
 import {QueryText} from '../model/querytext'
 import {CallistoUser} from '../model/callistouser'
 import {ServerConfig} from '../model/serverconfig'
+import {QueryRequest} from '../model/queryrequest'
 import {Utils} from '../util/utils'
 import { DataService } from '../service/data.service';
 
 import '../../../node_modules/pivottable/dist/pivot.min.js';
 import '../../../node_modules/pivottable/dist/pivot.min.css';
+
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/switchMap';
 
 declare var jQuery:any;
 declare var $:any;
@@ -19,18 +28,15 @@ declare var $:any;
 })
 export class HomeComponent implements OnInit {
 
-    queryTextModel = new QueryText();
-    queryTextModelFinal = new QueryText();
+    queryTextModel = new QueryText('','');
+    queryTextModelFinal = new QueryText('','');
 
     serverConfigs:ServerConfig[] = [];
 
-    //queryModel:string = '';
-    //colsModel:string = '';
-    //dbs = [];
     dataEmpty = false;
     private el:ElementRef;
 
-    constructor(private dataService:DataService, @Inject(ElementRef)el:ElementRef) {
+    constructor(private dataService:DataService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog) {
         this.el = el;
     }
 
@@ -38,14 +44,13 @@ export class HomeComponent implements OnInit {
         this.dataService.getUser().subscribe((response:Response) => {
             var _dbs = this.serverConfigs;
             var _dbsModel = this.queryTextModel;
-            let body = response.json();
-            console.log(response)
-            /*(body as CallistoUser).server_configs.forEach(function (server:ServerConfig) {
+            let body : CallistoUser = JSON.parse(response['_body']) as CallistoUser;
+            body.server_configs.forEach(function (server:ServerConfig) {
                 _dbs.push(server);
                 if (Utils.checkNullEmpty(_dbsModel.server_id)) {
                     _dbsModel.server_id = server.id;
                 }
-            });*/
+            });
         });
     }
 
@@ -85,20 +90,26 @@ export class HomeComponent implements OnInit {
     }
 
     runQuery(event, mQueryText:QueryText) {
-        const body = {
-            query: {query: mQueryText.query, server_id: mQueryText.server_id},
-            columnText: {TOKEN_COLUMNS: mQueryText.columns}
-        };
-        this.dataService.runQuery(body).subscribe(data => {
+        const request : QueryRequest = new QueryRequest();
+        request.query = new QueryText(mQueryText.query, mQueryText.server_id);
+        request.columnText = {TOKEN_COLUMNS: mQueryText.columns}
+
+        this.dataService.runQuery(request).subscribe(data => {
             console.log(data);
             data['rows'].unshift(data['headings']);
             this.renderTable(data['rows']);
         });
     }
 
-    copyQueryModel() {
-        this.queryTextModelFinal = this.queryTextModel.clone();
-        console.log(this.queryTextModelFinal);
+    saveQueryPopup(event, queryText:QueryText) {
+        let dialogRef = this.dialog.open(SaveQueryDialog, {
+            width: '720px',
+            data: queryText.clone()
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            //this.animal = result;
+        });
     }
 
     saveQuery(event, queryTextModelFinal:QueryText) {
@@ -106,11 +117,54 @@ export class HomeComponent implements OnInit {
             this.dataEmpty = true;
             return;
         }
-        console.log(queryTextModelFinal);
         this.dataService.saveQuery(queryTextModelFinal).subscribe(function (data) {
-            console.log("save response: " + data);
             return (data);
         })
     }
+}
 
+@Component({
+    selector: 'save-query-dialog',
+    templateUrl: 'save-query-dialog.html',
+    providers: [DataService]
+})
+export class SaveQueryDialog {
+    queryToSave: any;
+    private queryIdField: FormControl = new FormControl();
+    searchedQueryText : QueryText;
+    queryIdUnavailable = true;
+
+    constructor(
+        private dataService:DataService,
+        public dialogRef: MatDialogRef<SaveQueryDialog>,
+        @Inject(MAT_DIALOG_DATA) data: any) {
+        this.queryToSave = data;
+
+        this.queryIdField.valueChanges
+            .debounceTime(400)
+            .filter(term => {
+                this.queryIdUnavailable = Utils.checkNullEmpty(term) ? true : this.queryIdUnavailable;
+                return Utils.checkNotNullEmpty(term);
+            })
+            .distinctUntilChanged()
+            .map(queryId => this.dataService.searchQueryId(queryId) )
+            .subscribe(res => {
+                res.subscribe(queryResult => {
+                    this.queryIdUnavailable = Utils.checkNotNullEmpty(queryResult);
+                    this.searchedQueryText = queryResult;
+                })
+            } );
+    }
+
+    ngOnInit() {
+
+    }
+
+    onCancelClick(): void {
+        this.dialogRef.close();
+    }
+
+    searchedQueryIdAvailable() {
+        return this.searchedQueryText == null;
+    }
 }
