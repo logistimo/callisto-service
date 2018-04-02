@@ -1,10 +1,14 @@
-<div>
+<div class="main-form-container">
   <mat-form-field>
-    <input type="text" matInput [formControl]="queryIdField">
+    <input type="text" [(ngModel)]="queryId" placeholder="Query Id" matInput
+           [formControl]="queryIdField" [matAutocomplete]="auto">
   </mat-form-field>
-  <mat-autocomplete>
-    <mat-option *ngFor="let query of queries" [value]="query">
-      {{ query.query_id }}
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="queryIdSelected($event)">
+    <mat-option *ngFor="let queryId of resultQueryList" [value]="queryId">
+      {{ queryId }}
     </mat-option>
   </mat-autocomplete>
+
+  <pre>{{queryText | json}}</pre>
+
 </div>

@@ -5,6 +5,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpClientModule} from '@angular/common/http';
 import { XHRBackend, RequestOptions, HttpModule} from '@angular/http';
 import { HttpService } from './service/http.service'
+import { ResultsService } from './service/results.service'
 import { httpServiceFactory } from './factory/HttpServiceFactory'
 
 import {
@@ -29,6 +30,7 @@ import { AppComponent } from './app.component';
 import { HomeComponent, SaveQueryDialog } from './home/home.component';
 import { AppNavbarComponent } from './app-navbar/app-navbar.component';
 import { QuerySearchComponent } from './query-search/query-search.component';
+import { GraphComponent } from './graph/graph.component';
 
 
 @NgModule({
@@ -37,7 +39,8 @@ import { QuerySearchComponent } from './query-search/query-search.component';
         SaveQueryDialog,
         AppNavbarComponent,
         AppComponent,
-        QuerySearchComponent
+        QuerySearchComponent,
+        GraphComponent
     ],
     imports: [
         BrowserModule,
@@ -63,7 +66,7 @@ import { QuerySearchComponent } from './query-search/query-search.component';
         MatGridListModule,
         MatAutocompleteModule
     ],
-    providers: [{
+    providers: [ResultsService, {
         provide: HttpService,
         useFactory: httpServiceFactory,
         deps: [XHRBackend, RequestOptions]

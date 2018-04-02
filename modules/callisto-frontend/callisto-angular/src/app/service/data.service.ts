@@ -20,8 +20,16 @@ export class DataService {
     return this.httpClient.get('user/get', this.requestOption);
   }
 
+  getQuery(queryId) {
+    return this.httpClient.get('query/get/' + queryId, this.requestOption)
+      .map(res => { return Utils.checkNotNullEmpty(res._body) ?
+        JSON.parse(res._body) as QueryText : null
+        });
+  }
+
   runQuery(body) {
     return this.httpClient.post('query/run', body, this.requestOption)
+      .map(res => res['_body'])
   }
 
   saveQuery(body) {
@@ -32,6 +40,13 @@ export class DataService {
     return this.httpClient.get('query/get/' + queryId, this.requestOption)
       .map(res => { return Utils.checkNotNullEmpty(res._body) ?
           JSON.parse(res._body) as QueryText : null
+        });
+  }
+
+  searchQueryIdLike(term) {
+    return this.httpClient.get('query/all/' + term, this.requestOption)
+      .map(res => { return Utils.checkNotNullEmpty(res._body) ?
+            JSON.parse(res._body) : null;
         });
   }
 }

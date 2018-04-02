@@ -19,15 +19,26 @@
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "app",
       "styles": [
-        "styles.css"
+        "styles.css",
+        "../node_modules/pivottable/dist/pivot.css"
       ],
-      "scripts": [],
+      "scripts": [
+        "../node_modules/jquery/dist/jquery.min.js",
+        "../node_modules/jquery-ui-dist/jquery-ui.min.js",
+        "../node_modules/pivottable/dist/pivot.min.js",
+        "../node_modules/pivottable/dist/pivot.min.js",
+        "../node_modules/pivottable/dist/c3_renderers.js",
+        "../node_modules/pivottable/dist/export_renderers.js"
+      ],
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",
         "prod": "environments/environment.prod.ts"
       }
     }
+
+
+
   ],
   "e2e": {
     "protractor": {

@@ -9,6 +9,7 @@ import {ServerConfig} from '../model/serverconfig'
 import {QueryRequest} from '../model/queryrequest'
 import {Utils} from '../util/utils'
 import { DataService } from '../service/data.service';
+import { ResultsService } from '../service/results.service';
 
 import '../../../node_modules/pivottable/dist/pivot.min.js';
 import '../../../node_modules/pivottable/dist/pivot.min.css';
@@ -17,8 +18,6 @@ import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 
-declare var jQuery:any;
-declare var $:any;
 
 @Component({
     selector: 'app-home',
@@ -36,7 +35,7 @@ export class HomeComponent implements OnInit {
     dataEmpty = false;
     private el:ElementRef;
 
-    constructor(private dataService:DataService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog) {
+    constructor(private dataService:DataService, private resultsService:ResultsService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog) {
         this.el = el;
     }
 
@@ -54,50 +53,13 @@ export class HomeComponent implements OnInit {
         });
     }
 
-    renderTable(input) {
-
-        if (!this.el || !this.el.nativeElement || !this.el.nativeElement.children) {
-            console.log('cant build without element');
-            return;
-        }
-
-        var container = this.el.nativeElement;
-        var inst = jQuery(container);
-        var targetElement = inst.find('#output');
-
-        if (!targetElement) {
-            console.log('cant find the pivot element');
-            return;
-        }
-
-        //this helps if you build more than once as it will wipe the dom for that element
-        while (targetElement.firstChild) {
-            targetElement.removeChild(targetElement.firstChild);
-        }
-        //here is the magic
-        console.log($.pivotUtilities);
-        targetElement.pivotUI(input,
-            {
-                rows: [],
-                cols: [],
-                rendererName: "Bar Chart",
-                renderers: $.extend(
-                    $.pivotUtilities.renderers,
-                    $.pivotUtilities.c3_renderers,
-                    $.pivotUtilities.export_renderers
-                )
-            });
-    }
-
     runQuery(event, mQueryText:QueryText) {
         const request : QueryRequest = new QueryRequest();
         request.query = new QueryText(mQueryText.query, mQueryText.server_id);
         request.columnText = {TOKEN_COLUMNS: mQueryText.columns}
 
         this.dataService.runQuery(request).subscribe(data => {
-            console.log(data);
-            data['rows'].unshift(data['headings']);
-            this.renderTable(data['rows']);
+            this.resultsService.changeState(JSON.parse(data))
         });
     }
 
@@ -108,7 +70,7 @@ export class HomeComponent implements OnInit {
         });
 
         dialogRef.afterClosed().subscribe(result => {
-            //this.animal = result;
+
         });
     }
 }
@@ -133,11 +95,11 @@ export class SaveQueryDialog {
 
         this.queryIdField.valueChanges
             .debounceTime(400)
+            .distinctUntilChanged()
             .filter(term => {
                 this.queryIdUnavailable = Utils.checkNullEmpty(term) ? true : this.queryIdUnavailable;
                 return Utils.checkNotNullEmpty(term);
             })
-            .distinctUntilChanged()
             .map(queryId => this.dataService.searchQueryId(queryId) )
             .subscribe(res => {
                 res.subscribe(queryResult => {
