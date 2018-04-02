@@ -25,7 +25,7 @@ export class DataService {
   }
 
   saveQuery(body) {
-    return this.httpClient.post('query/save', body, this.requestOption)
+    return this.httpClient.put('query/save', body, this.requestOption)
   }
 
   searchQueryId(queryId) {

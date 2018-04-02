@@ -1,6 +1,22 @@
 <app-navbar></app-navbar>
 <div class="container">
-  <div class="starter-template">
-    <app-home></app-home>
+  <div class="starter-template row">
+    <div class="col-sm-6">
+      <mat-card>
+        <mat-card-title>Visualize</mat-card-title>
+        <mat-card-content>
+          <app-home></app-home>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="col-sm-6">
+      <mat-card>
+        <mat-card-title>Search</mat-card-title>
+        <mat-card-content>
+          <app-query-search></app-query-search>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 </div>

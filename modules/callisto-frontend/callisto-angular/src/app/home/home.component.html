@@ -1,30 +1,27 @@
 <div>
-    <div>
-        <div class="main-form-container">
-            <mat-form-field>
-                <textarea matInput placeholder="Type query here" [(ngModel)]="queryTextModel.query"></textarea>
-            </mat-form-field>
+    <div class="main-form-container">
+        <mat-form-field>
+            <textarea matInput placeholder="Type query here" [(ngModel)]="queryTextModel.query"></textarea>
+        </mat-form-field>
 
-            <mat-form-field>
-                <textarea matInput placeholder="Columns"  [(ngModel)]="queryTextModel.columns"></textarea>
-            </mat-form-field>
+        <mat-form-field>
+            <textarea matInput placeholder="Columns"  [(ngModel)]="queryTextModel.columns"></textarea>
+        </mat-form-field>
 
-            <mat-form-field>
-                <mat-select placeholder="Datasource" [(ngModel)]="queryTextModel.server_id">
-                    <mat-option *ngFor="let db of serverConfigs" value={{db.id}}>
-                        {{db.name}}</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
+        <mat-form-field>
+            <mat-select placeholder="Datasource" [(ngModel)]="queryTextModel.server_id">
+                <mat-option *ngFor="let db of serverConfigs" value={{db.id}}>
+                    {{db.name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
 
-        <div class="row float-right">
-            <button mat-button class="btn-primary float-right"
-                    (click)="runQuery($event, queryTextModel)">Run</button>
-
+        <div class="mt-2">
             <button mat-button class="btn float-right"
                     (click)="saveQueryPopup($event, queryTextModel)">Save</button>
-        </div>
 
-        <div id="output"></div>
+            <button mat-button class="btn-primary float-right"
+                    (click)="runQuery($event, queryTextModel)">Run</button>
+        </div>
     </div>
+    <div id="output"></div>
 </div>

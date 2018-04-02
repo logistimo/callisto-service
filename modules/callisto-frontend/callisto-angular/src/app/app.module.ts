@@ -18,12 +18,17 @@ import {
     MatIconModule,
     MatProgressSpinnerModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSnackBarModule,
+    MatCardModule,
+    MatGridListModule,
+    MatAutocompleteModule
 } from '@angular/material';
 
 import { AppComponent } from './app.component';
 import { HomeComponent, SaveQueryDialog } from './home/home.component';
 import { AppNavbarComponent } from './app-navbar/app-navbar.component';
+import { QuerySearchComponent } from './query-search/query-search.component';
 
 
 @NgModule({
@@ -31,7 +36,8 @@ import { AppNavbarComponent } from './app-navbar/app-navbar.component';
         HomeComponent,
         SaveQueryDialog,
         AppNavbarComponent,
-        AppComponent
+        AppComponent,
+        QuerySearchComponent
     ],
     imports: [
         BrowserModule,
@@ -51,7 +57,11 @@ import { AppNavbarComponent } from './app-navbar/app-navbar.component';
         MatIconModule,
         MatProgressSpinnerModule,
         MatDialogModule,
-        MatTooltipModule
+        MatTooltipModule,
+        MatSnackBarModule,
+        MatCardModule,
+        MatGridListModule,
+        MatAutocompleteModule
     ],
     providers: [{
         provide: HttpService,

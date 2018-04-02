@@ -1,0 +1,10 @@
+<div>
+  <mat-form-field>
+    <input type="text" matInput [formControl]="queryIdField">
+  </mat-form-field>
+  <mat-autocomplete>
+    <mat-option *ngFor="let query of queries" [value]="query">
+      {{ query.query_id }}
+    </mat-option>
+  </mat-autocomplete>
+</div>

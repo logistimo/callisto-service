@@ -6,13 +6,17 @@ body {
     padding-top: 80px;
 }
 .starter-template {
-    padding: 3rem 1.5rem;
+    padding: 2rem 1.5rem;
     text-align: center;
 }
 
 .main-form-container {
     display: flex;
     flex-direction: column;
+}
+
+.main-form-container .float-right-item {
+    align-self: flex-end;
 }
 
 .main-form-container > * {

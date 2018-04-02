@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef, Inject, AfterViewInit } from '@angular/core';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
+import {MatDialog, MatSnackBar, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
 import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
 import {Observable} from 'rxjs/Observable'
 
@@ -111,16 +111,6 @@ export class HomeComponent implements OnInit {
             //this.animal = result;
         });
     }
-
-    saveQuery(event, queryTextModelFinal:QueryText) {
-        if (Utils.checkNullEmpty(queryTextModelFinal.query_id)) {
-            this.dataEmpty = true;
-            return;
-        }
-        this.dataService.saveQuery(queryTextModelFinal).subscribe(function (data) {
-            return (data);
-        })
-    }
 }
 
 @Component({
@@ -137,6 +127,7 @@ export class SaveQueryDialog {
     constructor(
         private dataService:DataService,
         public dialogRef: MatDialogRef<SaveQueryDialog>,
+        public snackBar: MatSnackBar,
         @Inject(MAT_DIALOG_DATA) data: any) {
         this.queryToSave = data;
 
@@ -160,11 +151,23 @@ export class SaveQueryDialog {
 
     }
 
-    onCancelClick(): void {
+    private onCancelClick(): void {
         this.dialogRef.close();
     }
 
-    searchedQueryIdAvailable() {
-        return this.searchedQueryText == null;
+    saveQuery(event, queryTextModelFinal : QueryText) {
+        this.dataService.saveQuery(queryTextModelFinal).subscribe(data => {
+            if(data.status == 200) {
+                this.dialogRef.close();
+                this.snackBar.open("Success!", '', {
+                    duration: 2000,
+                });
+            } else {
+                this.snackBar.open("Failure!", '', {
+                    duration: 2000,
+                });
+            }
+            return (data);
+        });
     }
 }
