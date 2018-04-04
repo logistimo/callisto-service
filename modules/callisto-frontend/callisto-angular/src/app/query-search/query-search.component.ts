@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
 import {Utils} from '../util/utils'
 import { DataService } from '../service/data.service';
+import { QueryService } from '../service/query.service';
 import { QueryText } from '../model/querytext'
 
 @Component({
@@ -17,7 +18,8 @@ export class QuerySearchComponent implements OnInit {
   private queryText : QueryText;
 
   constructor(
-      private dataService:DataService
+      private dataService:DataService,
+      private queryService:QueryService
   ) {
     this.queryIdField.valueChanges
       .debounceTime(300)
@@ -36,6 +38,10 @@ export class QuerySearchComponent implements OnInit {
       .subscribe(queryText => {
           this.queryText = queryText as QueryText;
         })
+  }
+
+  emitQueryText(event : any) {
+    this.queryService.changeState(this.queryText);
   }
 
   ngOnInit() {

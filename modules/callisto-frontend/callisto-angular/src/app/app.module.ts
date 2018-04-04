@@ -6,6 +6,7 @@ import {HttpClientModule} from '@angular/common/http';
 import { XHRBackend, RequestOptions, HttpModule} from '@angular/http';
 import { HttpService } from './service/http.service'
 import { ResultsService } from './service/results.service'
+import { QueryService } from './service/query.service'
 import { httpServiceFactory } from './factory/HttpServiceFactory'
 
 import {
@@ -66,7 +67,7 @@ import { GraphComponent } from './graph/graph.component';
         MatGridListModule,
         MatAutocompleteModule
     ],
-    providers: [ResultsService, {
+    providers: [ResultsService, QueryService, {
         provide: HttpService,
         useFactory: httpServiceFactory,
         deps: [XHRBackend, RequestOptions]

@@ -9,6 +9,21 @@
     </mat-option>
   </mat-autocomplete>
 
-  <pre>{{queryText | json}}</pre>
+  <div *ngIf="queryText != undefined">
+    <pre>
+      <code>{{queryText | json}}</code>
+    </pre>
+
+    <div class="mt-4">
+      <a aria-label="Populate" class="action-btn">
+        <mat-icon class="float-right ml-3" aria-hidden="true" (click)="emitQueryText($event)"
+                  matTooltipPosition="above" matTooltip="Populate">done</mat-icon>
+      </a>
+      <a aria-label="Edit" class="action-btn">
+        <mat-icon class="float-right" aria-hidden="true"
+                  matTooltipPosition="above" matTooltip="Edit">mode_edit</mat-icon>
+      </a>
+    </div>
+  </div>
 
 </div>

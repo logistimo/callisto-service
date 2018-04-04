@@ -10,6 +10,7 @@ import {QueryRequest} from '../model/queryrequest'
 import {Utils} from '../util/utils'
 import { DataService } from '../service/data.service';
 import { ResultsService } from '../service/results.service';
+import { QueryService } from '../service/query.service';
 
 import '../../../node_modules/pivottable/dist/pivot.min.js';
 import '../../../node_modules/pivottable/dist/pivot.min.css';
@@ -28,14 +29,13 @@ import 'rxjs/add/operator/switchMap';
 export class HomeComponent implements OnInit {
 
     queryTextModel = new QueryText('','');
-    queryTextModelFinal = new QueryText('','');
-
     serverConfigs:ServerConfig[] = [];
 
     dataEmpty = false;
     private el:ElementRef;
 
-    constructor(private dataService:DataService, private resultsService:ResultsService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog) {
+    constructor(private dataService:DataService, private resultsService:ResultsService,
+                private queryService:QueryService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog) {
         this.el = el;
     }
 
@@ -51,6 +51,12 @@ export class HomeComponent implements OnInit {
                 }
             });
         });
+        this.queryService.currentQueryText.subscribe(res => {
+                if(Utils.checkNotNullEmpty(res)) {
+                    this.queryTextModel = res;
+                }
+            }
+        )
     }
 
     runQuery(event, mQueryText:QueryText) {

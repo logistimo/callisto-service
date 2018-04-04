@@ -1,11 +1,13 @@
 <div>
     <div class="main-form-container">
         <mat-form-field>
-            <textarea matInput placeholder="Type query here" [(ngModel)]="queryTextModel.query"></textarea>
+            <textarea spellcheck="false" matInput placeholder="Type query here" matTextareaAutosize
+                      matAutosizeMinRows="2"
+                      matAutosizeMaxRows="5" [(ngModel)]="queryTextModel.query"></textarea>
         </mat-form-field>
 
         <mat-form-field>
-            <textarea matInput placeholder="Columns"  [(ngModel)]="queryTextModel.columns"></textarea>
+            <textarea spellcheck="false" matInput placeholder="Columns"  [(ngModel)]="queryTextModel.columns"></textarea>
         </mat-form-field>
 
         <mat-form-field>

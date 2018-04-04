@@ -1,7 +1,29 @@
 pre {
+    width: 100%;
+    padding: 16px;
+    margin: 0;
+    overflow: auto;
+    overflow-y: hidden;
+    font-size: 12px;
+    line-height: 20px;
+    background: #efefef;
+    border: 1px solid #777;
+
     white-space: pre-wrap;       /* css-3 */
     white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
     white-space: -pre-wrap;      /* Opera 4-6 */
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+pre code {
+    color: #333;
+}
+
+pre .action {
+    background: #F5F5F5;
+}
+
+.action-btn {
+    cursor: pointer;
 }
