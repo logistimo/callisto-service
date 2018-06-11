@@ -42,9 +42,14 @@ public class DatastoreService implements IDatastoreService {
   }
 
   @Override
-  public void save(String userId, Datastore datastore) {
+  public List<Datastore> getDatastoresByUser(String userId){
+    return repository.findByUserId(userId);
+  }
+
+  @Override
+  public void save(Datastore datastore) {
     try {
-      Datastore dbDataStore = get(userId, datastore.getId());
+      Datastore dbDataStore = get(datastore.getUserId(), datastore.getId());
       if (dbDataStore != null) {
         dbDataStore.copyFrom(datastore);
         repository.save(dbDataStore);

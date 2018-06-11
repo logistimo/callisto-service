@@ -18,4 +18,7 @@ public interface DatastoreRepository extends MongoRepository<Datastore, String> 
   @Query(value = "{ 'userId': ?0 , 'id': ?1}")
   List<Datastore> readDatastore(String userId, String datastoreId, Pageable pageable);
 
+  @Query(value = "{ 'userId': ?0}")
+  List<Datastore> findByUserId(String userId);
+
 }

@@ -29,8 +29,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
 /**
  * @author Chandrakant
  */
@@ -42,9 +40,6 @@ public class User {
   @Indexed(unique = true)
   @JsonProperty("user_id")
   private String userId = "logistimo";
-
-  @JsonProperty("server_configs")
-  private List<Datastore> datastores;
 
   public String getId() {
     return this.id;
@@ -62,7 +57,4 @@ public class User {
     this.userId = un;
   }
 
-  public List<Datastore> getDatastores() {
-    return this.datastores;
-  }
 }
