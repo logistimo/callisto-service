@@ -40,7 +40,7 @@ import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.logistimo.callisto.CallistoDataType;
 import com.logistimo.callisto.DataSourceType;
 import com.logistimo.callisto.QueryResults;
-import com.logistimo.callisto.model.ServerConfig;
+import com.logistimo.callisto.model.Datastore;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -81,7 +81,7 @@ public class CassandraService implements IDataBaseService {
 
   @Override
   public QueryResults fetchRows(
-      ServerConfig config,
+      Datastore config,
       String query,
       Map<String, String> filters,
       Optional<Integer> size,
@@ -200,17 +200,17 @@ public class CassandraService implements IDataBaseService {
     return dataSourceType;
   }
 
-  public Session getSession(ServerConfig serverConfig) {
-    Integer sHash = new Gson().toJson(serverConfig).hashCode();
+  public Session getSession(Datastore datastore) {
+    Integer sHash = new Gson().toJson(datastore).hashCode();
     if (!Objects.equals(serverConfigHash, sHash)) {
-      connect(serverConfig, true);
+      connect(datastore, true);
     } else if (session == null || session.isClosed()) {
-      connect(serverConfig, false);
+      connect(datastore, false);
     }
     return session;
   }
 
-  private void connect(ServerConfig config, boolean reconnect) {
+  private void connect(Datastore config, boolean reconnect) {
     try {
       if (cluster == null || cluster.isClosed() || reconnect) {
         String username = config.getUsername();

@@ -26,7 +26,7 @@ package com.logistimo.callisto.service;
 import com.logistimo.callisto.CallistoDataType;
 import com.logistimo.callisto.DataSourceType;
 import com.logistimo.callisto.QueryResults;
-import com.logistimo.callisto.model.ServerConfig;
+import com.logistimo.callisto.model.Datastore;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,7 @@ public class MysqlService implements IDataBaseService {
 
   @Override
   public QueryResults fetchRows(
-      ServerConfig config,
+      Datastore config,
       String query,
       Map<String, String> filters,
       Optional<Integer> size,
@@ -114,7 +114,7 @@ public class MysqlService implements IDataBaseService {
     return dataSourceType;
   }
 
-  private Connection getConnection(ServerConfig config)
+  private Connection getConnection(Datastore config)
       throws ClassNotFoundException, SQLException {
     Class.forName("com.mysql.jdbc.Driver");
     return DriverManager.getConnection(

@@ -32,7 +32,7 @@ import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.ServerConfig;
+import com.logistimo.callisto.model.Datastore;
 import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
@@ -62,6 +62,8 @@ public class QueryService implements IQueryService {
   @Autowired private QueryRepository queryRepository;
 
   @Autowired private UserService userService;
+
+  @Autowired private  DatastoreService datastoreService;
 
   @Autowired private DataBaseCollection dataBaseCollection;
   @Autowired private FunctionManager functionManager;
@@ -156,9 +158,9 @@ public class QueryService implements IQueryService {
       logger.warn("Query " + request.queryId + " not found for user " + request.userId);
       return null;
     }
-    ServerConfig
-        serverConfig =
-        userService.readServerConfig(request.userId, queryText.getServerId());
+    Datastore
+        datastore =
+        datastoreService.get(request.userId, queryText.getServerId());
     List<String> functions = FunctionUtil.getAllFunctions(queryText.getQuery());
     if (!functions.isEmpty()) {
       for (String functionText : functions) {
@@ -168,7 +170,7 @@ public class QueryService implements IQueryService {
               functionManager.getFunction(FunctionUtil.getFunctionType(functionText));
           FunctionParam
               functionParam =
-              new FunctionParam(request, serverConfig.getEscaping(), rowHeadings);
+              new FunctionParam(request, datastore.getEscaping(), rowHeadings);
           functionParam.function = functionText;
           String data = qFunction.getResult(functionParam);
           queryText.setQuery(queryText.getQuery().replace(functionText, data));
@@ -176,7 +178,7 @@ public class QueryService implements IQueryService {
       }
     }
     QueryResults queryResults =
-        executeQuery(serverConfig, queryText.getQuery(), request.filters, request.size,
+        executeQuery(datastore, queryText.getQuery(), request.filters, request.size,
             request.offset);
     queryResults.setRowHeadings(rowHeadings);
     return queryResults;
@@ -193,14 +195,14 @@ public class QueryService implements IQueryService {
   }
 
   private QueryResults executeQuery(
-      ServerConfig serverConfig,
+      Datastore datastore,
       String query,
       Map<String, String> filters,
       Integer size,
       Integer offset) {
     IDataBaseService dataBaseService =
-        dataBaseCollection.getDataBaseService(serverConfig.getType());
+        dataBaseCollection.getDataBaseService(datastore.getType());
     return dataBaseService.fetchRows(
-        serverConfig, query, filters, Optional.ofNullable(size), Optional.ofNullable(offset));
+        datastore, query, filters, Optional.ofNullable(size), Optional.ofNullable(offset));
   }
 }

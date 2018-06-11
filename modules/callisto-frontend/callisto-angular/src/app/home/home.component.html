@@ -1,28 +1,52 @@
-<div>
-    <div class="main-form-container">
-        <mat-form-field>
+<div class="starter-template row">
+  <div class="col-sm-6">
+    <mat-card>
+      <mat-card-title>Execute</mat-card-title>
+      <mat-card-content>
+        <div>
+          <div class="main-form-container">
+            <mat-form-field>
             <textarea spellcheck="false" matInput placeholder="Type query here" matTextareaAutosize
                       matAutosizeMinRows="2"
                       matAutosizeMaxRows="5" [(ngModel)]="queryTextModel.query"></textarea>
-        </mat-form-field>
+            </mat-form-field>
 
-        <mat-form-field>
-            <textarea spellcheck="false" matInput placeholder="Columns"  [(ngModel)]="queryTextModel.columns"></textarea>
-        </mat-form-field>
+            <mat-form-field>
+              <textarea spellcheck="false" matInput placeholder="Columns"
+                        [(ngModel)]="queryTextModel.columns"></textarea>
+            </mat-form-field>
 
-        <mat-form-field>
-            <mat-select placeholder="Datasource" [(ngModel)]="queryTextModel.server_id">
+            <mat-form-field>
+              <mat-select placeholder="Datasource" [(ngModel)]="queryTextModel.server_id">
                 <mat-option *ngFor="let db of serverConfigs" value={{db.id}}>
-                    {{db.name}}</mat-option>
-            </mat-select>
-        </mat-form-field>
+                  {{db.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-        <div class="mt-2">
-            <button mat-button class="btn float-right"
-                    (click)="saveQueryPopup($event, queryTextModel)">Save</button>
+            <div class="mt-2">
+              <button mat-button class="btn float-right"
+                      (click)="saveQueryPopup($event, queryTextModel)">Save
+              </button>
 
-            <button mat-button class="btn-primary float-right"
-                    (click)="runQuery($event, queryTextModel)">Run</button>
+              <button mat-button class="btn-primary float-right"
+                      (click)="runQuery($event, queryTextModel)">Run
+              </button>
+            </div>
+          </div>
         </div>
-    </div>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="col-sm-6">
+    <mat-card>
+      <mat-card-title>Search</mat-card-title>
+      <mat-card-content>
+        <app-query-search></app-query-search>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
+<app-graph></app-graph>

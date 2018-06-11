@@ -2,9 +2,6 @@
 @import "~bootstrap/dist/css/bootstrap.css";
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 
-body {
-    padding-top: 80px;
-}
 .starter-template {
     padding: 2rem 1.5rem;
 }

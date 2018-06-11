@@ -44,7 +44,7 @@ public class User {
   private String userId = "logistimo";
 
   @JsonProperty("server_configs")
-  private List<ServerConfig> serverConfigs;
+  private List<Datastore> datastores;
 
   public String getId() {
     return this.id;
@@ -62,7 +62,7 @@ public class User {
     this.userId = un;
   }
 
-  public List<ServerConfig> getServerConfigs() {
-    return this.serverConfigs;
+  public List<Datastore> getDatastores() {
+    return this.datastores;
   }
 }
