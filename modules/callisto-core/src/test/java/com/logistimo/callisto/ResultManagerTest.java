@@ -51,11 +51,18 @@ public class ResultManagerTest {
   ResultManager resultManager;
   FunctionManager functionManager;
 
+  MathFunction mathFunction;
+  BottomxFunction bottomxFunction;
+  TopxFunction topxFunction;
+
   @Before
   public void setUp() {
     functionManager = Mockito.mock(FunctionManager.class);
     resultManager = new ResultManager();
     resultManager.setFunctionManager(functionManager);
+    mathFunction = new MathFunction();
+    bottomxFunction = new BottomxFunction();
+    topxFunction = new TopxFunction();
   }
 
   @Test
@@ -67,9 +74,9 @@ public class ResultManagerTest {
     QueryResults results = new QueryResults();
     List<String> headings = Arrays.asList("abc", "def", "pqr", "mapc");
     results.setHeadings(headings);
-    when(functionManager.getFunction("math")).thenReturn(new MathFunction());
-    when(functionManager.getFunction("bottomx")).thenReturn(new BottomxFunction());
-    when(functionManager.getFunction("topx")).thenReturn(new TopxFunction());
+    when(functionManager.getFunction("math")).thenReturn(mathFunction);
+    when(functionManager.getFunction("bottomx")).thenReturn(bottomxFunction);
+    when(functionManager.getFunction("topx")).thenReturn(topxFunction);
     results.addRow(Arrays.asList("result of abc", "125", "250",
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
     results.addRow(Arrays.asList("another result of abc", "49", "123",
@@ -90,7 +97,7 @@ public class ResultManagerTest {
 
 
   @Test
-  public void getVariableTest() throws CallistoException {
+  public void getVariablesAndFunctionsTest() throws CallistoException {
     String text = "$did | $abc | $hello+$$math( 2*$did)$$ |$abc ";
     List list = FunctionUtil.getAllFunctionsAndVariables(text);
     assertEquals(5, list.size());
