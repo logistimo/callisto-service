@@ -21,19 +21,20 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.function;
+package com.logistimo.callisto;
 
-import com.logistimo.callisto.CallistoApplication;
-import com.logistimo.callisto.QueryResults;
-import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.function.BottomxFunction;
+import com.logistimo.callisto.function.FunctionUtil;
+import com.logistimo.callisto.function.MathFunction;
+import com.logistimo.callisto.function.TopxFunction;
 import com.logistimo.callisto.model.QueryRequestModel;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mockito;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,13 +42,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 /** Created by chandrakant on 26/05/17. */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = CallistoApplication.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 public class ResultManagerTest {
 
-  @Autowired ResultManager resultManager;
+  ResultManager resultManager;
+  FunctionManager functionManager;
+
+  @Before
+  public void setUp() {
+    functionManager = Mockito.mock(FunctionManager.class);
+    resultManager = new ResultManager();
+    resultManager.setFunctionManager(functionManager);
+  }
 
   @Test
   public void getDerivedResultTest() throws CallistoException {
@@ -58,6 +67,9 @@ public class ResultManagerTest {
     QueryResults results = new QueryResults();
     List<String> headings = Arrays.asList("abc", "def", "pqr", "mapc");
     results.setHeadings(headings);
+    when(functionManager.getFunction("math")).thenReturn(new MathFunction());
+    when(functionManager.getFunction("bottomx")).thenReturn(new BottomxFunction());
+    when(functionManager.getFunction("topx")).thenReturn(new TopxFunction());
     results.addRow(Arrays.asList("result of abc", "125", "250",
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
     results.addRow(Arrays.asList("another result of abc", "49", "123",
