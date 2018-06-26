@@ -167,8 +167,8 @@ public class ResultManager {
         }
       }
     }
-    str = StringUtils.replace(str, CharacterConstants.DOUBLE_QUOTE, CharacterConstants.EMPTY);
-    str = StringUtils.replace(str, CharacterConstants.SINGLE_QUOTE, CharacterConstants.EMPTY);
+    //str = StringUtils.replace(str, CharacterConstants.DOUBLE_QUOTE, CharacterConstants.EMPTY);
+    //str = StringUtils.replace(str, CharacterConstants.SINGLE_QUOTE, CharacterConstants.EMPTY);
     return str;
   }
 
