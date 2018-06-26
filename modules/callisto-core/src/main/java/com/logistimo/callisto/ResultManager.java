@@ -56,9 +56,9 @@ public class ResultManager {
 
   private static final Logger logger = Logger.getLogger(ResultManager.class);
 
-  @Autowired private FunctionManager functionManager;
+  private FunctionManager functionManager;
 
-  public static BinaryOperator<String> linkedHashMapMerger = (u, v) -> {
+  public static final BinaryOperator<String> linkedHashMapMerger = (u, v) -> {
     throw new IllegalStateException(String.format("Duplicate key %s", u));
   };
 
@@ -113,9 +113,9 @@ public class ResultManager {
    */
   private static QueryResults fillResult(QueryResults results, List<String> rowHeadings,
                                          Integer index) {
-    if (rowHeadings != null) {
+    if (rowHeadings != null && results != null) {
       Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
-      if (results != null && results.getRows() != null) {
+      if (results.getRows() != null) {
         for (List row : results.getRows()) {
           rowHeadingsSet.remove(row.get(index));
         }
@@ -167,8 +167,6 @@ public class ResultManager {
         }
       }
     }
-    str = StringUtils.replace(str, CharacterConstants.DOUBLE_QUOTE, CharacterConstants.EMPTY);
-    str = StringUtils.replace(str, CharacterConstants.SINGLE_QUOTE, CharacterConstants.EMPTY);
     return str;
   }
 
@@ -212,5 +210,10 @@ public class ResultManager {
                 linkedHashMapMerger, LinkedHashMap::new));
     filterMap.putAll(new Gson().fromJson(strToParse, type));
     return filterMap;
+  }
+
+  @Autowired
+  public void setFunctionManager(FunctionManager functionManager) {
+    this.functionManager = functionManager;
   }
 }

@@ -32,11 +32,11 @@ import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
-
-import javax.annotation.Resource;
 
 /**
  * Created by chandrakant on 18/05/17.
@@ -45,9 +45,18 @@ import javax.annotation.Resource;
 public class CsvFunction implements ICallistoFunction {
 
   private static final String NAME = "csv";
-  @Resource IQueryService queryService;
+
+  private IQueryService queryService;
+
+  @Autowired
+  public void setQueryService(IQueryService queryService) {
+    this.queryService = queryService;
+  }
 
   public String getCSV(FunctionParam param) throws CallistoException {
+    if(param.getQueryRequestModel().filters == null) {
+      param.getQueryRequestModel().filters = new HashMap<>();
+    }
     return getCSV(param, false);
   }
 
@@ -61,11 +70,11 @@ public class CsvFunction implements ICallistoFunction {
   public String getCSV(FunctionParam param, boolean forceEnclose)
       throws CallistoException {
     StringBuilder csv = new StringBuilder();
-    QueryFunction
-        function =
-        QueryFunction.getQueryFunction(param.function, param.getQueryRequestModel().filters);
+    QueryParams
+        queryParams =
+        QueryParams.getQueryParams(param.function, param.getQueryRequestModel().filters);
     QueryResults results =
-        queryService.readData(buildQueryRequestModel(param, function));
+        queryService.readData(buildQueryRequestModel(param, queryParams));
     if (results != null && results.getRows() != null) {
       for (List<String> strings : results.getRows()) {
         if (!forceEnclose
@@ -91,7 +100,7 @@ public class CsvFunction implements ICallistoFunction {
       csv.setLength(csv.length() - 1);
     }
 
-    if (function.fill && results != null && results.getRows() != null) {
+    if (queryParams.fill && results != null && results.getRows() != null) {
       results.getRows().stream().filter(rows -> StringUtils.isNotEmpty(rows.get(0)))
           .forEach(rows -> param.getRowHeadings().add(rows.get(0)));
     }
@@ -99,7 +108,7 @@ public class CsvFunction implements ICallistoFunction {
   }
 
   private QueryRequestModel buildQueryRequestModel(FunctionParam functionParam,
-                                                   QueryFunction function) {
+                                                   QueryParams function) {
     QueryRequestModel nestedQueryResultModel = new QueryRequestModel();
     nestedQueryResultModel.userId = functionParam.getQueryRequestModel().userId;
     nestedQueryResultModel.queryId = function.queryID;

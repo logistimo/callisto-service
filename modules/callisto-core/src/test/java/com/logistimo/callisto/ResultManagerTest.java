@@ -21,19 +21,20 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.function;
+package com.logistimo.callisto;
 
-import com.logistimo.callisto.CallistoApplication;
-import com.logistimo.callisto.QueryResults;
-import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.function.BottomxFunction;
+import com.logistimo.callisto.function.FunctionUtil;
+import com.logistimo.callisto.function.MathFunction;
+import com.logistimo.callisto.function.TopxFunction;
 import com.logistimo.callisto.model.QueryRequestModel;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mockito;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,13 +42,28 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 /** Created by chandrakant on 26/05/17. */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = CallistoApplication.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 public class ResultManagerTest {
 
-  @Autowired ResultManager resultManager;
+  ResultManager resultManager;
+  FunctionManager functionManager;
+
+  MathFunction mathFunction;
+  BottomxFunction bottomxFunction;
+  TopxFunction topxFunction;
+
+  @Before
+  public void setUp() {
+    functionManager = Mockito.mock(FunctionManager.class);
+    resultManager = new ResultManager();
+    resultManager.setFunctionManager(functionManager);
+    mathFunction = new MathFunction();
+    bottomxFunction = new BottomxFunction();
+    topxFunction = new TopxFunction();
+  }
 
   @Test
   public void getDerivedResultTest() throws CallistoException {
@@ -58,6 +74,9 @@ public class ResultManagerTest {
     QueryResults results = new QueryResults();
     List<String> headings = Arrays.asList("abc", "def", "pqr", "mapc");
     results.setHeadings(headings);
+    when(functionManager.getFunction("math")).thenReturn(mathFunction);
+    when(functionManager.getFunction("bottomx")).thenReturn(bottomxFunction);
+    when(functionManager.getFunction("topx")).thenReturn(topxFunction);
     results.addRow(Arrays.asList("result of abc", "125", "250",
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
     results.addRow(Arrays.asList("another result of abc", "49", "123",
@@ -72,13 +91,13 @@ public class ResultManagerTest {
     QueryResults newResult = resultManager.getDesiredResult(request, results, desiredResultFormat);
     assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
     assertEquals("2", newResult.getRows().get(0).get(1));
-    assertEquals("{key7:14,key8:17,key9:20,key1:23,key5:25}", newResult.getRows().get(0).get(2));
-    assertEquals("{key7:14,key6:12,key2:10,key3:8,key4:2}", newResult.getRows().get(0).get(3));
+    assertEquals("{\"key7\":14,\"key8\":17,\"key9\":20,\"key1\":23,\"key5\":25}", newResult.getRows().get(0).get(2));
+    assertEquals("{\"key7\":14,\"key6\":12,\"key2\":10,\"key3\":8,\"key4\":2}", newResult.getRows().get(0).get(3));
   }
 
 
   @Test
-  public void getVariableTest() throws CallistoException {
+  public void getVariablesAndFunctionsTest() throws CallistoException {
     String text = "$did | $abc | $hello+$$math( 2*$did)$$ |$abc ";
     List list = FunctionUtil.getAllFunctionsAndVariables(text);
     assertEquals(5, list.size());

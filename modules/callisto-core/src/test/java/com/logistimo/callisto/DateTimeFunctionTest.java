@@ -21,18 +21,19 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.function;
+package com.logistimo.callisto;
 
-import com.logistimo.callisto.CallistoApplication;
-import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.function.DateTimeFunction;
+import com.logistimo.callisto.function.FunctionParam;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 
@@ -41,13 +42,15 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by chandrakant on 26/05/17.
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = CallistoApplication.class)
+@RunWith(SpringJUnit4ClassRunner.class)
 public class DateTimeFunctionTest {
 
-  @Autowired
-  @Qualifier("datetime")
   ICallistoFunction dateTime;
+
+  @Before
+  public void setup(){
+    dateTime = new DateTimeFunction();
+  }
 
   @Test
   public void getParamTest() throws CallistoException {

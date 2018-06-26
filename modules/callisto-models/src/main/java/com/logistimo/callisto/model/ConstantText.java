@@ -48,4 +48,7 @@ public class ConstantText {
       return constant;
     }
 
+    public void setConstant(String constant) {
+        this.constant = constant;
+    }
 }

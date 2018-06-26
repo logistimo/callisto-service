@@ -33,25 +33,25 @@ import java.util.Map;
 /**
  * @author Mohan Raja
  */
-public class QueryFunction {
+public class QueryParams {
   public FunctionType type;
   public String queryID;
   public Integer size;
   public Integer offset;
   public boolean fill;
 
-  private static final Logger logger = Logger.getLogger(QueryFunction.class);
+  private static final Logger logger = Logger.getLogger(QueryParams.class);
 
-  public static QueryFunction getQueryFunction(String functionText, Map<String, String> filters)
+  public static QueryParams getQueryParams(String functionText, Map<String, String> filters)
       throws CallistoException {
-    QueryFunction function = new QueryFunction();
+    QueryParams queryParams = new QueryParams();
     int index = functionText.indexOf(CharacterConstants.OPEN_BRACKET);
     if (index == -1) {
-      logger.warn("Invalid function found. " + function);
+      logger.warn("Invalid queryParams found. " + queryParams);
       throw new CallistoException("Q001", functionText);
     }
     String[] functionParams;
-    function.type =
+    queryParams.type =
         FunctionType.getFunctionType(
             functionText.substring(CharacterConstants.FN_ENCLOSE.length(), index).trim());
     functionParams =
@@ -62,31 +62,31 @@ public class QueryFunction {
     if (functionParams.length >= 1) {
       String qId = functionParams[0].trim();
       if (filters.containsKey(qId)) {
-        function.queryID = filters.get(qId);
+        queryParams.queryID = filters.get(qId);
       } else {
-        function.queryID = qId;
+        queryParams.queryID = qId;
       }
     }
     if (functionParams.length >= 2) {
       String size = functionParams[1].trim();
       if (filters.containsKey(size)) {
-        function.size = Integer.parseInt(filters.get(size));
+        queryParams.size = Integer.parseInt(filters.get(size));
       } else {
-        function.size = Integer.parseInt(size);
+        queryParams.size = Integer.parseInt(size);
       }
     }
     if (functionParams.length >= 3) {
       String offset = functionParams[2].trim();
       if (filters.containsKey(offset)) {
-        function.offset = Integer.parseInt(filters.get(offset));
+        queryParams.offset = Integer.parseInt(filters.get(offset));
       } else {
-        function.offset = Integer.parseInt(offset);
+        queryParams.offset = Integer.parseInt(offset);
       }
     }
     if (functionParams.length >= 4) {
-      function.fill = Boolean.parseBoolean(functionParams[3].trim());
+      queryParams.fill = Boolean.parseBoolean(functionParams[3].trim());
     }
-    return function;
+    return queryParams;
   }
 
 }

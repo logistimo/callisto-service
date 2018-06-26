@@ -35,6 +35,7 @@ import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
@@ -46,6 +47,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import jdk.nashorn.internal.codegen.CompilerConstants;
+
 /**
  * Created by chandrakant on 18/05/17.
  */
@@ -54,7 +57,7 @@ public class LinkFunction implements ICallistoFunction {
 
   private static final Logger logger = Logger.getLogger(LinkFunction.class);
   private static final String NAME = "link";
-  @Resource IQueryService queryService;
+  IQueryService queryService;
 
   public static List<String> getParameter(String value) {
     String val = value.trim();
@@ -105,10 +108,9 @@ public class LinkFunction implements ICallistoFunction {
         .readData(buildQueryRequestModel(functionParam.getQueryRequestModel(), queryId));
     if (rs.getRows() != null && rs.getRows().size() == 1 && rs.getRows().get(0).size() == 1) {
       return rs.getRows().get(0).get(0);
+    } else {
+      throw new CallistoException("Q107", functionParam.function, new Gson().toJson(rs));
     }
-    logger.warn("Expected result size from Link function " + functionParam.function
-        + " is 1. Actual result: " + rs.toString());
-    return CharacterConstants.EMPTY;
   }
 
   private Map getLinkFilterMap(FunctionParam functionParam, String linkFilters, Type type)
@@ -135,6 +137,11 @@ public class LinkFunction implements ICallistoFunction {
           "Error while getting result for link function: " + functionParam.function, e1);
     }
     return e;
+  }
+
+  @Autowired
+  public void setQueryService(IQueryService queryService) {
+    this.queryService = queryService;
   }
 
   @Override
