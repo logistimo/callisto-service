@@ -42,18 +42,18 @@ public class ConstantService implements IConstantService {
 
   @Override
   public ConstantText readConstant(String userId, String constId) {
-    ConstantText constnt = null;
+    ConstantText constant = null;
     try {
       List<ConstantText> constants = repository.readConstant(userId, constId);
       if (constants != null && !constants.isEmpty()) {
-        constnt = constants.get(0);
+        constant = constants.get(0);
       } else {
         logger.warn("No constant found with id: " + constId);
       }
     } catch (Exception e) {
       logger.warn("Error in getting constant with id: " + constId);
     }
-    return constnt;
+    return constant;
   }
 
   @Override

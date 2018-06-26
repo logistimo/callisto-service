@@ -26,6 +26,7 @@ package com.logistimo.callisto.function;
 import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.service.IConstantService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class ConstantFunction implements ICallistoFunction {
   private static final Integer MIN_ARGS_LENGTH = 1;
   private static final Integer MAX_ARGS_LENGTH = 1;
 
-  @Autowired IConstantService constantService;
+  private IConstantService constantService;
 
   @Override
   public String getName() {
@@ -50,7 +51,12 @@ public class ConstantFunction implements ICallistoFunction {
   @Override
   public String getResult(FunctionParam functionParam) throws CallistoException {
     String param = getParameter(functionParam.function);
-    return constantService.readConstant(functionParam.getRequest().userId, param).getConstant();
+    ConstantText constantText = constantService.readConstant(functionParam.getRequest().userId,
+        param);
+    if(constantText == null) {
+      throw new CallistoException("Q106", functionParam.function);
+    }
+    return constantText.getConstant();
   }
 
   @Override
@@ -75,5 +81,10 @@ public class ConstantFunction implements ICallistoFunction {
     return StringUtils.split(
             StringUtils.substring(val, fnStart + 1, fnEnd), CharacterConstants.COMMA)[
         0];
+  }
+
+  @Autowired
+  public void setConstantService(IConstantService constantService) {
+    this.constantService = constantService;
   }
 }
