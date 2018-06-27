@@ -74,8 +74,13 @@ public class LinkFunction implements ICallistoFunction {
   }
 
   private static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
-                                                          String queryId) {
-    QueryRequestModel newQueryRequestModel = request.clone();
+                                                          String queryId) throws CallistoException {
+    QueryRequestModel newQueryRequestModel;
+    try {
+      newQueryRequestModel = request.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new CallistoException("Q108");
+    }
     newQueryRequestModel.queryId = queryId;
     return newQueryRequestModel;
   }
