@@ -42,8 +42,8 @@ public class QueryRequestModel implements Cloneable {
   public Integer offset;
 
   @Override
-  public QueryRequestModel clone() {
-    QueryRequestModel newRequestModel = new QueryRequestModel();
+  public QueryRequestModel clone() throws CloneNotSupportedException {
+    QueryRequestModel newRequestModel = (QueryRequestModel) super.clone();
     newRequestModel.userId = String.valueOf(this.userId);
     newRequestModel.queryId = this.queryId;
     newRequestModel.filters = this.filters == null ? null : (Map) ((HashMap) this.filters).clone();
