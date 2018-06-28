@@ -35,9 +35,11 @@ import { QuerySearchComponent } from './query-search/query-search.component';
 import { GraphComponent } from './graph/graph.component';
 import { MyNavComponent } from './my-nav/my-nav.component';
 import { LayoutModule } from '@angular/cdk/layout';
+import { DatastoresComponent } from './datastores/datastores.component';
 
 const appRoutes: Routes = [
   { path: 'home', component: HomeComponent },
+  { path: 'datastores', component: DatastoresComponent },
   { path: '',
     redirectTo: '/home',
     pathMatch: 'full'
@@ -52,7 +54,8 @@ const appRoutes: Routes = [
     AppComponent,
     QuerySearchComponent,
     GraphComponent,
-    MyNavComponent
+    MyNavComponent,
+    DatastoresComponent
   ],
   imports: [
     BrowserModule,
