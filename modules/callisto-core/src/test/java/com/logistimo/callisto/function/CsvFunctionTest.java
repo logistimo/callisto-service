@@ -21,8 +21,10 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.function;
 
+import com.logistimo.callisto.CallistoDataType;
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.CsvFunction;
 import com.logistimo.callisto.function.FunctionParam;
