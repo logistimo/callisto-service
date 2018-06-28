@@ -28,10 +28,10 @@ import com.google.gson.reflect.TypeToken;
 
 import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IQueryService;
-import com.logistimo.callisto.util.CacheUtil;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -47,6 +47,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import jdk.nashorn.internal.codegen.CompilerConstants;
+
 /**
  * Created by chandrakant on 18/05/17.
  */
@@ -55,8 +57,7 @@ public class LinkFunction implements ICallistoFunction {
 
   private static final Logger logger = Logger.getLogger(LinkFunction.class);
   private static final String NAME = "link";
-  @Resource IQueryService queryService;
-  @Autowired CacheUtil cacheUtil;
+  IQueryService queryService;
 
   public static List<String> getParameter(String value) {
     String val = value.trim();
@@ -72,7 +73,8 @@ public class LinkFunction implements ICallistoFunction {
     return params;
   }
 
-  public QueryRequestModel buildQueryRequestModel(QueryRequestModel request, String queryId) {
+  private static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
+                                                          String queryId) {
     QueryRequestModel newQueryRequestModel = request.clone();
     newQueryRequestModel.queryId = queryId;
     return newQueryRequestModel;
@@ -94,8 +96,21 @@ public class LinkFunction implements ICallistoFunction {
       }.getType();
       linkFiltersMap = getLinkFilterMap(functionParam, linkFilters, type);
     }
-    return cacheUtil.getLinkResult(this, functionParam, queryId, linkFiltersMap, queryService,
-        (queryId + String.valueOf(linkFiltersMap)).hashCode());
+    return getResult(functionParam, queryId, linkFiltersMap);
+  }
+
+  private String getResult(FunctionParam functionParam, String queryId, Map linkFiltersMap)
+      throws CallistoException {
+    if (linkFiltersMap != null && !linkFiltersMap.isEmpty()) {
+      functionParam.getQueryRequestModel().filters.putAll(linkFiltersMap);
+    }
+    QueryResults rs = queryService
+        .readData(buildQueryRequestModel(functionParam.getQueryRequestModel(), queryId));
+    if (rs.getRows() != null && rs.getRows().size() == 1 && rs.getRows().get(0).size() == 1) {
+      return rs.getRows().get(0).get(0);
+    } else {
+      throw new CallistoException("Q107", functionParam.function, new Gson().toJson(rs));
+    }
   }
 
   private Map getLinkFilterMap(FunctionParam functionParam, String linkFilters, Type type)
@@ -122,6 +137,11 @@ public class LinkFunction implements ICallistoFunction {
           "Error while getting result for link function: " + functionParam.function, e1);
     }
     return e;
+  }
+
+  @Autowired
+  public void setQueryService(IQueryService queryService) {
+    this.queryService = queryService;
   }
 
   @Override
