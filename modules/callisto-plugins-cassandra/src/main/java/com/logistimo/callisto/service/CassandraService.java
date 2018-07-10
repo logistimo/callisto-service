@@ -38,9 +38,11 @@ import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
+import com.datastax.driver.core.exceptions.SyntaxError;
 import com.logistimo.callisto.CallistoDataType;
 import com.logistimo.callisto.DataSourceType;
 import com.logistimo.callisto.QueryResults;
+import com.logistimo.callisto.exception.CallistoSyntaxErrorException;
 import com.logistimo.callisto.model.Datastore;
 
 import org.apache.commons.lang.StringUtils;
@@ -121,10 +123,8 @@ public class CassandraService implements IDataBaseService {
           break;
         }
       }
-    } catch (InvalidQueryException e) {
-      throw new InvalidQueryException("Invalid query exception", e);
-    } catch (Exception e) {
-      logger.warn("Exception in cassandra fetch", e);
+    } catch (InvalidQueryException | SyntaxError e) {
+      throw new CallistoSyntaxErrorException("Invalid cassandra query", e);
     }
     logger.info("Query Execution finished");
     return results;
@@ -253,7 +253,8 @@ public class CassandraService implements IDataBaseService {
   private String constructQuery(String query, Map<String, String> filters) {
     if (filters != null && filters.size() > 0) {
       for (Map.Entry<String, String> entry : filters.entrySet()) {
-        query = query.replace(entry.getKey(), entry.getValue());
+        String placeholder = "{{" + entry.getKey() + "}}";
+        query = query.replace(placeholder, entry.getValue());
       }
     }
     return query;

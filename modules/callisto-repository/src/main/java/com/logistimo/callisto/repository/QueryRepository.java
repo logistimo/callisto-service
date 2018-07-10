@@ -58,4 +58,16 @@ public interface QueryRepository extends MongoRepository<QueryText, String> {
   @Query(value = "{ 'userId': ?0 , 'queryId': {$regex : ?1, $options: 'i'}} ", fields = "{ "
                                                                                         + "'queryId' : 1 }")
   List<QueryText> readQueryIds(String userId, String like, Pageable pageable);
+
+  @Query(value = "{ 'userId': ?0 }")
+  List<QueryText> readQueries(String userId, Pageable pageable);
+
+  @Query(value = "{ 'userId': ?0 }", count = true)
+  Long getCount(String userId);
+
+  @Query(value = "{ 'userId': ?0 , 'queryId': {$regex : ?1, $options: 'i'} }")
+  List<QueryText> searchQueriesWithQueryId(String userId, String like, Pageable pageable);
+
+  @Query(value = "{ 'userId': ?0 , 'queryId': {$regex : ?1, $options: 'i'} }", fields = "{ 'queryId' : 1 }", count = true)
+  Long getSearchQueriesCount(String userId, String like);
 }

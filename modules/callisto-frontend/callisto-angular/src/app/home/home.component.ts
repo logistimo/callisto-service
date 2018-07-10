@@ -5,7 +5,7 @@ import {Observable} from 'rxjs/Observable'
 
 import {QueryText} from '../model/querytext'
 import {CallistoUser} from '../model/callistouser'
-import {ServerConfig} from '../model/serverconfig'
+import {Datastore} from '../model/datastore'
 import {QueryRequest} from '../model/queryrequest'
 import {Utils} from '../util/utils'
 import { DataService } from '../service/data.service';
@@ -29,25 +29,25 @@ import 'rxjs/add/operator/switchMap';
 export class HomeComponent implements OnInit {
 
     queryTextModel = new QueryText('','');
-    serverConfigs:ServerConfig[] = [];
+    datastores : Datastore[] = [];
 
     dataEmpty = false;
     private el:ElementRef;
 
-    constructor(private dataService:DataService, private resultsService:ResultsService,
+    constructor(private dataService:DataService,
                 private queryService:QueryService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog) {
         this.el = el;
     }
 
     ngOnInit() {
-        this.dataService.getUser().subscribe((response:Response) => {
-            var _dbs = this.serverConfigs;
+        this.dataService.getDatastores().subscribe((response : Response) => {
+            var _dbs = this.datastores;
             var _dbsModel = this.queryTextModel;
-            let body : CallistoUser = JSON.parse(response['_body']) as CallistoUser;
-            body.server_configs.forEach(function (server:ServerConfig) {
-                _dbs.push(server);
-                if (Utils.checkNullEmpty(_dbsModel.server_id)) {
-                    _dbsModel.server_id = server.id;
+            let datastores = JSON.parse(response['_body']);
+            datastores.forEach(function (datastore: Datastore) {
+                _dbs.push(datastore);
+                if (Utils.checkNullEmpty(_dbsModel.datastore_id)) {
+                    _dbsModel.datastore_id = datastore.id;
                 }
             });
         });
@@ -61,11 +61,11 @@ export class HomeComponent implements OnInit {
 
     runQuery(event, mQueryText:QueryText) {
         const request : QueryRequest = new QueryRequest();
-        request.query = new QueryText(mQueryText.query, mQueryText.server_id);
+        request.query = new QueryText(mQueryText.query, mQueryText.datastore_id);
         request.columnText = {TOKEN_COLUMNS: mQueryText.columns}
 
         this.dataService.runQuery(request).subscribe(data => {
-            this.resultsService.changeState(JSON.parse(data))
+            //this.resultsService.changeState(JSON.parse(data))
         });
     }
 

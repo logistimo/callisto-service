@@ -32,14 +32,19 @@ import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
+import com.logistimo.callisto.model.ResultsModel;
 import com.logistimo.callisto.service.IConstantService;
 import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -64,23 +71,53 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/query")
 public class QueryController {
 
+  public static final String RESPONSE_TOTAL_SIZE_HEADER_KEY = "size";
+
   @Resource IQueryService queryService;
   @Resource IConstantService constantService;
 
   @Autowired ResultManager resultManager;
 
-  @RequestMapping(value = "/all", method = RequestMethod.GET)
-  public List<String> getQueriesLike(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
-                                     Pageable pageable, @RequestParam(defaultValue = "logistimo")
-                                     String userId) {
+  @RequestMapping(value = "", method = RequestMethod.GET)
+  public ResponseEntity getQueries(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
+                                    Pageable pageable, @RequestParam(defaultValue = "logistimo")
+                                    String userId) {
+    List<QueryText> queryTexts = queryService.readQueries(userId, pageable);
+    Long totalSize = queryService.getTotalNumberOfQueries(userId);
+    MultiValueMap<String, String> headers = new HttpHeaders();
+    if(totalSize != null) {
+      headers.put(RESPONSE_TOTAL_SIZE_HEADER_KEY, Collections.singletonList(String.valueOf
+          (totalSize)));
+    }
+    return new ResponseEntity(queryTexts, headers, HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/search/{like}", method = RequestMethod.GET)
+  public ResponseEntity getQueriesLike(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
+                                    Pageable pageable, @RequestParam(defaultValue = "logistimo")
+                                    String userId, @PathVariable String like) {
+    ResultsModel resultsModel = queryService.searchQueriesLike(userId, like, pageable);
+    MultiValueMap<String, String> headers = new HttpHeaders();
+    Long totalSize = resultsModel.totalResultsCount;
+    if(totalSize != null) {
+      headers.put(RESPONSE_TOTAL_SIZE_HEADER_KEY, Collections.singletonList(String.valueOf
+          (totalSize)));
+    }
+    return new ResponseEntity(resultsModel.result, headers, HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/ids", method = RequestMethod.GET)
+  public List<String> getQueryIds(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
+                                    Pageable pageable, @RequestParam(defaultValue = "logistimo")
+                                    String userId) {
     return queryService.readQueryIds(userId, null, pageable);
   }
 
-  @RequestMapping(value = "/all/{like}", method = RequestMethod.GET)
-  public List<String> getQueriesLikePaginated(@PathVariable String like, @RequestParam
+  @RequestMapping(value = "/ids/{like}", method = RequestMethod.GET)
+  public List<String> getQueryIdsLike(@PathVariable String like, @RequestParam
       (defaultValue = "logistimo") String userId,
-                                              @PageableDefault(page = 0, size = Integer.MAX_VALUE)
-                                              Pageable pageable) {
+                                               @PageableDefault(page = 0, size = Integer.MAX_VALUE)
+                                                 Pageable pageable) {
     return queryService.readQueryIds(userId, like, pageable);
   }
 

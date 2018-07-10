@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import {QueryResults} from '../model/queryresult'
+import {GraphResult} from '../model/graph-result'
 
 @Injectable()
 export class ResultsService {
@@ -11,9 +12,8 @@ export class ResultsService {
 
   constructor() { }
 
-  changeState(results) {
-    results['rows'].unshift(results['headings']);
-    this.resultSource.next(results['rows']);
+  changeState(graphResult : GraphResult) {
+    this.resultSource.next(graphResult);
   }
 
   getState() {

@@ -34,7 +34,7 @@ import java.util.Map;
 public class QueryRequestModel implements Cloneable {
   public String userId = "logistimo";
   public String queryId;
-  public QueryText query;
+  public QueryText query; // used only if queryId is not present
   public Map<String, String> filters;
   public String derivedResultsId; //constant ID for the desired result i.e. LinkedHashMap
   public Map<String, String> columnText;

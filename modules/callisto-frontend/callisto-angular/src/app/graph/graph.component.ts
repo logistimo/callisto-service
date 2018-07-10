@@ -1,10 +1,11 @@
-import { Component, OnInit, ElementRef, Inject } from '@angular/core';
+import { Component, OnInit, ElementRef, Inject, Input } from '@angular/core';
 import { ResultsService } from '../service/results.service';
 
 import '../../../node_modules/pivottable/dist/pivot.min.js';
 import '../../../node_modules/pivottable/dist/pivot.min.css';
 
 import { Utils } from '../util/utils'
+import { GraphResult } from '../model/graph-result'
 
 declare var jQuery:any;
 declare var $:any;
@@ -18,18 +19,23 @@ export class GraphComponent implements OnInit {
 
   private el:ElementRef;
   private result;
+  @Input() queryId;
 
   constructor(@Inject(ElementRef) el:ElementRef, private resultsService : ResultsService) {
     this.el = el;
   }
 
   ngOnInit() {
-    this.resultsService.currentResult.subscribe(res => {
-      if(Utils.checkNotNullEmpty(res) && res instanceof Array && res.length > 0) {
-        this.result = res;
-        this.renderTable();
-      }
-    })
+    this.resultsService.currentResult
+        .subscribe(res => {
+          if (Utils.checkNotNullEmpty(res) && res instanceof GraphResult) {
+            const graphResult = res as GraphResult;
+            this.result = [];
+            this.result.push(graphResult.result['headings']);
+            this.result = this.result.concat(graphResult.result['rows']);
+            this.renderTable();
+          }
+        });
   }
 
   renderTable() {

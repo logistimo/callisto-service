@@ -17,8 +17,8 @@
             </mat-form-field>
 
             <mat-form-field>
-              <mat-select placeholder="Datasource" [(ngModel)]="queryTextModel.server_id">
-                <mat-option *ngFor="let db of serverConfigs" value={{db.id}}>
+              <mat-select placeholder="Datasource" [(ngModel)]="queryTextModel.datastore_id">
+                <mat-option *ngFor="let db of datastores" value={{db.id}}>
                   {{db.name}}
                 </mat-option>
               </mat-select>

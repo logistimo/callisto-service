@@ -126,7 +126,8 @@ public class MysqlService implements IDataBaseService {
   private String constructQuery(String query, Map<String, String> filters) {
     if (filters != null && filters.size() > 0) {
       for (Map.Entry<String, String> entry : filters.entrySet()) {
-        query = query.replace(entry.getKey(), entry.getValue());
+        String placeholder = "{{" + entry.getKey() + "}}";
+        query = query.replace(placeholder, entry.getValue());
       }
     }
     return query;

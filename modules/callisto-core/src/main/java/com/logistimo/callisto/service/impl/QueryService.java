@@ -33,6 +33,7 @@ import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
 import com.logistimo.callisto.model.Datastore;
+import com.logistimo.callisto.model.ResultsModel;
 import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
@@ -109,6 +110,24 @@ public class QueryService implements IQueryService {
     return "Query deleted successfully";
   }
 
+  @Override
+  public List<QueryText> readQueries(String userId, Pageable pageable) {
+    return queryRepository.readQueries(userId, pageable);
+  }
+
+  @Override
+  public Long getTotalNumberOfQueries(String userId) {
+    return queryRepository.getCount(userId);
+  }
+
+  @Override
+  public ResultsModel searchQueriesLike(String userId, String like, Pageable pageable) {
+    ResultsModel resultsModel = new ResultsModel();
+    resultsModel.result = queryRepository.searchQueriesWithQueryId(userId, like, pageable);
+    resultsModel.totalResultsCount = queryRepository.getSearchQueriesCount(userId, like);
+    return resultsModel;
+  }
+
   public QueryText readQuery(String userId, String queryId) {
     try {
       Page<QueryText> queryList = queryRepository.readQuery(userId, queryId, new PageRequest(0, 1));
@@ -160,7 +179,7 @@ public class QueryService implements IQueryService {
     }
     Datastore
         datastore =
-        datastoreService.get(request.userId, queryText.getServerId());
+        datastoreService.get(request.userId, queryText.getDatastoreId());
     List<String> functions = FunctionUtil.getAllFunctions(queryText.getQuery());
     if (!functions.isEmpty()) {
       for (String functionText : functions) {

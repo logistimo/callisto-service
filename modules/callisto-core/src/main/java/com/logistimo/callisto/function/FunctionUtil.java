@@ -241,6 +241,9 @@ public class FunctionUtil {
    */
   public static LinkedHashMap<String, String> parseColumnText(String str) throws CallistoException {
     try {
+      if(StringUtils.isEmpty(str)) {
+        return new LinkedHashMap<>();
+      }
       String[] splitArr = StringUtils.split(str, CharacterConstants.COMMA);
       for (int i = 0; i < splitArr.length; i++) {
         if (i != splitArr.length - 1

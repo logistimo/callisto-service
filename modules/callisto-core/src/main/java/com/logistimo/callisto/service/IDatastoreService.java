@@ -15,4 +15,5 @@ public interface IDatastoreService {
 
   void save(Datastore datastore);
 
+  Datastore getDatastoreById(String datastoreId);
 }

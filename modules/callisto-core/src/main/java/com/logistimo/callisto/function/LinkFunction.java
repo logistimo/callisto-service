@@ -73,7 +73,7 @@ public class LinkFunction implements ICallistoFunction {
     return params;
   }
 
-  private static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
+  public static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
                                                           String queryId) {
     QueryRequestModel newQueryRequestModel = request.clone();
     newQueryRequestModel.queryId = queryId;

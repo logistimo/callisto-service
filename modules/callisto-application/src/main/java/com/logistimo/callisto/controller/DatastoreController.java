@@ -24,17 +24,16 @@ public class DatastoreController {
   @Resource
   IDatastoreService datastoreService;
 
-  @RequestMapping(value = "/", method = RequestMethod.POST)
-  public void createOrUpdateDatastore(@RequestBody Datastore model)
-      throws CallistoException {
-    datastoreService.save(model);
-  }
-
-
-  @RequestMapping(value = "/", method = RequestMethod.POST)
+  @RequestMapping(value = "", method = RequestMethod.GET)
   public List<Datastore> getDatastoresByUser(@RequestParam String userId)
       throws CallistoException {
     return datastoreService.getDatastoresByUser(userId);
+  }
+
+  @RequestMapping(value = "", method = RequestMethod.POST)
+  public void createOrUpdateDatastore(@RequestBody Datastore model)
+      throws CallistoException {
+    datastoreService.save(model);
   }
 
 }

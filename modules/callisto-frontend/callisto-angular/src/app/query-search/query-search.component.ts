@@ -17,6 +17,7 @@ export class QuerySearchComponent implements OnInit {
   private queryId : string;
   private queryText : QueryText;
 
+
   constructor(
       private dataService:DataService,
       private queryService:QueryService

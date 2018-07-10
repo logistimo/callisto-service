@@ -51,8 +51,8 @@ public class QueryText {
   @JsonProperty("columns")
   private String columns;
 
-  @JsonProperty("server_id")
-  private String serverId;
+  @JsonProperty("datastore_id")
+  private String datastoreId;
 
   public String getId() {
     return id;
@@ -86,12 +86,12 @@ public class QueryText {
     this.query = query;
   }
 
-  public String getServerId() {
-    return serverId;
+  public String getDatastoreId() {
+    return datastoreId;
   }
 
-  public void setServerId(String serverId) {
-    this.serverId = serverId;
+  public void setDatastoreId(String serverId) {
+    this.datastoreId = serverId;
   }
 
   public String getColumns() {

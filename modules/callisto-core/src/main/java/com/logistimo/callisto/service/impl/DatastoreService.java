@@ -62,4 +62,9 @@ public class DatastoreService implements IDatastoreService {
     }
   }
 
+  @Override
+  public Datastore getDatastoreById(String datastoreId) {
+    return repository.findOne(datastoreId);
+  }
+
 }
