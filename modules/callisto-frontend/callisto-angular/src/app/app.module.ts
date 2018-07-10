@@ -5,11 +5,9 @@ import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
 import { XHRBackend, RequestOptions, HttpModule} from '@angular/http';
-import { HttpService } from './service/http.service'
 import { ResultsService } from './service/results.service'
 import { QuerySharingService } from './service/query-sharing.service'
 import { QueryService } from './service/query.service'
-import { httpServiceFactory } from './factory/HttpServiceFactory'
 import { DomainFilterFilterPipe } from './query/filter.pipe'
 import { ErrorHandler } from './error/error-handler'
 import { RequestInterceptor } from './error/http-interceptor'
@@ -126,15 +124,12 @@ const appRoutes: Routes = [
       }
     )
   ],
-  providers: [ErrorHandler, ResultsService, QuerySharingService, QueryService, {
-    provide: HttpService,
-    useFactory: httpServiceFactory,
-    deps: [XHRBackend, RequestOptions]
-  },{
-    provide: HTTP_INTERCEPTORS,
-    useClass: RequestInterceptor,
-    multi: true,
-  }],
+  providers: [ErrorHandler, ResultsService, QuerySharingService, QueryService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: RequestInterceptor,
+      multi: true,
+    }],
   bootstrap: [AppComponent],
   entryComponents: [
     HomeComponent,

@@ -14,6 +14,7 @@ import { Utils } from '../util/utils'
 import { FilterResultsAdapterUtils } from '../util/filter.results.adapter'
 import {ReactiveFormsModule, FormControl, FormsModule, FormArray, FormGroup, AbstractControl } from '@angular/forms';
 import {MatSnackBar} from '@angular/material';
+import 'rxjs/add/operator/filter'
 
 @Component({
   selector: 'app-query',
@@ -65,7 +66,7 @@ export class QueryComponent implements OnInit {
         .subscribe(data => {
           const result = new GraphResult();
           result.query_id = mQueryText.query_id;
-          result.result = JSON.parse(data);
+          result.result = data;
           this.resultsService.changeState(result)
         });
   }

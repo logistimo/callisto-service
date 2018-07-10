@@ -5,7 +5,7 @@ import { DataService } from '../service/data.service';
 import { QueryService } from '../service/query.service';
 import { PageEvent } from '@angular/material';
 import { Utils } from '../util/utils'
-import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
 import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
 import { QuerySharingService } from '../service/query-sharing.service';
 
@@ -39,13 +39,14 @@ export class QueryListingComponent implements OnInit {
 
   ngOnInit() {
     this.updateQueryListing('', 0, this.defaultPageSize);
-    this.dataService.getDatastores().subscribe((response : Response) => {
-      var _dbs = this.datastores;
-      let datastores = JSON.parse(response['_body']);
-      datastores.forEach(function (datastore: Datastore) {
-        _dbs.push(datastore);
-      });
-    });
+    this.dataService.getDatastores()
+        .subscribe(response => {
+          var _dbs = this.datastores;
+          let datastores = response as Array<Datastore>;
+          datastores.forEach(function (datastore:Datastore) {
+            _dbs.push(datastore);
+          });
+        });
     this.querySharingService.changeState(null)
   }
 
@@ -59,9 +60,9 @@ export class QueryListingComponent implements OnInit {
   }
 
   updateQueryListing(searchQueryId, page, pageSize) {
-    var call = Utils.checkNullEmpty(searchQueryId)
+    const queries = Utils.checkNullEmpty(searchQueryId)
         ? this.dataService.getQueries(page, pageSize) : this.dataService.searchQueriesLike(searchQueryId, page, pageSize);
-    call
+    queries
         .map(res => {
           this.totalDataSize = res.totalSize;
           return Utils.checkNotNullEmpty(res.result) ? res.result : []

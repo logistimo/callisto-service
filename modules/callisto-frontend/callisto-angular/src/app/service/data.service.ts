@@ -1,118 +1,109 @@
 import { Injectable } from '@angular/core';
-import { HttpService } from './http.service';
 import { Observable } from 'rxjs/Observable';
-import { RequestOptions, Headers, URLSearchParams} from '@angular/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { QueryText } from '../model/querytext'
 import { Utils } from '../util/utils'
+import 'rxjs/add/operator/map'
 
 @Injectable()
 export class DataService {
 
-  requestOption : RequestOptions;
+  requestOption;
 
-  constructor(private httpClient:HttpService) {
-    this.requestOption = new RequestOptions();
-    this.requestOption.headers = new Headers();
-    this.requestOption.headers.append('X-app-version', 'v2');
+  constructor(private http:HttpClient) {
+    this.requestOption = {
+      params: {},
+      headers: {}
+    };
+    this.requestOption.headers['X-app-version'] = 'v2';
   }
 
-  private getDefaultRequestOptions() : RequestOptions {
-    const reqOptions = new RequestOptions();
-    reqOptions.headers = new Headers();
-    reqOptions.headers.append('X-app-version', 'v2');
-    if(Utils.checkNullEmpty(reqOptions.params)){
-      reqOptions.params = new URLSearchParams();
-      reqOptions.params.append('userId', "logistimo");
-    }
+  private getDefaultRequestOptions() {
+    var reqOptions = {
+      params: {},
+      headers: {}
+    };
+    reqOptions.headers['X-app-version'] = 'v2';
+    reqOptions.params['userId'] = "logistimo";
     return reqOptions
   }
 
 
   getUser() {
-    return this.httpClient.get('user/get', this.requestOption);
+    return this.http.get('user/get', this.requestOption);
   }
 
   getDatastores() {
     var reqOptions = this.getDefaultRequestOptions();
-    return this.httpClient.get('datastore/', reqOptions);
+    return this.http.get('datastore/', reqOptions);
   }
 
   getQueryIds(page, size) {
     var reqOptions = this.getDefaultRequestOptions();
-    reqOptions.params.append('page', page);
-    reqOptions.params.append('size', String(size));
-    return this.httpClient.get('query/ids', reqOptions)
-        .map(res => { return Utils.checkNotNullEmpty(res['_body']) ?
+    reqOptions.params['page'] = page;
+    reqOptions.params['size'] = String(size);
+    return this.http.get('query/ids', reqOptions)
+        .subscribe(res => { return Utils.checkNotNullEmpty(res['_body']) ?
           JSON.parse(res['_body']) : null
         });
   }
 
   getQueries(page, size) {
     var reqOptions = this.getDefaultRequestOptions();
-    reqOptions.params.append('page', page);
-    reqOptions.params.append('size', String(size));
-    return this.httpClient.get('query', reqOptions)
+    reqOptions.params['page'] = page;
+    reqOptions.params['size'] = String(size);
+    reqOptions['observe'] = 'response';
+    return this.http.get('query', reqOptions)
         .map(res => {
-          return Utils.checkNotNullEmpty(res._body) ?
-          {result: JSON.parse(res._body), totalSize: res.headers._headers.get('size')[0]} : null
-        });
-  }
-
-  getDomainFilters() {
-    var reqOptions = this.getDefaultRequestOptions();
-    return this.httpClient.get('filter', reqOptions)
-        .map(res => {
-          return Utils.checkNotNullEmpty(res._body) ? JSON.parse(res._body) : null
+          return Utils.checkNotNullEmpty(res['body']) ?
+          { result: res['body'], totalSize: res['headers'].get('size')} :
+          { result: null, totalSize: 0 }
         });
   }
 
   searchQueriesLike(term, page, size) {
     var reqOptions = this.getDefaultRequestOptions();
-    reqOptions.params.append('page', page);
-    reqOptions.params.append('size', String(size));
-    return this.httpClient.get('query/search/' + term, reqOptions)
+    reqOptions.params['page'] = page;
+    reqOptions.params['size'] = String(size);
+    reqOptions['observe'] = 'response';
+    return this.http.get('query/search/' + term, reqOptions)
         .map(res => {
-          return Utils.checkNotNullEmpty(res._body) ?
-          {result: JSON.parse(res._body), totalSize: res.headers._headers.get('size')[0]} : null;
+          return Utils.checkNotNullEmpty(res['body']) ?
+          {result: res['body'], totalSize: res['headers'].get('size')} :
+          { result: null, totalSize: 0 };
         });
+  }
+
+  getDomainFilters() {
+    var reqOptions = this.getDefaultRequestOptions();
+    return this.http.get('filter', reqOptions);
   }
 
   getQuery(queryId) {
-    return this.httpClient.get('query/get/' + queryId, this.requestOption)
-      .map(res => { return Utils.checkNotNullEmpty(res._body) ?
-        JSON.parse(res._body) as QueryText : null
-      });
+    return this.http.get('query/get/' + queryId, this.requestOption)
+      .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
   }
 
   runQuery(body) {
-    return this.httpClient.post('query/run', body, this.requestOption)
-      .map(res => res['_body'])
+    return this.http.post('query/run', body, this.requestOption);
   }
 
   saveQuery(body) {
-    return this.httpClient.put('query/save', body, this.requestOption)
-  }
-
-  searchQueryId(queryId) {
-    return this.httpClient.get('query/get/' + queryId, this.requestOption)
-      .map(res => { return Utils.checkNotNullEmpty(res._body) ?
-          JSON.parse(res._body) as QueryText : null
-        });
+    return this.http.put('query/save', body, this.requestOption)
   }
 
   searchQueryIdLike(term) {
-    return this.httpClient.get('query/all/' + term, this.requestOption)
-      .map(res => { return Utils.checkNotNullEmpty(res._body) ?
-            {result: JSON.parse(res._body), totalSize: res.headers._headers.get('size')[0]} : null;
+    const reqOptions = this.getDefaultRequestOptions();
+    reqOptions['observe'] = 'response';
+    return this.http.get('query/all/' + term, reqOptions)
+      .map(res => { return Utils.checkNotNullEmpty(res['body']) ?
+            {result: res['body'], totalSize: res['headers'].get('size')} : null;
         });
   }
 
   getFilterResults(searchTerm:string, filterId:string):any {
     var reqOptions = this.getDefaultRequestOptions();
-    reqOptions.params.append('search', searchTerm);
-    return this.httpClient.get('filter/search/' + filterId, reqOptions)
-      .map(res => {
-          return Utils.checkNotNullEmpty(res._body) ? JSON.parse(res._body) : null;
-        });
+    reqOptions.params['search'] = searchTerm;
+    return this.http.get('filter/search/' + filterId, reqOptions);
   }
 }

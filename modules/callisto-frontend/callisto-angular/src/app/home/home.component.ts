@@ -106,7 +106,7 @@ export class SaveQueryDialog {
                 this.queryIdUnavailable = Utils.checkNullEmpty(term) ? true : this.queryIdUnavailable;
                 return Utils.checkNotNullEmpty(term);
             })
-            .map(queryId => this.dataService.searchQueryId(queryId) )
+            .map(queryId => this.dataService.getQuery(queryId))
             .subscribe(res => {
                 res.subscribe(queryResult => {
                     this.queryIdUnavailable = Utils.checkNotNullEmpty(queryResult);
@@ -125,17 +125,7 @@ export class SaveQueryDialog {
 
     saveQuery(event, queryTextModelFinal : QueryText) {
         this.dataService.saveQuery(queryTextModelFinal).subscribe(data => {
-            if(data.status == 200) {
-                this.dialogRef.close();
-                this.snackBar.open("Success!", '', {
-                    duration: 2000,
-                });
-            } else {
-                this.snackBar.open("Failure!", '', {
-                    duration: 2000,
-                });
-            }
-            return (data);
+            return data;
         });
     }
 }
