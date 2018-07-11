@@ -6,7 +6,13 @@ export class ErrorHandler {
 
     constructor(public snackbar: MatSnackBar) {}
 
-    public handleError(err: any) {
-        this.snackbar.open(err.message, 'close');
+    public handleError(err:any) {
+        if (err.status == 500) {
+            var msg = "Server error: ";
+            this.snackbar.open(msg + err.error.message, 'close',
+                {
+                    duration: 2000
+                });
+        }
     }
 }

@@ -43,7 +43,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,7 +51,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -182,12 +180,15 @@ public class QueryController {
       if (model.columnText != null && !model.columnText.isEmpty()) {
         //expects only one element
         Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
-        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
-            .parseColumnText(entry.getValue());
-        if(model.filters == null) {
-          model.filters = new HashMap<>();
+        LinkedHashMap<String, String> parsedColumnData = new LinkedHashMap<>();
+        if (StringUtils.isNotEmpty(entry.getKey()) && StringUtils.isNotEmpty(entry.getValue())) {
+          parsedColumnData = FunctionUtil
+              .parseColumnText(entry.getValue());
+          if (model.filters == null) {
+            model.filters = new HashMap<>();
+          }
+          model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
         }
-        model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
         results = queryService.readData(model);
         if (results.getRowHeadings() == null) {
           results.setRowHeadings(model.rowHeadings);

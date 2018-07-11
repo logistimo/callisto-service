@@ -10,3 +10,8 @@ pre {
     white-space: -o-pre-wrap;    /* Opera 7 */
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+.mat-expansion-panel-header-title,
+.mat-expansion-panel-header-description {
+    flex-basis: 0;
+}

@@ -68,8 +68,12 @@ export class GraphComponent implements OnInit {
               $.pivotUtilities.renderers,
               $.pivotUtilities.c3_renderers,
               $.pivotUtilities.export_renderers
-          )
+          ),
+          rendererOptions: {
+            c3: {
+              size: { width:700 }
+            }
+          }
         });
   }
-
 }

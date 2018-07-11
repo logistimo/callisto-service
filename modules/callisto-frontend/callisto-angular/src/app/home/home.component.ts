@@ -40,17 +40,18 @@ export class HomeComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.dataService.getDatastores().subscribe((response : Response) => {
-            var _dbs = this.datastores;
-            var _dbsModel = this.queryTextModel;
-            let datastores = JSON.parse(response['_body']);
-            datastores.forEach(function (datastore: Datastore) {
-                _dbs.push(datastore);
-                if (Utils.checkNullEmpty(_dbsModel.datastore_id)) {
-                    _dbsModel.datastore_id = datastore.id;
-                }
+        this.dataService.getDatastores()
+            .subscribe(response => {
+                var _dbs = this.datastores;
+                var _dbsModel = this.queryTextModel;
+                let datastores = response as Array<Datastore>;
+                datastores.forEach(function (datastore:Datastore) {
+                    _dbs.push(datastore);
+                    if (Utils.checkNullEmpty(_dbsModel.datastore_id)) {
+                        _dbsModel.datastore_id = datastore.id;
+                    }
+                });
             });
-        });
         this.queryService.currentQueryText.subscribe(res => {
                 if(Utils.checkNotNullEmpty(res)) {
                     this.queryTextModel = res;

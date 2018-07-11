@@ -17,10 +17,10 @@
                 <mat-expansion-panel (opened)="panelOpenState = true"
                                      (closed)="panelOpenState = false">
                     <mat-expansion-panel-header>
-                        <mat-panel-title class="col-sm-8">
+                        <mat-panel-title class="col-md-12 col-lg-8">
                             {{query.query_id}}
                         </mat-panel-title>
-                        <mat-panel-description class="col-sm-4">
+                        <mat-panel-description class="col-md-12 col-lg-4">
                             Datastore: {{getDatastoreNameForId(query.datastore_id)}}
                         </mat-panel-description>
                     </mat-expansion-panel-header>

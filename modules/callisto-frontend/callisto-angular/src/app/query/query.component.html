@@ -1,47 +1,52 @@
-<mat-card>
-    <mat-card-title>Query details</mat-card-title>
-    <div class="main-form-container" style="margin-top: 20px">
-        <mat-form-field appearance="outline">
-            <mat-label>Query</mat-label>
+<div class="main-form-container">
+    <mat-card>
+        <mat-card-title>Query details</mat-card-title>
+        <div class="main-form-container" style="margin-top: 20px">
+            <mat-form-field appearance="outline">
+                <mat-label>Query</mat-label>
             <textarea spellcheck="false" matInput matTextareaAutosize
                       matAutosizeMinRows="3" (ngModelChange)="onQueryChanged($event)"
-                      matAutosizeMaxRows="5" [ngModel]="query?.query"></textarea>
-        </mat-form-field>
+                      matAutosizeMaxRows="5" [(ngModel)]="query.query"></textarea>
+            </mat-form-field>
 
-        <mat-form-field appearance="outline">
-            <mat-label>Result columns</mat-label>
+            <mat-form-field appearance="outline">
+                <mat-label>Custom columns</mat-label>
             <textarea spellcheck="false" matInput matAutosizeMinRows="2"
-                      [ngModel]="query?.columns"></textarea>
-        </mat-form-field>
+                      [(ngModel)]="query.columns"></textarea>
+            </mat-form-field>
 
-        <hr />
+            <hr />
 
-        <mat-card-subtitle>Filters</mat-card-subtitle>
-        <form [formGroup]="filterFormGroup">
-            <mat-grid-list cols="3" rowHeight="5:1">
-                <mat-grid-tile formArrayName="filterFormArray"
-                               *ngFor="let filterData of filtersMetadata; let i = index">
-                    <mat-form-field class="no-bottom-margin col-sm-12" appearance="outline">
-                        <mat-label>{{filterData.filter.name}}</mat-label>
-                        <input type="text" [(ngModel)]="filterDisplayNames[filterData.filter.filter_id]"
-                               [matAutocomplete]="auto" matInput
-                               formControlName="{{i}}">
-                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="filterValueSelected($event, filterData.filter.filter_id)">
-                            <mat-option
-                                    *ngFor="let filterResult of filterResults[filterData.filter.filter_id]"
+            <mat-card-subtitle>Filters</mat-card-subtitle>
+            <form [formGroup]="filterFormGroup">
+                <mat-grid-list cols="3" rowHeight="5:1">
+                    <mat-grid-tile formArrayName="filterFormArray"
+                                   *ngFor="let filterData of filtersMetadata; let i = index">
+                        <mat-form-field class="no-bottom-margin col-sm-12" appearance="outline">
+                            <mat-label>{{filterData.filter.name}}</mat-label>
+                            <input type="text" [(ngModel)]="filterDisplayNames[filterData.filter.filter_id]"
+                                   [matAutocomplete]="auto" matInput
+                                   formControlName="{{i}}">
+                            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="filterValueSelected($event, filterData.filter.filter_id)">
+                                <mat-option
+                                        *ngFor="let filterResult of filterResults[filterData.filter.filter_id]"
                                         [value]="filterResult">
-                                {{ filterResult.name }}
-                            </mat-option>
-                        </mat-autocomplete>
-                    </mat-form-field>
-                </mat-grid-tile>
-            </mat-grid-list>
-        </form>
+                                    {{ filterResult.name }}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                </mat-grid-list>
+            </form>
 
-        <div class="mt-2">
-            <button mat-button class="btn-accent float-right"
-                    (click)="runQuery($event, query)">RUN
-            </button>
+            <div class="mt-2">
+                <button mat-button class="btn-accent float-right"
+                        (click)="runQuery($event, query)">RUN
+                </button>
+            </div>
         </div>
-    </div>
-</mat-card>
+    </mat-card>
+    <app-graph class="p-2" *ngIf="showGraph"></app-graph>
+</div>
+
+

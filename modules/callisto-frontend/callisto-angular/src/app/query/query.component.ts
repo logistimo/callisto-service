@@ -32,6 +32,7 @@ export class QueryComponent implements OnInit {
   private filterDisplayNames;
   private filters = {};
   private columnsFilterId;
+  private showGraph;
 
   constructor(private dataService:DataService, private resultsService:ResultsService,
               private queryService:QueryService,  private router: Router, private route: ActivatedRoute,
@@ -64,6 +65,7 @@ export class QueryComponent implements OnInit {
     request.filters = this.populateFilters();
     this.dataService.runQuery(request)
         .subscribe(data => {
+          this.showGraph = true;
           const result = new GraphResult();
           result.query_id = mQueryText.query_id;
           result.result = data;
@@ -97,6 +99,7 @@ export class QueryComponent implements OnInit {
 
 
   ngOnInit() {
+    this.showGraph = false;
     this.filterDisplayNames = {};
     this.querySharingService.currentResult
         .subscribe(res => {
