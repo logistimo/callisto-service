@@ -15,7 +15,7 @@ public class QueryRequestModelTest {
   public void queryRequestModelTest() throws CloneNotSupportedException {
     QueryRequestModel queryRequestModel = new QueryRequestModel();
     queryRequestModel.queryId = "some_query_id";
-    QueryRequestModel nQueryRequestModel = queryRequestModel.clone();
+    QueryRequestModel nQueryRequestModel = new QueryRequestModel(queryRequestModel);
     assertEquals("some_query_id", nQueryRequestModel.queryId);
   }
 }
