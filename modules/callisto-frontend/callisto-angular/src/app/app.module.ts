@@ -44,6 +44,7 @@ import { DatastoresComponent } from './datastores/datastores.component';
 import { QueryListingComponent } from './query-listing/query-listing.component';
 import { QueryComponent } from './query/query.component';
 import { QueriesComponent } from './queries/queries.component';
+import { NewQueryComponent } from './new-query/new-query.component';
 
 const appRoutes: Routes = [
   { path: '',
@@ -66,6 +67,9 @@ const appRoutes: Routes = [
       }, {
         path: 'query/:id',
         component: QueryComponent
+      }, {
+        path: 'new',
+        component: NewQueryComponent
       }
     ]
   }
@@ -84,7 +88,8 @@ const appRoutes: Routes = [
     QueryListingComponent,
     QueryComponent,
     QueriesComponent,
-    DomainFilterFilterPipe
+    DomainFilterFilterPipe,
+    NewQueryComponent
   ],
   imports: [
     BrowserModule,

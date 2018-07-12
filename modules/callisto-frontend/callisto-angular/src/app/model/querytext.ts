@@ -6,7 +6,8 @@ export class QueryText {
     description:string;
     datastore_id:string;
 
-    constructor(query:string, datastore_id:string) {
+
+    constructor(query?:string, datastore_id?:string) {
         this.query_id = '';
         this.user_id = 'logistimo';
         this.query = query;

@@ -28,11 +28,12 @@ import com.logistimo.callisto.FunctionManager;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.exception.DuplicateQueryIdException;
 import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.FunctionUtil;
+import com.logistimo.callisto.model.Datastore;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.Datastore;
 import com.logistimo.callisto.model.ResultsModel;
 import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
@@ -69,20 +70,13 @@ public class QueryService implements IQueryService {
   @Autowired private DataBaseCollection dataBaseCollection;
   @Autowired private FunctionManager functionManager;
 
-  public String saveQuery(QueryText q) {
-    String res = "failure";
-    try {
-      List<QueryText> existing = queryRepository.readQuery(q.getUserId(), q.getQueryId());
-      if (existing == null || existing.isEmpty()) {
-        queryRepository.save(q);
-        res = "Query saved successfully";
-      } else {
-        res = "duplicate query Id, try updating the previous one";
-      }
-    } catch (Exception e) {
-      logger.error("Error while saving query", e);
+  public void saveQuery(QueryText q) {
+    List<QueryText> existing = queryRepository.readQuery(q.getUserId(), q.getQueryId());
+    if (existing == null || existing.isEmpty()) {
+      queryRepository.save(q);
+    } else {
+      throw new DuplicateQueryIdException("Query Id already exists");
     }
-    return res;
   }
 
   public String updateQuery(QueryText q) {
@@ -100,14 +94,8 @@ public class QueryService implements IQueryService {
     return res;
   }
 
-  public String deleteQuery(String userId, String queryId) {
-    try {
-      queryRepository.delete(readQuery(userId, queryId));
-    } catch (Exception e) {
-      logger.error("Error while deleting query", e);
-      return "Error while deleting query";
-    }
-    return "Query deleted successfully";
+  public void deleteQuery(String userId, String queryId) {
+    queryRepository.delete(readQuery(userId, queryId));
   }
 
   @Override

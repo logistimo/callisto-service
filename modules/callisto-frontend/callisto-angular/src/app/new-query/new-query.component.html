@@ -1,0 +1,50 @@
+<div class="main-form-container">
+    <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Query Id</mat-label>
+        <input spellcheck="false" matInput [formControl]="queryIdField"
+               [(ngModel)]="queryTextModel.query_id">
+        <mat-icon matSuffix color="{{queryIdUnavailable && 'warn' || 'primary'}}"
+                  matTooltip="{{queryIdUnavailable && 'Unavailable' || 'Available'}}"
+                  matTooltipPosition="above">
+            {{queryIdUnavailable ? 'error' : 'check_circle'}}
+        </mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Type query here</mat-label>
+        <textarea spellcheck="false" matInput matTextareaAutosize
+                  matAutosizeMinRows="3"
+                  matAutosizeMaxRows="5" [(ngModel)]="queryTextModel.query"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Columns</mat-label>
+              <textarea spellcheck="false" matInput matTextareaAutosize
+                        matAutosizeMinRows="2"
+                        matAutosizeMaxRows="3"
+                        [(ngModel)]="queryTextModel.columns"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
+              <textarea spellcheck="false" matInput matTextareaAutosize
+                        matAutosizeMinRows="2"
+                        matAutosizeMaxRows="3"
+                        [(ngModel)]="queryTextModel.description"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Datasources</mat-label>
+        <mat-select placeholder="Datasource" [(ngModel)]="queryTextModel.datastore_id">
+            <mat-option *ngFor="let db of datastores" value={{db.id}}>
+                {{db.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <div class="mt-2">
+        <button mat-button class="btn float-right"
+                (click)="saveQuery($event, queryTextModel)">Save
+        </button>
+    </div>
+</div>

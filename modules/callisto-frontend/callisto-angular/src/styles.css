@@ -18,3 +18,7 @@
 .main-form-container > * {
     width: 100%;
 }
+
+.callisto-container {
+    width: 80%
+}

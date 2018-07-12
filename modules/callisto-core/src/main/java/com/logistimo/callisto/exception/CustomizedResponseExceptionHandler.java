@@ -18,12 +18,20 @@ public class CustomizedResponseExceptionHandler extends ResponseEntityExceptionH
   private static final Logger logger = Logger.getLogger(CustomizedResponseExceptionHandler.class);
 
   @ExceptionHandler(CallistoSyntaxErrorException.class)
-  public final ResponseEntity<ErrorDetails> handleSyntaxErrorException
+  public final ResponseEntity<ErrorDetails> handleQuerySyntaxErrorException
       (CallistoSyntaxErrorException ex, WebRequest request) {
     logger.error(ex.getMessage(), ex);
     ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
         request.getDescription(false));
     return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(DuplicateQueryIdException.class)
+  public final ResponseEntity<ErrorDetails> handleDuplicateQueryIdException
+      (DuplicateQueryIdException ex, WebRequest request) {
+    ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
+        request.getDescription(false));
+    return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(Exception.class)

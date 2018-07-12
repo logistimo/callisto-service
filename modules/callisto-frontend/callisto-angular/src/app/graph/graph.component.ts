@@ -71,7 +71,7 @@ export class GraphComponent implements OnInit {
           ),
           rendererOptions: {
             c3: {
-              size: { width:700 }
+              size: { width:500 }
             }
           }
         });

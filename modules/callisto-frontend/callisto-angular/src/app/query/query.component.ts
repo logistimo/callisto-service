@@ -15,6 +15,7 @@ import { FilterResultsAdapterUtils } from '../util/filter.results.adapter'
 import {ReactiveFormsModule, FormControl, FormsModule, FormArray, FormGroup, AbstractControl } from '@angular/forms';
 import {MatSnackBar} from '@angular/material';
 import 'rxjs/add/operator/filter'
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-query',
@@ -33,6 +34,9 @@ export class QueryComponent implements OnInit {
   private filters = {};
   private columnsFilterId;
   private showGraph;
+  private filtersListColumnSize;
+  private filtersListColumnDimensionRatio;
+  private subscriptions: Array<Subscription> = [];
 
   constructor(private dataService:DataService, private resultsService:ResultsService,
               private queryService:QueryService,  private router: Router, private route: ActivatedRoute,
@@ -75,8 +79,10 @@ export class QueryComponent implements OnInit {
 
   populateFilters() {
     for(let key in this.filterDisplayNames) {
-      if(Utils.checkNullEmpty(this.filters[key])) {
+      if(!(this.filters[key] instanceof FilterResult)) {
         this.filters[key] = this.filterDisplayNames[key];
+      } else {
+        this.filters[key] = (this.filters[key] as FilterResult).value;
       }
     }
     return this.filters;
@@ -101,16 +107,36 @@ export class QueryComponent implements OnInit {
   ngOnInit() {
     this.showGraph = false;
     this.filterDisplayNames = {};
-    this.querySharingService.currentResult
-        .subscribe(res => {
-          if (Utils.checkNotNullEmpty(res)) {
-            this.query = res as QueryText;
-            this.getDomainFilters();
-          }
-        });
+    this.query = new QueryText();
+    this.onResize(null);
     const url = this.route.snapshot.url;
-    if(url[0].path == 'query' && url.length > 1) {
-      this.getQuery(url[1].path);
+    if (url.length == 2 && url[0].path == 'query') {
+      const paramQueryId = url[1].path;
+      if (Utils.checkNotNullEmpty(paramQueryId)) {
+        this.subscriptions.push(
+            this.querySharingService.currentResult
+                .subscribe(res => {
+                  this.getDomainFilters();
+                  if (Utils.checkNotNullEmpty(res)) {
+                    this.query = res as QueryText;
+                  } else {
+                    this.getQuery(paramQueryId);
+                  }
+                })
+        );
+      }
+    }
+  }
+
+  onResize(event) {
+    if(Utils.checkNullEmpty(event)) {
+      const smallScreen : boolean = (window['height'] <= 400);
+      this.filtersListColumnSize = smallScreen ? 1 : 3;
+      this.filtersListColumnDimensionRatio = smallScreen ? "5:1" : "4:1";
+    } else {
+      const smallScreen : boolean = (event.target.innerWidth <= 400);
+      this.filtersListColumnSize =  smallScreen ? 1 : 3;
+      this.filtersListColumnDimensionRatio = smallScreen ? "5:1" : "4:1";
     }
   }
 
@@ -155,13 +181,12 @@ export class QueryComponent implements OnInit {
   private filterValueSelected(event, filterId) {
     const filterResult : FilterResult = event.option.value as FilterResult;
     this.filterDisplayNames[filterId] =  filterResult.name;
-    this.filters[filterId] = filterResult.value;
+    this.filters[filterId] = filterResult;
   }
 
   private setupAutocompleteForFilters() {
     const _dataservice = this.dataService;
     const _filterResults = this.filterResults;
-    const _filters = this.filters;
     this.filtersMetadata.forEach(function (filterData) {
       filterData.formControl.valueChanges
           .debounceTime(500)
@@ -178,9 +203,13 @@ export class QueryComponent implements OnInit {
     });
   }
 
-  openSnackBar(message: string, action: string) {
-    this.snackBar.open(message, action, {
-      duration: 2000,
+  private showSnackbar(msg) {
+    this.snackBar.open(msg, 'close', {duration: 2000});
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((subscription: Subscription) => {
+      subscription.unsubscribe();
     });
   }
 }

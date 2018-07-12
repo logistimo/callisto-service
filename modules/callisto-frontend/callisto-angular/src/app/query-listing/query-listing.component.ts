@@ -3,7 +3,7 @@ import {QueryText} from '../model/querytext'
 import {Datastore} from '../model/datastore'
 import { DataService } from '../service/data.service';
 import { QueryService } from '../service/query.service';
-import { PageEvent } from '@angular/material';
+import { PageEvent, MatSnackBar } from '@angular/material';
 import { Utils } from '../util/utils'
 import { ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
 import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
@@ -30,7 +30,8 @@ export class QueryListingComponent implements OnInit {
   private queries: QueryText[] = [];
   @Output() onRunQuery: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor(private dataService: DataService, private router: Router, private route: ActivatedRoute, private querySharingService : QuerySharingService) {
+  constructor(private dataService: DataService, private router: Router, private route: ActivatedRoute,
+              private querySharingService : QuerySharingService, public snackBar: MatSnackBar) {
     this.queryIdSearchField.valueChanges
         .debounceTime(1000)
         .distinctUntilChanged()
@@ -57,6 +58,15 @@ export class QueryListingComponent implements OnInit {
   goToQueryComponent($event, queryText: QueryText) {
     this.router.navigate(['../query' , queryText.query_id], { relativeTo: this.route });
     this.querySharingService.changeState(queryText)
+  }
+
+  deleteQuery(event, queryText: QueryText) {
+    this.dataService.deleteQuery(queryText.query_id)
+    .subscribe(res => {
+          this.showSnackbar(res.msg);
+          this.updateQueryListing(this.searchQueryId, this.page, this.pageSize);
+        }
+    );
   }
 
   updateQueryListing(searchQueryId, page, pageSize) {
@@ -95,6 +105,14 @@ export class QueryListingComponent implements OnInit {
     this.page = event.pageIndex;
     this.pageSize = event.pageSize;
     this.updateQueryListing(this.searchQueryId, event.pageIndex, event.pageSize);
+  }
+
+  goToSaveQuery(event) {
+    this.router.navigate(['../new'], { relativeTo: this.route });
+  }
+
+  private showSnackbar(msg) {
+    this.snackBar.open(msg, 'close', {duration: 2000});
   }
 
 }

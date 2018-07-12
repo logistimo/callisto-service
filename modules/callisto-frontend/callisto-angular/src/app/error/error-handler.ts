@@ -11,7 +11,13 @@ export class ErrorHandler {
             var msg = "Server error: ";
             this.snackbar.open(msg + err.error.message, 'close',
                 {
-                    duration: 2000
+                    duration: 3000
+                });
+        } else if (err.status == 409) {
+            var msg = "Conflict: ";
+            this.snackbar.open(msg + err.error.message, 'close',
+                {
+                    duration: 3000
                 });
         }
     }

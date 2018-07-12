@@ -27,6 +27,7 @@ import com.google.gson.Gson;
 
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
+import com.logistimo.callisto.SuccessDetails;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
@@ -120,8 +121,10 @@ public class QueryController {
   }
 
   @RequestMapping(value = "/save", method = RequestMethod.PUT)
-  public String saveQuery(@RequestBody QueryText queryText) {
-    return queryService.saveQuery(queryText);
+  public ResponseEntity saveQuery(@RequestBody QueryText queryText) {
+    queryService.saveQuery(queryText);
+    SuccessDetails successDetails = new SuccessDetails("Query successfully saved");
+    return new ResponseEntity<>(successDetails, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/udpate", method = RequestMethod.POST)
@@ -129,7 +132,7 @@ public class QueryController {
     return queryService.updateQuery(queryText);
   }
 
-  @RequestMapping(value = "/get/{queryId}", method = RequestMethod.GET)
+  @RequestMapping(value = "/{queryId}", method = RequestMethod.GET)
   public QueryText getQuery(
       @RequestParam(defaultValue = "logistimo") String userId, @PathVariable String queryId) {
     return queryService.readQuery(userId, queryId);
@@ -201,9 +204,11 @@ public class QueryController {
     return results;
   }
 
-  @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
-  public String deleteQuery(
-      @RequestParam(defaultValue = "logistimo") String userId, @RequestParam String queryId) {
-    return queryService.deleteQuery(userId, queryId);
+  @RequestMapping(value = "/{queryId}", method = RequestMethod.DELETE)
+  public ResponseEntity deleteQuery(
+      @RequestParam(defaultValue = "logistimo") String userId, @PathVariable String queryId) {
+    queryService.deleteQuery(userId, queryId);
+    SuccessDetails successDetails = new SuccessDetails("Query successfully deleted");
+    return new ResponseEntity<>(successDetails, HttpStatus.OK);
   }
 }

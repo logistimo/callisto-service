@@ -3,6 +3,8 @@ import { RouterModule, Routes, Router, ActivatedRoute, NavigationEnd, DefaultUrl
 import { QuerySharingService } from '../service/query-sharing.service'
 import { Utils } from '../util/utils'
 import { QueryText } from '../model/querytext'
+import {NewQueryComponent} from '../new-query/new-query.component'
+import {QueryListingComponent} from '../query-listing/query-listing.component'
 
 @Component({
   selector: 'app-queries',
@@ -22,8 +24,6 @@ export class QueriesComponent implements OnInit {
           if (Utils.checkNotNullEmpty(res)) {
             const queryText = res as QueryText;
             this.updatePathDisplay(queryText.query_id)
-          } else {
-            this.updatePathDisplay('');
           }
         });
   }
@@ -31,6 +31,14 @@ export class QueriesComponent implements OnInit {
   updatePathDisplay(subpath) {
     const delimiter = Utils.checkNotNullEmpty(subpath) ? " / " : ''
     this.path = delimiter + subpath;
+  }
+
+  componentAdded(event) {
+    if(event instanceof NewQueryComponent) {
+      this.updatePathDisplay('New query');
+    } else if(event instanceof QueryListingComponent) {
+      this.updatePathDisplay('');
+    }
   }
 
 }

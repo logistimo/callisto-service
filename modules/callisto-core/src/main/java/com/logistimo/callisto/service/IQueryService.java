@@ -35,7 +35,7 @@ import java.util.List;
 /** @author Chandrakant */
 public interface IQueryService {
 
-  String saveQuery(QueryText q);
+  void saveQuery(QueryText q);
 
   String updateQuery(QueryText q);
 
@@ -46,7 +46,7 @@ public interface IQueryService {
   QueryResults readData(QueryRequestModel requestModel)
       throws CallistoException;
 
-  String deleteQuery(String userId, String queryId);
+  void deleteQuery(String userId, String queryId);
 
   List<QueryText> readQueries(String userId, Pageable pageable);
 

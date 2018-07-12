@@ -80,7 +80,7 @@ export class DataService {
   }
 
   getQuery(queryId) {
-    return this.http.get('query/get/' + queryId, this.requestOption)
+    return this.http.get('query/' + queryId, this.requestOption)
       .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
   }
 
@@ -88,8 +88,10 @@ export class DataService {
     return this.http.post('query/run', body, this.requestOption);
   }
 
-  saveQuery(body) {
-    return this.http.put('query/save', body, this.requestOption)
+  saveQuery(body : QueryText) {
+    const reqOptions = this.getDefaultRequestOptions();
+    return this.http.put('query/save', body, reqOptions)
+        .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null})
   }
 
   searchQueryIdLike(term) {
@@ -105,5 +107,11 @@ export class DataService {
     var reqOptions = this.getDefaultRequestOptions();
     reqOptions.params['search'] = searchTerm;
     return this.http.get('filter/search/' + filterId, reqOptions);
+  }
+
+  deleteQuery(query_id:String):any {
+    var reqOptions = this.getDefaultRequestOptions();
+    return this.http.delete('query/' + query_id, reqOptions)
+        .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
   }
 }

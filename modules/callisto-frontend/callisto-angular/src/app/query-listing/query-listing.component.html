@@ -1,4 +1,4 @@
-<div class="container" style="margin-top: 20px">
+<div class="container-fluid" style="margin-top: 20px">
     <div class="row">
         <mat-form-field class="col-sm-10">
             <input type="text" [formControl]="queryIdSearchField"
@@ -6,7 +6,7 @@
         </mat-form-field>
         <div class="col-sm-2">
             <button mat-button class="btn-primary float-right"
-                    (click)="saveQueryPopup($event, query)">New query</button>
+                    (click)="goToSaveQuery($event)">New query</button>
         </div>
     </div>
 
@@ -27,9 +27,12 @@
                     <div class="main-form-container" style="margin-top: 20px">
                         <b>Query</b>
                         <pre><code>{{query.query}}</code></pre>
-                        <div class="mt-2">
-                            <button mat-button class="btn-accent float-right"
+                        <div class="mt-2 float-right">
+                            <button mat-raised-button class="ml-2 float-right" color="primary"
                                     (click)="goToQueryComponent($event, query)">RUN
+                            </button>
+                            <button mat-button class="ml-2 btn-accent float-right"
+                                    (click)="deleteQuery($event, query)">DELETE
                             </button>
                         </div>
                     </div>
