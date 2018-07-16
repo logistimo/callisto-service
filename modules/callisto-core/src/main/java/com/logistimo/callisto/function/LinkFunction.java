@@ -69,7 +69,7 @@ public class LinkFunction implements ICallistoFunction {
     return params;
   }
 
-  private static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
+  QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
                                                           String queryId) throws CallistoException {
     QueryRequestModel newQueryRequestModel;
     try {

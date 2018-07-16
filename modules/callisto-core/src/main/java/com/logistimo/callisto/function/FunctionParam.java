@@ -37,7 +37,6 @@ public class FunctionParam {
   private List<String> resultRow;
   private List<String> rowHeadings; // row headings of QueryResult
   public String function;
-  private boolean forceEnclose;
   private String escaping;
 
   public FunctionParam(){
@@ -88,14 +87,6 @@ public class FunctionParam {
 
   public void setQueryRequestModel(QueryRequestModel request) {
     this.request = request;
-  }
-
-  public boolean isForceEnclose() {
-    return forceEnclose;
-  }
-
-  public void setForceEnclose(boolean forceEnclose) {
-    this.forceEnclose = forceEnclose;
   }
 
   public String getEscaping() {

@@ -21,13 +21,11 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.util;
+package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.function.FunctionParam;
-import com.logistimo.callisto.function.LinkFunction;
 import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.log4j.Logger;
