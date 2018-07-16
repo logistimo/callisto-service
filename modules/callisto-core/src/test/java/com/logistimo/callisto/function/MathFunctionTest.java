@@ -1,8 +1,7 @@
-package com.logistimo.callisto;
+package com.logistimo.callisto.function;
 
+import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.function.FunctionUtil;
-import com.logistimo.callisto.function.MathFunction;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

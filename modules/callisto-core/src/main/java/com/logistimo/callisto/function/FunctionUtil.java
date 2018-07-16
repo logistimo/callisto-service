@@ -73,7 +73,7 @@ public class FunctionUtil {
               val,
               StringUtils.indexOf(val, CharacterConstants.FN_ENCLOSE)
                   + CharacterConstants.FN_ENCLOSE.length(),
-              StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET)))) {
+              StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET)).trim())) {
         return true;
       } else {
         logger.warn("Invalid function: " + val);
@@ -89,7 +89,7 @@ public class FunctionUtil {
           StringUtils.substring(
               val, StringUtils.indexOf(val, CharacterConstants.FN_ENCLOSE)
                   + StringUtils.length(CharacterConstants.FN_ENCLOSE),
-              StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET));
+              StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET)).trim();
     } catch (IllegalArgumentException e) {
       logger.error("Exception while getting function type: " + val, e);
     }
@@ -105,7 +105,7 @@ public class FunctionUtil {
     return getAllFunctions(text, 0);
   }
 
-  public static List<String> getAllFunctions(String text, int start) {
+  private static List<String> getAllFunctions(String text, int start) {
     List<String> matches = new ArrayList<>();
     if (text.contains(CharacterConstants.FN_ENCLOSE)) {
       int ss = text.indexOf(CharacterConstants.FN_ENCLOSE, start);

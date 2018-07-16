@@ -45,10 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-
-import jdk.nashorn.internal.codegen.CompilerConstants;
-
 /**
  * Created by chandrakant on 18/05/17.
  */
@@ -73,9 +69,14 @@ public class LinkFunction implements ICallistoFunction {
     return params;
   }
 
-  public static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
-                                                          String queryId) {
-    QueryRequestModel newQueryRequestModel = request.clone();
+  private static QueryRequestModel buildQueryRequestModel(QueryRequestModel request,
+                                                          String queryId) throws CallistoException {
+    QueryRequestModel newQueryRequestModel;
+    try {
+      newQueryRequestModel = new QueryRequestModel(request);
+    } catch (CloneNotSupportedException e) {
+      throw new CallistoException("Q108");
+    }
     newQueryRequestModel.queryId = queryId;
     return newQueryRequestModel;
   }
