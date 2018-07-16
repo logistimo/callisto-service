@@ -26,6 +26,7 @@ package com.logistimo.callisto.function;
 import com.logistimo.callisto.CallistoDataType;
 import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.QueryParams;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;

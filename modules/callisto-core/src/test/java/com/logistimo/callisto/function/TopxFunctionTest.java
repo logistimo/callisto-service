@@ -21,8 +21,9 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.function;
 
+import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.TopxFunction;
@@ -81,6 +82,23 @@ public class TopxFunctionTest {
     model.filters.put("TOKEN_OFFSET", "0");
     nMap = topx.getResult(fParam);
     assertEquals("{\"key6\":12,\"key1\":10,\"key2\":10}", nMap);
+  }
+
+  @Test(expected = CallistoException.class)
+  public void topxTestNegative() throws CallistoException {
+    String arg = "$$topx($map,TOKEN_SIZE,TOKEN_OFFSET)$$";
+    QueryRequestModel model = new QueryRequestModel();
+    model.filters = new HashMap<>();
+    model.filters.put("TOKEN_SIZE", "3");
+    model.filters.put("TOKEN_OFFSET", "0");
+    FunctionParam fParam= new FunctionParam();
+    fParam.setQueryRequestModel(model);
+    fParam.function = arg;
+    fParam.setResultHeadings(Arrays.asList("abc","def","map","seriously?"));
+    fParam.setResultRow(Arrays.asList("IDK", "None",
+        "{\"key1\":\"abc\",\"key2\":10,\"key3\":12}",
+        "seriously?"));
+    topx.getResult(fParam);
   }
 
 }

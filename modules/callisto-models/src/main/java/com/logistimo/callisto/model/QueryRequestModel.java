@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * @author Mohan Raja
  */
-public class QueryRequestModel implements Cloneable {
+public class QueryRequestModel {
   public String userId = "logistimo";
   public String queryId;
   public Map<String, String> filters;
@@ -41,20 +41,21 @@ public class QueryRequestModel implements Cloneable {
   public List<String> rowHeadings;
   public Integer offset;
 
-  @Override
-  public QueryRequestModel clone() {
-    QueryRequestModel newRequestModel = new QueryRequestModel();
-    newRequestModel.userId = String.valueOf(this.userId);
-    newRequestModel.queryId = this.queryId;
-    newRequestModel.filters = this.filters == null ? null : (Map) ((HashMap) this.filters).clone();
-    newRequestModel.columnText =
-        this.columnText == null ? null : (Map) ((HashMap) this.columnText).clone();
-    newRequestModel.rowHeadings =
-        this.rowHeadings == null ? null : (List) ((ArrayList) this.rowHeadings).clone();
-    newRequestModel.derivedResultsId = this.derivedResultsId;
-    newRequestModel.size = this.size;
-    newRequestModel.offset = this.offset;
-    return newRequestModel;
+  public QueryRequestModel() {
+
+  }
+
+  public QueryRequestModel(QueryRequestModel queryRequestModel) throws CloneNotSupportedException {
+    this.userId = String.valueOf(queryRequestModel.userId);
+    this.queryId = queryRequestModel.queryId;
+    this.filters = queryRequestModel.filters == null ? null : (Map) ((HashMap) queryRequestModel.filters).clone();
+    this.columnText =
+        queryRequestModel.columnText == null ? null : (Map) ((HashMap) queryRequestModel.columnText).clone();
+    this.rowHeadings =
+        queryRequestModel.rowHeadings == null ? null : (List) ((ArrayList) queryRequestModel.rowHeadings).clone();
+    this.derivedResultsId = queryRequestModel.derivedResultsId;
+    this.size = queryRequestModel.size;
+    this.offset = queryRequestModel.offset;
   }
 
 }
