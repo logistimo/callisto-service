@@ -1,5 +1,6 @@
 export class Datastore {
     id : string;
+    userId: string;
     name : string;
     hosts : string[];
     port : number;

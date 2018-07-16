@@ -1,11 +1,11 @@
-<div class="container-fluid" style="margin-top: 20px">
-    <div class="row">
+<div style="margin-top: 10px">
+    <div class="row align-center">
         <mat-form-field class="col-sm-10">
             <input type="text" [formControl]="queryIdSearchField"
                    matInput placeholder="Search by query Id" [(ngModel)]="searchQueryId">
         </mat-form-field>
         <div class="col-sm-2">
-            <button mat-button class="btn-primary float-right"
+            <button mat-stroked-button color="primary" class="float-right"
                     (click)="goToSaveQuery($event)">New query</button>
         </div>
     </div>
@@ -29,7 +29,7 @@
                         <pre><code>{{query.query}}</code></pre>
                         <div class="mt-2 float-right">
                             <button mat-raised-button class="ml-2 float-right" color="primary"
-                                    (click)="goToQueryComponent($event, query)">RUN
+                                    (click)="navigateToQueryComponent($event, query)">DETAILS
                             </button>
                             <button mat-button class="ml-2 btn-accent float-right"
                                     (click)="deleteQuery($event, query)">DELETE

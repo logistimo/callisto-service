@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { QueryText } from '../model/querytext'
+import { Datastore } from '../model/datastore'
 import { Utils } from '../util/utils'
 import 'rxjs/add/operator/map'
 
@@ -9,7 +10,7 @@ import 'rxjs/add/operator/map'
 export class DataService {
 
   requestOption;
-
+  public defaultUserName = "logistimo";
   constructor(private http:HttpClient) {
     this.requestOption = {
       params: {},
@@ -24,7 +25,7 @@ export class DataService {
       headers: {}
     };
     reqOptions.headers['X-app-version'] = 'v2';
-    reqOptions.params['userId'] = "logistimo";
+    reqOptions.params['userId'] = this.defaultUserName;
     return reqOptions
   }
 
@@ -109,9 +110,22 @@ export class DataService {
     return this.http.get('filter/search/' + filterId, reqOptions);
   }
 
-  deleteQuery(query_id:String):any {
+  deleteQuery(query_id:string):any {
     var reqOptions = this.getDefaultRequestOptions();
     return this.http.delete('query/' + query_id, reqOptions)
+        .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
+  }
+
+  getDatastore(datastoreId:string):any {
+    var reqOptions = this.getDefaultRequestOptions();
+    return this.http.get('datastore/' + datastoreId, reqOptions)
+        .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
+  }
+
+  saveDatastore(datastoreModel : Datastore):any {
+    datastoreModel.userId = this.defaultUserName;
+    const reqOptions = this.getDefaultRequestOptions();
+    return this.http.put('datastore', datastoreModel, reqOptions)
         .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
   }
 }

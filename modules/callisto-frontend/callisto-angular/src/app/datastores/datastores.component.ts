@@ -3,6 +3,7 @@ import { Datastore } from '../model/datastore';
 import { DataService } from '../service/data.service';
 import {Utils} from '../util/utils'
 import { QueryService } from '../service/query.service';
+import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-datastores',
@@ -12,18 +13,18 @@ import { QueryService } from '../service/query.service';
 })
 export class DatastoresComponent implements OnInit {
 
-  constructor(private dataService:DataService, private queryService: QueryService) { }
+  constructor(private dataService:DataService, private router: Router, private route: ActivatedRoute) { }
 
   datastores : Datastore[] = [];
 
   ngOnInit() {
-    this.dataService.getDatastores().subscribe((response:Response) => {
-      var _dbs = this.datastores;
-      let datastores = JSON.parse(response['_body']);
-      datastores.forEach(function (datastore: Datastore) {
-        _dbs.push(datastore);
-      });
+    this.dataService.getDatastores().subscribe(response => {
+      this.datastores = response as Array<Datastore>;
     });
+  }
+
+  private navigateToNewDatastore() {
+    this.router.navigate(['new'], { relativeTo: this.route });
   }
 
 }

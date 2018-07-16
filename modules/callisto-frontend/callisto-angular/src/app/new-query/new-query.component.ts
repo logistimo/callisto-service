@@ -20,8 +20,6 @@ export class NewQueryComponent implements OnInit {
     private queryIdUnavailable = true;
     private searchedQueryText:QueryText;
 
-    @Output() pathEmitter = new EventEmitter<string>();
-
     constructor(public snackBar:MatSnackBar, private dataService:DataService) {
     }
 

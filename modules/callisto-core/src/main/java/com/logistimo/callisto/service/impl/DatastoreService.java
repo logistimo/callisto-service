@@ -57,7 +57,6 @@ public class DatastoreService implements IDatastoreService {
         repository.save(datastore);
       }
     } catch (Exception e) {
-      logger.error("Error while saving database", e);
       throw new CallistoException(e);
     }
   }

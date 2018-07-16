@@ -39,8 +39,8 @@ export class QueryComponent implements OnInit {
   private subscriptions: Array<Subscription> = [];
 
   constructor(private dataService:DataService, private resultsService:ResultsService,
-              private queryService:QueryService,  private router: Router, private route: ActivatedRoute,
-              private querySharingService : QuerySharingService, public snackBar: MatSnackBar) {
+              private route: ActivatedRoute, private querySharingService : QuerySharingService,
+              public snackBar: MatSnackBar) {
     this.filterFormGroup = new FormGroup({
       filterFormArray : new FormArray([])
     });
@@ -50,6 +50,7 @@ export class QueryComponent implements OnInit {
   private onQueryChanged(newQuery) {
     this.query.query = newQuery;
     this.extractFiltersFromQuery(this.query.query);
+    this.extractInternalFiltersFromQueriesInFunctions();
   }
 
   getQuery(queryId:string) {
@@ -78,14 +79,15 @@ export class QueryComponent implements OnInit {
   }
 
   populateFilters() {
+    const _filters : any = {};
     for(let key in this.filterDisplayNames) {
-      if(!(this.filters[key] instanceof FilterResult)) {
-        this.filters[key] = this.filterDisplayNames[key];
+      if(this.filters[key] instanceof FilterResult) {
+        _filters[key] = (this.filters[key] as FilterResult).value;
       } else {
-        this.filters[key] = (this.filters[key] as FilterResult).value;
+        _filters[key] = this.filterDisplayNames[key];
       }
     }
-    return this.filters;
+    return _filters;
   }
 
   getDomainFilters() {
@@ -132,11 +134,11 @@ export class QueryComponent implements OnInit {
     if(Utils.checkNullEmpty(event)) {
       const smallScreen : boolean = (window['height'] <= 400);
       this.filtersListColumnSize = smallScreen ? 1 : 3;
-      this.filtersListColumnDimensionRatio = smallScreen ? "5:1" : "4:1";
+      this.filtersListColumnDimensionRatio = smallScreen ? "6:1" : "4:1";
     } else {
       const smallScreen : boolean = (event.target.innerWidth <= 400);
       this.filtersListColumnSize =  smallScreen ? 1 : 3;
-      this.filtersListColumnDimensionRatio = smallScreen ? "5:1" : "4:1";
+      this.filtersListColumnDimensionRatio = smallScreen ? "6:1" : "4:1";
     }
   }
 
@@ -167,6 +169,11 @@ export class QueryComponent implements OnInit {
       (this.filterFormGroup.controls.filterFormArray as FormArray).push(formControl);
       index = endIndex + filterIdentifierSuffix.length;
     }
+  }
+
+  private extractInternalFiltersFromQueriesInFunctions():void {
+    const functionIdentifierPrefix = "$$";
+    const functionIdentifierSuffix = "$$";
   }
 
   private findFilterFromFilterId(filterId, filters: Filter[]) {

@@ -1,0 +1,62 @@
+<div class="container-fluid main-form-container callisto-container p-4">
+
+    <h4 class="mb-4">Update Datastores</h4>
+
+    <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Datastore Id</mat-label>
+        <input spellcheck="false" matInput [formControl]="datastoreIdField"
+               [(ngModel)]="datastoreModel.id">
+        <mat-icon matSuffix color="{{datastoreIdUnavailable && 'warn' || 'primary'}}"
+                  matTooltip="{{datastoreIdUnavailable && 'Unavailable' || 'Available'}}"
+                  matTooltipPosition="above">
+            {{datastoreIdUnavailable ? 'error' : 'check_circle'}}
+        </mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.name">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Hosts (csv)</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="_hostsCsv">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Port</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.port">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Username</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.username">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.password">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Schema name</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.schema">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.type">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Escaping term</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.escaping">
+    </mat-form-field>
+
+
+    <div class="mt-2">
+        <button mat-stroked-button color="primary" class="btn float-right"
+                (click)="saveDatastore($event, datastoreModel)">Save
+        </button>
+    </div>
+</div>

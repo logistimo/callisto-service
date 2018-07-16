@@ -55,7 +55,7 @@ export class QueryListingComponent implements OnInit {
     this.showGraphForQueryId = queryId;
   }
 
-  goToQueryComponent($event, queryText: QueryText) {
+  navigateToQueryComponent($event, queryText: QueryText) {
     this.router.navigate(['../query' , queryText.query_id], { relativeTo: this.route });
     this.querySharingService.changeState(queryText)
   }

@@ -20,5 +20,10 @@
 }
 
 .callisto-container {
-    width: 80%
+    width: 80%;
+    margin-left: 20px;
+}
+
+.align-center {
+    align-items: center;
 }

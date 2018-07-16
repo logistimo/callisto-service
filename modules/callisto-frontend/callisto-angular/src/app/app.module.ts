@@ -45,6 +45,7 @@ import { QueryListingComponent } from './query-listing/query-listing.component';
 import { QueryComponent } from './query/query.component';
 import { QueriesComponent } from './queries/queries.component';
 import { NewQueryComponent } from './new-query/new-query.component';
+import { NewDatastoreComponent } from './new-datastore/new-datastore.component';
 
 const appRoutes: Routes = [
   { path: '',
@@ -52,7 +53,14 @@ const appRoutes: Routes = [
     pathMatch: 'full'
   },
   { path: 'home', component: HomeComponent },
-  { path: 'datastores', component: DatastoresComponent },
+  {
+    path: 'datastores',
+    component: DatastoresComponent,
+  },
+  {
+    path: 'datastores/new',
+    component: NewDatastoreComponent,
+  },
   {
     path: 'queries',
     component: QueriesComponent,
@@ -89,7 +97,8 @@ const appRoutes: Routes = [
     QueryComponent,
     QueriesComponent,
     DomainFilterFilterPipe,
-    NewQueryComponent
+    NewQueryComponent,
+    NewDatastoreComponent
   ],
   imports: [
     BrowserModule,
