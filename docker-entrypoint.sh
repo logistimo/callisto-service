@@ -5,6 +5,8 @@ spring.data.mongodb.host=$MONGODB_HOST
 spring.data.mongodb.port=$MONGODB_PORT
 spring.data.mongodb.database=$CALLISTO_DATABASE"
 
+wget -P $CALLISTO_HOME/jmx/ http://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/$APM_AGENT_VER/elastic-apm-agent-$APM_AGENT_VER.jar
+
 cd $CALLISTO_HOME
 exec java -cp $CALLISTO_HOME/*.jar \
 	-Dloader.path=$CALLISTO_HOME/lib/* \
@@ -13,4 +15,8 @@ exec java -cp $CALLISTO_HOME/*.jar \
 	-Dspring.data.mongodb.port=$MONGODB_PORT \
 	-javaagent:$CALLISTO_HOME/jmx/jmx_prometheus_javaagent-0.7.jar=$JAVA_AGENT_PORT:$CALLISTO_HOME/jmx/jmx_exporter.json \
 	-Dspring.data.mongodb.database=$CALLISTO_DATABASE \
+	-javaagent:$CALLISTO_HOME/jmx/elastic-apm-agent-$APM_AGENT_VER.jar \
+	-Delastic.apm.service_name=$SERVICE_NAME \
+    -Delastic.apm.application_packages=com.logistimo.callisto \
+    -Delastic.apm.server_url=http://$APM_SERVER_URL \
 	-Dloader.main=com.logistimo.callisto.CallistoApplication org.springframework.boot.loader.PropertiesLauncher
