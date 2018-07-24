@@ -19,8 +19,7 @@ ENV SERVER_PORT=9080 \
         MONGODB_PORT=27017 \
         CALLISTO_DATABASE=callisto \
         SERVICE_NAME=logi-callisto \
-        APM_SERVER_URL=localhost:8200 \
-        APM_AGENT_VER=0.6.0
+        APM_SERVER_URL=localhost:8200
 
 VOLUME $CALLISTO_HOME/logs
 
@@ -33,7 +32,8 @@ ADD custom-functions/* $CALLISTO_HOME/lib/
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod +x /docker-entrypoint.sh
+RUN wget -P $CALLISTO_HOME/jmx/ http://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/0.6.0/elastic-apm-agent-0.6.0.jar \
+        && chmod +x /docker-entrypoint.sh
 
 CMD ["/docker-entrypoint.sh"]
 
