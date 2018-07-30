@@ -26,6 +26,7 @@ export class GraphComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.resultsService.changeState(null);
     this.resultsService.currentResult
         .subscribe(res => {
           if (Utils.checkNotNullEmpty(res) && res instanceof GraphResult) {

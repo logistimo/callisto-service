@@ -173,7 +173,7 @@ public class MathFunction implements ICallistoFunction {
                 linkFunction.getResult(param));
       }
     } catch (Exception e) {
-      logger.warn("Error while replacing links in expression :" + val);
+      logger.warn("Error while replacing links in expression :" + val, e);
     }
     return val;
   }
@@ -202,7 +202,7 @@ public class MathFunction implements ICallistoFunction {
                     .getConstant());
       }
     } catch (Exception e) {
-      logger.warn("Error while replacing constants in expression :" + val);
+      logger.warn("Error while replacing constants in expression :" + val, e);
     }
     return val;
   }
