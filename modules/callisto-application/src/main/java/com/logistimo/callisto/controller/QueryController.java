@@ -151,7 +151,7 @@ public class QueryController {
       if (constant != null) {
         LinkedHashMap<String, String> derivedColumns =
             resultManager.getResultFormatMap(constant.getConstant(), results);
-        results = resultManager.getDesiredResult(model, results, derivedColumns);
+        results = resultManager.getDerivedResults(model, results, derivedColumns);
       }
     } else if (Objects.equals(request.getHeader("X-app-version"), "v2")) {
       if (model.columnText != null && !model.columnText.isEmpty()) {
@@ -164,7 +164,7 @@ public class QueryController {
         if (results.getRowHeadings() == null) {
           results.setRowHeadings(model.rowHeadings);
         }
-        results = resultManager.getDesiredResult(model, results, parsedColumnData);
+        results = resultManager.getDerivedResults(model, results, parsedColumnData);
       }
     } else {
       results = queryService.readData(model);
@@ -196,7 +196,7 @@ public class QueryController {
         if (results.getRowHeadings() == null) {
           results.setRowHeadings(model.rowHeadings);
         }
-        results = resultManager.getDesiredResult(model, results, parsedColumnData);
+        results = resultManager.getDerivedResults(model, results, parsedColumnData);
       }
     } else if (model.query != null) {
       results = queryService.readData(model);

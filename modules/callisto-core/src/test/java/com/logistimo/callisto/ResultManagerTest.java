@@ -83,12 +83,12 @@ public class ResultManagerTest {
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
     results.addRow(Arrays.asList("seriously?", "24", "340",
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
-    LinkedHashMap<String, String> desiredResultFormat = new LinkedHashMap<>();
-    desiredResultFormat.put("Display format of abc", "$abc $def $$math(100/(2.5*2))$$");
-    desiredResultFormat.put("Modified 2nd column", "$$math($pqr/$def)$$");
-    desiredResultFormat.put("Modified bottom map", "$$bottomx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
-    desiredResultFormat.put("Modified top map", "$$topx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
-    QueryResults newResult = resultManager.getDesiredResult(request, results, desiredResultFormat);
+    LinkedHashMap<String, String> derivedResultFormat = new LinkedHashMap<>();
+    derivedResultFormat.put("Display format of abc", "$abc $def $$math(100/(2.5*2))$$");
+    derivedResultFormat.put("Modified 2nd column", "$$math($pqr/$def)$$");
+    derivedResultFormat.put("Modified bottom map", "$$bottomx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
+    derivedResultFormat.put("Modified top map", "$$topx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
+    QueryResults newResult = resultManager.getDerivedResults(request, results, derivedResultFormat);
     assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
     assertEquals("2", newResult.getRows().get(0).get(1));
     assertEquals("{\"key7\":14,\"key8\":17,\"key9\":20,\"key1\":23,\"key5\":25}", newResult.getRows().get(0).get(2));

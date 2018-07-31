@@ -36,7 +36,7 @@ public class QueryRequestModel {
   public String queryId;
   public QueryText query; // used only if queryId is not present
   public Map<String, String> filters;
-  public String derivedResultsId; //constant ID for the desired result i.e. LinkedHashMap
+  public String derivedResultsId; //constant ID for the derived result i.e. LinkedHashMap
   public Map<String, String> columnText;
   public Integer size;
   public List<String> rowHeadings;

@@ -70,7 +70,7 @@ public class ResultManager {
    * @return Derived QueryResults using original QueryResults and derivedColumnMap
    */
   @CacheEvict(allEntries = true,value = {"links"})
-  public QueryResults getDesiredResult(
+  public QueryResults getDerivedResults(
       QueryRequestModel request,
       QueryResults rs,
       LinkedHashMap<String, String> derivedColumnMap)
@@ -98,7 +98,7 @@ public class ResultManager {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
         for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String r =
-              parseDesiredValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
+              parseDerivedValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
                   headings, row);
           dRow.add(r);
         }
@@ -141,7 +141,7 @@ public class ResultManager {
    * @param row      result row, respective to column names
    * @return String after replacing all the CallistoFunctions and Variables
    */
-  public String parseDesiredValue(
+  public String parseDerivedValue(
       QueryRequestModel request, String str, List<String> functionsVars, List<String> headings,
       List<String> row)
       throws CallistoException {
@@ -173,7 +173,7 @@ public class ResultManager {
   }
 
   /**
-   * @param val      desired value to be parsed
+   * @param val      derived value to be parsed
    * @param headings original result headings
    * @return checks if val is only a variable i.e. $xyz, and return index of variable in heading,
    * otherwise -1
