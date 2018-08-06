@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Logistimo.
+ * Copyright © 2018 Logistimo.
  *
  * This file is part of Logistimo.
  *
@@ -21,38 +21,21 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.service;
+package com.logistimo.callisto.repository;
 
-import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.QueryResults;
-import com.logistimo.callisto.model.QueryRequestModel;
-import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.ResultsModel;
+import com.logistimo.callisto.model.ReportConfig;
 
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-/** @author Chandrakant */
-public interface IQueryService {
+@Repository
+public interface ReportConfigRepository extends MongoRepository<ReportConfig, String> {
 
-  void saveQuery(QueryText q);
+  @Query(value = "{'userId': ?0}", fields = "{'type': 1, 'subType': 1}")
+  List<ReportConfig> readAllReportTypes(String userId);
 
-  String updateQuery(QueryText q);
-
-  QueryText readQuery(String userId, String queryId);
-
-  List<String> readQueryIds(String userId, String like, Pageable pageable);
-
-  QueryResults readData(QueryRequestModel requestModel)
-      throws CallistoException;
-
-  void deleteQuery(String userId, String queryId);
-
-  List<String> getAllQueryIds(String userId);
-
-  List<QueryText> readQueries(String userId, Pageable pageable);
-
-  Long getTotalNumberOfQueries(String userId);
-
-  ResultsModel searchQueriesLike(String userId, String like, Pageable pageable);
+  ReportConfig findOneByUserIdAndTypeAndSubType(String userId, String type, String subType);
 }

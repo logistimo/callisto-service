@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,7 +73,7 @@ public class ResultManager {
   public QueryResults getDerivedResults(
       QueryRequestModel request,
       QueryResults rs,
-      LinkedHashMap<String, String> derivedColumnMap)
+      Map<String, String> derivedColumnMap)
       throws CallistoException {
     List<String> headings = rs.getHeadings();
     if (derivedColumnMap == null || derivedColumnMap.isEmpty()) {
@@ -84,17 +84,19 @@ public class ResultManager {
             .toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
                 linkedHashMapMerger, LinkedHashMap::new));
     //TODO: mechanism to identify which column is for rowHeadings,
-    QueryResults results = fillResult(rs, request.rowHeadings, 0);
+    if(rs != null) {
+      rs.fillResults(request.rowHeadings, 0);
+    }
     QueryResults derivedResults = new QueryResults();
     derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
-    derivedResults.setRowHeadings(results.getRowHeadings());
-    if (results.getHeadings() != null && results.getRows() != null) {
+    derivedResults.setRowHeadings(rs.getRowHeadings());
+    if (rs.getHeadings() != null && rs.getRows() != null) {
       Map<String, List<String>>
           functionsVarsMap =
           derivedColumnMap.entrySet().stream()
               .map(e -> Pair.of(e.getKey(), FunctionUtil.getAllFunctionsAndVariables(e.getValue())))
               .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-      for (List row : results.getRows()) {
+      for (List row : rs.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
         for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String r =
@@ -106,30 +108,6 @@ public class ResultManager {
       }
     }
     return derivedResults;
-  }
-
-  /**
-   * @param results QueryResults to be filled
-   * @param index   index of rowHeading element
-   * @return QueryResults after filling dummy rows for the all absent rowHeading elements
-   */
-  private static QueryResults fillResult(QueryResults results, List<String> rowHeadings,
-                                         Integer index) {
-    if (rowHeadings != null && results != null) {
-      Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
-      if (results.getRows() != null) {
-        for (List row : results.getRows()) {
-          rowHeadingsSet.remove(row.get(index));
-        }
-      }
-      for (String heading : rowHeadings) {
-        String[] nRow = new String[index + 1];
-        Arrays.fill(nRow, CharacterConstants.EMPTY);
-        nRow[index] = heading;
-        results.addRow(Arrays.asList(nRow));
-      }
-    }
-    return results;
   }
 
   /**
@@ -199,19 +177,41 @@ public class ResultManager {
    * @param results original QueryResults
    * @return parsed Map
    */
-  public LinkedHashMap<String, String> getResultFormatMap(String strToParse, QueryResults results) {
+  public Map<String, String> getDerivedColumnsMap(String strToParse, QueryResults results) {
     if (results == null || results.getHeadings() == null) {
       return null;
     }
     Type type = new TypeToken<LinkedHashMap<String, String>>() {
     }.getType();
-    LinkedHashMap<String, String> filterMap;
-    filterMap =
-        results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
-            .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
-                linkedHashMapMerger, LinkedHashMap::new));
-    filterMap.putAll(new Gson().fromJson(strToParse, type));
-    return filterMap;
+    Map<String, String> derivedResults = getRawColumnsAsDerivedColumns(
+        new HashSet<>(results.getHeadings()));
+    derivedResults.putAll(new Gson().fromJson(strToParse, type));
+    return derivedResults;
+  }
+
+  private Map<String, String> getRawColumnsAsDerivedColumns(Set<String> columns) {
+    return columns.stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
+        .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
+            linkedHashMapMerger, LinkedHashMap::new));
+  }
+
+  /**
+   *
+   * @param existingDerivedResults
+   * @param columns
+   * @param rawResultHeadings
+   * @return
+   */
+  public Map<String, String> getCompleteDerivedColumnsMap(
+      Map<String, String> existingDerivedResults,
+      Set<String> columns,
+      List<String> rawResultHeadings) {
+    Map<String, String> derivedResults = new HashMap<>();
+    derivedResults.putAll(existingDerivedResults);
+    Set<String> rawResultHeadingsSet = new HashSet<>(rawResultHeadings);
+    rawResultHeadingsSet.removeAll(columns);
+    derivedResults.putAll(getRawColumnsAsDerivedColumns(rawResultHeadingsSet));
+    return derivedResults;
   }
 
   @Autowired

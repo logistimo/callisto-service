@@ -149,8 +149,8 @@ public class QueryController {
       }
       ConstantText constant = constantService.readConstant(model.userId, model.derivedResultsId);
       if (constant != null) {
-        LinkedHashMap<String, String> derivedColumns =
-            resultManager.getResultFormatMap(constant.getConstant(), results);
+        Map<String, String> derivedColumns =
+            resultManager.getDerivedColumnsMap(constant.getConstant(), results);
         results = resultManager.getDerivedResults(model, results, derivedColumns);
       }
     } else if (Objects.equals(request.getHeader("X-app-version"), "v2")) {

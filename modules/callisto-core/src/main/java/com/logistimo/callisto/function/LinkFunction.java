@@ -159,4 +159,9 @@ public class LinkFunction implements ICallistoFunction {
   public int getMaxArgLength() {
     return -1;
   }
+
+  public static String getFunctionSyntax(String renameQueryId) {
+    return CharacterConstants.FN_ENCLOSE + NAME + CharacterConstants.OPEN_BRACKET + renameQueryId
+           + CharacterConstants.CLOSE_BRACKET + CharacterConstants.FN_ENCLOSE;
+  }
 }

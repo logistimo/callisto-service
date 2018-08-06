@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Logistimo.
+ * Copyright © 2018 Logistimo.
  *
  * This file is part of Logistimo.
  *
@@ -21,38 +21,38 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.service;
+package com.logistimo.callisto.model;
 
-import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.QueryResults;
-import com.logistimo.callisto.model.QueryRequestModel;
-import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.ResultsModel;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.springframework.data.domain.Pageable;
-import java.util.List;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-/** @author Chandrakant */
-public interface IQueryService {
+import java.util.Map;
 
-  void saveQuery(QueryText q);
+import lombok.Data;
 
-  String updateQuery(QueryText q);
+@Document(collection = "report_configs")
+@Data
+public class ReportConfig {
 
-  QueryText readQuery(String userId, String queryId);
+  @Id
+  private String id;
 
-  List<String> readQueryIds(String userId, String like, Pageable pageable);
+  @JsonProperty("user_id")
+  private String userId;
 
-  QueryResults readData(QueryRequestModel requestModel)
-      throws CallistoException;
+  @Indexed
+  @JsonProperty("type")
+  private String type;
 
-  void deleteQuery(String userId, String queryId);
+  @JsonProperty("sub_type")
+  private String subType;
 
-  List<String> getAllQueryIds(String userId);
+  @JsonProperty("metrics")
+  private Map<String, String> metrics;
 
-  List<QueryText> readQueries(String userId, Pageable pageable);
-
-  Long getTotalNumberOfQueries(String userId);
-
-  ResultsModel searchQueriesLike(String userId, String like, Pageable pageable);
+  @JsonProperty("column_filter_id")
+  private String columnFilterId;
 }

@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Mohan Raja
@@ -96,6 +97,12 @@ public class QueryService implements IQueryService {
 
   public void deleteQuery(String userId, String queryId) {
     queryRepository.delete(readQuery(userId, queryId));
+  }
+
+  @Override
+  public List<String> getAllQueryIds(String userId) {
+    List<QueryText> queries = queryRepository.readQueryIds(userId);
+    return queries.stream().map(QueryText::getQueryId).collect(Collectors.toList());
   }
 
   @Override

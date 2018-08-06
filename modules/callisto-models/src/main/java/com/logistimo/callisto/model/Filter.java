@@ -3,81 +3,93 @@ package com.logistimo.callisto.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.Set;
 
 @Document
 public class Filter {
-  @Id private String id;
+
+  @Id
+  private String id;
 
   @JsonProperty("user_id")
   private String userId;
 
-  @Indexed
-  @JsonProperty("filter_id")
-  private String filterId;
+  @JsonProperty("placeholder")
+  private String placeholder;
 
   @JsonProperty("name")
   private String name;
 
-  @JsonProperty("search_filter_placeholder")
-  private String searchFilterPlaceholder;
-
-  @JsonProperty("filter_value_column_name")
-  private String filterValueColumnName;
-
-  @JsonProperty("filter_display_column_name")
-  private String filterDisplayColumnName;
-
-  @JsonProperty("query_ids")
-  private List<FilterQueryModel> queryIds;
+  @JsonProperty("auto_complete_config")
+  private FilterAutoCompleteConfigModel autoCompleteConfig;
 
   @JsonProperty("is_column_filter")
   private boolean isColumnFilter;
 
-  public void setQueryIds(
-      List<FilterQueryModel> queryIds) {
-    this.queryIds = queryIds;
-  }
+  @JsonProperty("rename_query_id")
+  private String renameQueryId;
 
-  public String getDefaultQueryId() {
-    if(queryIds != null && !queryIds.isEmpty()) {
-      return queryIds.get(0).queryId;
+  public String getDefaultAutoCompleteQueryId() {
+    if (autoCompleteConfig != null) {
+      return autoCompleteConfig.getDefaultQueryId();
     }
     return null;
   }
 
-  public String getSearchFilterPlaceholder() {
-    return searchFilterPlaceholder;
+  public String getPlaceholder() {
+    return placeholder;
   }
 
-  public void setSearchFilterPlaceholder(String searchFilterPlaceholder) {
-    this.searchFilterPlaceholder = searchFilterPlaceholder;
+  public String getAutoCompletePlaceholder() {
+    if(autoCompleteConfig != null) {
+      return autoCompleteConfig.placeholder;
+    }
+    return null;
   }
 
-  public class FilterQueryModel {
-    @JsonProperty("filter_ids")
-    private List<String> filterIds;
+  public void setPlaceholder(String placeholder) {
+    this.placeholder = placeholder;
+  }
 
-    @JsonProperty("query_id")
-    private String queryId;
+  public String getRenameQueryId() {
+    return renameQueryId;
+  }
 
-    public List<String> getFilterIds() {
-      return filterIds;
+  public void setRenameQueryid(String renameQueryId) {
+    this.renameQueryId = renameQueryId;
+  }
+
+  public class FilterAutoCompleteConfigModel {
+
+    @JsonProperty("placeholder")
+    private String placeholder;
+
+    @JsonProperty("value_column_name")
+    private String valueColumnName;
+
+    @JsonProperty("display_column_name")
+    private String displayColumnName;
+
+    @JsonProperty("auto_complete_queries")
+    private List<FilterAutoCompleteQueries> queries;
+
+    public class FilterAutoCompleteQueries {
+
+      @JsonProperty("filter_ids")
+      Set<String> filterIds;
+
+      @JsonProperty("query_id")
+      String queryId;
     }
 
-    public void setFilterIds(List<String> filterIds) {
-      this.filterIds = filterIds;
-    }
-
-    public void setQueryId(String queryId) {
-      this.queryId = queryId;
-    }
-
-    public String getQueryId() {
-      return this.queryId;
+    private String getDefaultQueryId() {
+      if(queries != null && !queries.isEmpty()) {
+        return queries.get(0).queryId;
+      }
+      return null;
     }
   }
 }

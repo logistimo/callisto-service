@@ -278,12 +278,15 @@ public class FunctionUtil {
    * @return a CSV String of all the variables/columns used in the map values.
    */
   public static String extractColumnsCsv(Map<String, String> columnData) {
-    Set columns = columnData.entrySet().stream()
+    return StringUtils.join(extractColumnSet(columnData), CharacterConstants.COMMA);
+  }
+
+  public static Set<String> extractColumnSet(Map<String, String> columnData) {
+    return columnData.entrySet().stream()
         .flatMap(e -> e.getValue().contains(CharacterConstants.FN_ENCLOSE) ? FunctionUtil
             .getAllVariables(e.getValue(), CharacterConstants.DOLLAR).stream()
             .map(s -> s.substring(1))
             : new ArrayList<>(Collections.singletonList(e.getValue().substring(1))).stream())
         .collect(Collectors.toSet());
-    return StringUtils.join(columns, CharacterConstants.COMMA);
   }
 }

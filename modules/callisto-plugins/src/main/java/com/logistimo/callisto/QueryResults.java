@@ -24,7 +24,10 @@
 package com.logistimo.callisto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /** @author Mohan Raja */
 public class QueryResults {
@@ -67,6 +70,29 @@ public class QueryResults {
   public void setRowHeadings(List<String> rowHeadings) {
     if(rowHeadings != null && !rowHeadings.isEmpty()){
       this.rowHeadings = rowHeadings;
+    }
+  }
+
+  /**
+   *
+   * @param rowHeadings
+   * @param index index of rowHeading element
+   * @return QueryResults after filling dummy rows for the all absent rowHeading elements
+   */
+  public void fillResults(List<String> rowHeadings, Integer index) {
+    if (rowHeadings != null && !rowHeadings.isEmpty()) {
+      Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
+      if (getRows() != null) {
+        for (List row : getRows()) {
+          rowHeadingsSet.remove(row.get(index));
+        }
+      }
+      for (String heading : rowHeadings) {
+        String[] nRow = new String[index + 1];
+        Arrays.fill(nRow, "");
+        nRow[index] = heading;
+        addRow(Arrays.asList(nRow));
+      }
     }
   }
 }

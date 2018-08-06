@@ -8,19 +8,20 @@ import com.logistimo.callisto.service.IDatastoreService;
 import com.logistimo.callisto.service.IFilterService;
 import com.logistimo.callisto.service.IQueryService;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class FilterService implements IFilterService {
 
   private FilterRepository filterRepository;
   private IQueryService queryService;
-  private IDatastoreService datastoreService;
 
   @Autowired
   public void setFilterRepository(FilterRepository filterRepository) {
@@ -32,23 +33,28 @@ public class FilterService implements IFilterService {
     this.queryService = queryService;
   }
 
-  @Autowired
-  public void setDatastoreService(IDatastoreService datastoreService) {
-    this.datastoreService = datastoreService;
+  @Override
+  public Optional<Filter> getFilter(String userId, String filterId) {
+    return filterRepository.findOne(userId, filterId);
   }
 
   @Override
   public QueryResults getFilterResults(String userId, String filterId, String search) {
-    Filter filter = filterRepository.findOne(userId, filterId);
-    QueryRequestModel queryRequestModel = constructQueryRequestModel(filter, search);
+    Optional<Filter> filter = filterRepository.findOne(userId, filterId);
+    QueryRequestModel queryRequestModel = null;
+    if(filter.isPresent()) {
+      queryRequestModel = constructAutoCompleteQueryRequestModel(filter.get(), search);
+    }
     return queryService.readData(queryRequestModel);
   }
 
-  private QueryRequestModel constructQueryRequestModel(Filter filter, String search) {
+  private QueryRequestModel constructAutoCompleteQueryRequestModel(Filter filter, String search) {
     QueryRequestModel queryRequestModel = new QueryRequestModel();
-    queryRequestModel.queryId = filter.getDefaultQueryId();
+    queryRequestModel.queryId = filter.getDefaultAutoCompleteQueryId();
     Map<String, String> filters = new HashMap<>();
-    filters.put(filter.getSearchFilterPlaceholder(), search);
+    if(StringUtils.isNotEmpty(filter.getAutoCompletePlaceholder())) {
+      filters.put(filter.getAutoCompletePlaceholder(), search);
+    }
     queryRequestModel.filters = filters;
     return queryRequestModel;
   }

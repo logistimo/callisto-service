@@ -7,11 +7,12 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FilterRepository extends MongoRepository<Filter, String> {
   List<Filter> findByUserId(String userId);
 
   @Query(value = "{ 'userId': ?0 , 'filterId': ?1 } ")
-  Filter findOne(String userId, String filterId);
+  Optional<Filter> findOne(String userId, String filterId);
 }
