@@ -23,8 +23,6 @@
 
 package com.logistimo.callisto.reports.model;
 
-import com.google.gson.JsonArray;
-
 import lombok.Data;
 
 @Data
@@ -32,5 +30,5 @@ public class ReportResult {
   private String userId;
   private String reportType;
   private String reportSubType;
-  private JsonArray results;
+  private Object results;
 }

@@ -3,6 +3,7 @@ package com.logistimo.callisto.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -13,6 +14,10 @@ public class Filter {
 
   @Id
   private String id;
+
+  @Indexed
+  @JsonProperty("filter_id")
+  private String filterId;
 
   @JsonProperty("user_id")
   private String userId;

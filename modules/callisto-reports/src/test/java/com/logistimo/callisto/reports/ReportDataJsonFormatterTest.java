@@ -29,7 +29,7 @@ import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.model.Filter;
-import com.logistimo.callisto.reports.core.ReportDataHelper;
+import com.logistimo.callisto.reports.core.ReportDataJsonFormatter;
 import com.logistimo.callisto.service.IFilterService;
 
 import org.junit.Assert;
@@ -49,20 +49,20 @@ import java.util.Set;
 import static org.mockito.Matchers.argThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ReportDataHelperTest {
+public class ReportDataJsonFormatterTest {
 
-  private ReportDataHelper reportDataHelper;
+  private ReportDataJsonFormatter reportDataJsonFormatter;
   private ICallistoFunction linkFunction;
   private IFilterService filterService;
 
   @Before
   public void setUp() {
-    reportDataHelper = new ReportDataHelper();
+    reportDataJsonFormatter = new ReportDataJsonFormatter();
     linkFunction = Mockito.mock(ICallistoFunction.class);
-    reportDataHelper.setLinkFunction(linkFunction);
+    reportDataJsonFormatter.setLinkFunction(linkFunction);
 
     filterService = Mockito.mock(IFilterService.class);
-    reportDataHelper.setFilterService(filterService);
+    reportDataJsonFormatter.setFilterService(filterService);
   }
 
   @Test
@@ -95,7 +95,8 @@ public class ReportDataHelperTest {
         "$$link(boring-rename-query-id)$$", "TOKEN_BORING_DIMEN", "827364"))))
         .thenReturn("Uber boring dimension display name");
 
-    JsonArray results = reportDataHelper.formatReportData("logistimo", metricKeys, queryResults);
+    JsonArray results = (JsonArray) reportDataJsonFormatter.getFormattedResult("logistimo", metricKeys,
+        queryResults);
 
     Assert.assertNotEquals(results, null);
 

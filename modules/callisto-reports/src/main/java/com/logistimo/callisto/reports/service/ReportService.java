@@ -28,7 +28,7 @@ import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.ReportRequestModel;
-import com.logistimo.callisto.reports.core.ReportDataHelper;
+import com.logistimo.callisto.reports.core.IReportDataFormatter;
 import com.logistimo.callisto.reports.core.ReportRequestHelper;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
@@ -37,6 +37,7 @@ import com.logistimo.callisto.service.IQueryService;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class ReportService implements IReportService {
   private ResultManager resultManager;
   private IQueryService queryService;
   private ReportRequestHelper reportRequestHelper;
-  private ReportDataHelper reportDataHelper;
+  private IReportDataFormatter reportDataFormatter;
   private ModelMapper modelMapper = new ModelMapper();
 
   @Autowired
@@ -75,8 +76,9 @@ public class ReportService implements IReportService {
   }
 
   @Autowired
-  public void setReportDataHelper(ReportDataHelper reportDataHelper) {
-    this.reportDataHelper = reportDataHelper;
+  @Qualifier("list")
+  public void setReportDataFormatter(IReportDataFormatter reportDataFormatter) {
+    this.reportDataFormatter = reportDataFormatter;
   }
 
   @Override
@@ -90,9 +92,10 @@ public class ReportService implements IReportService {
   }
 
   @Override
-  public ReportResult getReportData(String userId, ReportRequestModel reportRequestModel) {
-    ReportConfig reportConfig = reportConfigRepository.findOneByUserIdAndTypeAndSubType(userId,
-        reportRequestModel.getReportType(), reportRequestModel.getReportSubType());
+  public ReportResult getReportData(ReportRequestModel reportRequestModel) {
+    ReportConfig reportConfig = reportConfigRepository.findOneByUserIdAndTypeAndSubType
+        (reportRequestModel.getUserId(),
+            reportRequestModel.getReportType(), reportRequestModel.getReportSubType());
     QueryRequestModel queryRequestModel = reportRequestHelper
         .getQueryRequestModel(reportRequestModel, reportConfig);
     QueryResults rawResults = queryService.readData(queryRequestModel);
@@ -102,11 +105,12 @@ public class ReportService implements IReportService {
     QueryResults derivedResults = resultManager.getDerivedResults(queryRequestModel, rawResults,
         derivedColumns);
     ReportResult reportResult = new ReportResult();
-    reportResult.setUserId(userId);
+    reportResult.setUserId(reportRequestModel.getUserId());
     reportResult.setReportType(reportRequestModel.getReportType());
     reportResult.setReportSubType(reportRequestModel.getReportSubType());
-    reportResult.setResults(reportDataHelper.formatReportData(userId, reportConfig.getMetrics()
-        .keySet(), derivedResults));
+    reportResult.setResults(
+        reportDataFormatter.getFormattedResult(reportRequestModel.getUserId(), reportConfig
+            .getMetrics().keySet(), derivedResults));
     return reportResult;
   }
 

@@ -21,16 +21,12 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.reports.service;
+package com.logistimo.callisto.reports.core;
 
-import com.logistimo.callisto.reports.ReportRequestModel;
-import com.logistimo.callisto.reports.model.ReportModel;
-import com.logistimo.callisto.reports.model.ReportResult;
+import com.logistimo.callisto.QueryResults;
 
-import java.util.List;
+import java.util.Set;
 
-public interface IReportService {
-  List<ReportModel> getAllReports(String userId);
-
-  ReportResult getReportData(ReportRequestModel reportRequestModel);
+public interface IReportDataFormatter {
+  Object getFormattedResult(String userId, Set<String> metricKeys, QueryResults queryResults);
 }
