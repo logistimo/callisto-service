@@ -37,7 +37,7 @@ public interface IQueryService {
 
   void saveQuery(QueryText q);
 
-  String updateQuery(QueryText q);
+  void updateQuery(QueryText q);
 
   QueryText readQuery(String userId, String queryId);
 

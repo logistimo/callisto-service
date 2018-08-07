@@ -1,6 +1,6 @@
 package com.logistimo.callisto.controller;
 
-import com.logistimo.callisto.SuccessDetails;
+import com.logistimo.callisto.SuccessResponseDetails;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.Datastore;
 import com.logistimo.callisto.service.IDatastoreService;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import javax.annotation.Resource;
-import javax.xml.crypto.Data;
 
 /**
  * Created by charan on 09/06/18.
@@ -46,8 +45,8 @@ public class DatastoreController {
   @RequestMapping(value = "", method = RequestMethod.PUT)
   public ResponseEntity createOrUpdateDatastore(@RequestBody Datastore model) {
     datastoreService.save(model);
-    SuccessDetails successDetails = new SuccessDetails("Datastore updated successfully");
-    return new ResponseEntity<>(successDetails, HttpStatus.OK);
+    SuccessResponseDetails successResponseDetails = new SuccessResponseDetails("Datastore updated successfully");
+    return new ResponseEntity<>(successResponseDetails, HttpStatus.OK);
   }
 
 }

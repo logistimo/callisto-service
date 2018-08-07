@@ -1,9 +1,9 @@
 package com.logistimo.callisto;
 
-public class SuccessDetails {
+public class SuccessResponseDetails {
   private String msg;
 
-  public SuccessDetails(String msg) {
+  public SuccessResponseDetails(String msg) {
     this.msg = msg;
   }
 

@@ -27,7 +27,7 @@ import com.google.gson.Gson;
 
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
-import com.logistimo.callisto.SuccessDetails;
+import com.logistimo.callisto.SuccessResponseDetails;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
@@ -88,7 +88,7 @@ public class QueryController {
       headers.put(RESPONSE_TOTAL_SIZE_HEADER_KEY, Collections.singletonList(String.valueOf
           (totalSize)));
     }
-    return new ResponseEntity(queryTexts, headers, HttpStatus.OK);
+    return new ResponseEntity<>(queryTexts, headers, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/search/{like}", method = RequestMethod.GET)
@@ -102,40 +102,46 @@ public class QueryController {
       headers.put(RESPONSE_TOTAL_SIZE_HEADER_KEY, Collections.singletonList(String.valueOf
           (totalSize)));
     }
-    return new ResponseEntity(resultsModel.result, headers, HttpStatus.OK);
+    return new ResponseEntity<>(resultsModel.result, headers, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/ids", method = RequestMethod.GET)
-  public List<String> getQueryIds(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
+  public ResponseEntity getQueryIds(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
                                     Pageable pageable, @RequestParam(defaultValue = "logistimo")
                                     String userId) {
-    return queryService.readQueryIds(userId, null, pageable);
+    List<String> queryIds = queryService.readQueryIds(userId, null, pageable);
+    return new ResponseEntity<>(queryIds, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/ids/{like}", method = RequestMethod.GET)
-  public List<String> getQueryIdsLike(@PathVariable String like, @RequestParam
+  public ResponseEntity getQueryIdsLike(@PathVariable String like, @RequestParam
       (defaultValue = "logistimo") String userId,
                                                @PageableDefault(page = 0, size = Integer.MAX_VALUE)
                                                  Pageable pageable) {
-    return queryService.readQueryIds(userId, like, pageable);
+    List<String> queryIds = queryService.readQueryIds(userId, like, pageable);
+    return new ResponseEntity<>(queryIds, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/save", method = RequestMethod.PUT)
   public ResponseEntity saveQuery(@RequestBody QueryText queryText) {
     queryService.saveQuery(queryText);
-    SuccessDetails successDetails = new SuccessDetails("Query successfully saved");
-    return new ResponseEntity<>(successDetails, HttpStatus.OK);
+    SuccessResponseDetails successResponseDetails = new SuccessResponseDetails("Query successfully saved");
+    return new ResponseEntity<>(successResponseDetails, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/udpate", method = RequestMethod.POST)
-  public String updateQuery(@RequestBody QueryText queryText) {
-    return queryService.updateQuery(queryText);
+  public ResponseEntity updateQuery(@RequestBody QueryText queryText) {
+    queryService.updateQuery(queryText);
+    SuccessResponseDetails responseDetails =
+        new SuccessResponseDetails("Query updated successfully");
+    return new ResponseEntity<>(responseDetails, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/{queryId}", method = RequestMethod.GET)
-  public QueryText getQuery(
+  public ResponseEntity getQuery(
       @RequestParam(defaultValue = "logistimo") String userId, @PathVariable String queryId) {
-    return queryService.readQuery(userId, queryId);
+    QueryText queryText = queryService.readQuery(userId, queryId);
+    return new ResponseEntity<>(queryText, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/getdata", method = RequestMethod.POST)
@@ -176,7 +182,7 @@ public class QueryController {
   }
 
   @RequestMapping(value = "/run", method = RequestMethod.POST)
-  public QueryResults runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)
+  public ResponseEntity runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)
       throws CallistoException {
     QueryResults results = null;
     if (Objects.equals(request.getHeader("X-app-version"), "v2")) {
@@ -201,14 +207,14 @@ public class QueryController {
     } else if (model.query != null) {
       results = queryService.readData(model);
     }
-    return results;
+    return new ResponseEntity<>(results, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/{queryId}", method = RequestMethod.DELETE)
   public ResponseEntity deleteQuery(
       @RequestParam(defaultValue = "logistimo") String userId, @PathVariable String queryId) {
     queryService.deleteQuery(userId, queryId);
-    SuccessDetails successDetails = new SuccessDetails("Query successfully deleted");
-    return new ResponseEntity<>(successDetails, HttpStatus.OK);
+    SuccessResponseDetails successResponseDetails = new SuccessResponseDetails("Query successfully deleted");
+    return new ResponseEntity<>(successResponseDetails, HttpStatus.OK);
   }
 }

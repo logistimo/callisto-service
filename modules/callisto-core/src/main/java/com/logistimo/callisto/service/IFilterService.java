@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface IFilterService {
   Optional<Filter> getFilter(String userId, String filterId);
-  QueryResults getFilterResults(String userId, String id, String search);
+  QueryResults getFilterAutocompleteResults(String userId, String id, String search);
   List<Filter> getFiltersForUserId(String userId);
 }

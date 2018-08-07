@@ -39,7 +39,7 @@ public class FilterService implements IFilterService {
   }
 
   @Override
-  public QueryResults getFilterResults(String userId, String filterId, String search) {
+  public QueryResults getFilterAutocompleteResults(String userId, String filterId, String search) {
     Optional<Filter> filter = filterRepository.findOne(userId, filterId);
     QueryRequestModel queryRequestModel = null;
     if(filter.isPresent()) {

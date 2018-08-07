@@ -80,19 +80,16 @@ public class QueryService implements IQueryService {
     }
   }
 
-  public String updateQuery(QueryText q) {
-    String res = "failure";
+  public void updateQuery(QueryText q) {
     try {
       List<QueryText> queryList = queryRepository.readQuery(q.getUserId(), q.getQueryId());
       if (queryList != null && queryList.size() == 1) {
         q.setId(queryList.get(0).getId());
         queryRepository.save(q);
-        res = "Query updated successfully";
       }
     } catch (Exception e) {
-      logger.error("Error while updating query", e);
+      throw new CallistoException("Q109", e);
     }
-    return res;
   }
 
   public void deleteQuery(String userId, String queryId) {

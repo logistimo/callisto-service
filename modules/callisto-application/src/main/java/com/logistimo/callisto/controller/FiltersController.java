@@ -28,22 +28,16 @@ public class FiltersController {
   @RequestMapping(value = "", method = RequestMethod.GET)
   public ResponseEntity getFilters(@RequestParam(defaultValue = "logistimo") String userId) {
     List<Filter> filters = filterService.getFiltersForUserId(userId);
-    return new ResponseEntity(filters, HttpStatus.OK);
-  }
-
-  @RequestMapping(value = "/{filterId}", method = RequestMethod.GET)
-  public ResponseEntity getFilterResults(@RequestParam(defaultValue = "logistimo") String userId,
-                                   @PathVariable String filterId) {
-    List<Filter> filters = filterService.getFiltersForUserId(userId);
-    return new ResponseEntity(filters, HttpStatus.OK);
+    return new ResponseEntity<>(filters, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/search/{filterId}", method = RequestMethod.GET)
-  public ResponseEntity getFilterResults(@RequestParam(defaultValue = "logistimo") String userId,
-                                         @PathVariable String filterId,
-                                         @RequestParam String search) {
-    QueryResults results = filterService.getFilterResults(userId, filterId, search);
-    return new ResponseEntity(results, HttpStatus.OK);
+  public ResponseEntity getFilterSearchResults(
+      @RequestParam(defaultValue = "logistimo") String userId,
+      @PathVariable String filterId,
+      @RequestParam String search) {
+    QueryResults results = filterService.getFilterAutocompleteResults(userId, filterId, search);
+    return new ResponseEntity<>(results, HttpStatus.OK);
   }
 
 }
