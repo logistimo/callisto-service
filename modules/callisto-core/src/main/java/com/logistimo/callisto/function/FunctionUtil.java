@@ -52,7 +52,7 @@ public class FunctionUtil {
       delimiters =
       {CharacterConstants.ADD, CharacterConstants.COMMA, CharacterConstants.CLOSE_BRACKET,
           CharacterConstants.DIVIDE, CharacterConstants.MULTIPLY, CharacterConstants.SPACE,
-          CharacterConstants.PIPE, CharacterConstants.SUBTRACT, CharacterConstants.CLOSE_CBRACKET,
+          CharacterConstants.PIPE, CharacterConstants.SUBTRACT, CharacterConstants.CLOSE_CURLY_BRACKET,
           String.valueOf(CharacterConstants.DOLLAR)};
 
   private FunctionUtil() {

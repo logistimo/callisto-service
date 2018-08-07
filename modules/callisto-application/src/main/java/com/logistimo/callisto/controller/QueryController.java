@@ -33,7 +33,7 @@ import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.ResultsModel;
+import com.logistimo.callisto.model.PageResultsModel;
 import com.logistimo.callisto.service.IConstantService;
 import com.logistimo.callisto.service.IQueryService;
 
@@ -95,14 +95,14 @@ public class QueryController {
   public ResponseEntity getQueriesLike(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
                                     Pageable pageable, @RequestParam(defaultValue = "logistimo")
                                     String userId, @PathVariable String like) {
-    ResultsModel resultsModel = queryService.searchQueriesLike(userId, like, pageable);
+    PageResultsModel pageResultsModel = queryService.searchQueriesLike(userId, like, pageable);
     MultiValueMap<String, String> headers = new HttpHeaders();
-    Long totalSize = resultsModel.totalResultsCount;
+    Long totalSize = pageResultsModel.getTotalResultsCount();
     if(totalSize != null) {
       headers.put(RESPONSE_TOTAL_SIZE_HEADER_KEY, Collections.singletonList(String.valueOf
           (totalSize)));
     }
-    return new ResponseEntity<>(resultsModel.result, headers, HttpStatus.OK);
+    return new ResponseEntity<>(pageResultsModel.getResult(), headers, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/ids", method = RequestMethod.GET)

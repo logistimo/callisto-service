@@ -32,6 +32,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by chandrakant on 09/03/17.
@@ -40,7 +41,7 @@ import java.util.List;
 public interface QueryRepository extends MongoRepository<QueryText, String> {
 
   @Query(value = "{ 'userId': ?0 , 'queryId': ?1 } ")
-  List<QueryText> readQuery(String userId, String queryId);
+  Optional<QueryText> findOne(String userId, String queryId);
 
   @Query(value = "{ 'userId': ?0 , 'queryId': ?1 } ")
   Page<QueryText> readQuery(String userId, String queryId, Pageable pageable);

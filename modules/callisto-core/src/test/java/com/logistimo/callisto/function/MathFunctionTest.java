@@ -74,12 +74,12 @@ public class MathFunctionTest {
     String str =
         MathFunction.calculateExpression(
             null, expr, Arrays.asList(headings), Arrays.asList(row), null, null);
-    assertEquals("72.75", str);
+    assertEquals(72.75, Double.valueOf(str), 0.01);
     expr = "$$math(100*($var1/$var2)*($var3/720))$$";
     str =
         MathFunction.calculateExpression(
             null, expr, Arrays.asList(headings), Arrays.asList(row), null, null);
-    assertEquals("12474.2", str);
+    assertEquals(12474.2, Double.valueOf(str), 0.1);
     expr = "$$math(100*($var1*41.2/($var3/720)))$$";
     str =
         MathFunction.calculateExpression(

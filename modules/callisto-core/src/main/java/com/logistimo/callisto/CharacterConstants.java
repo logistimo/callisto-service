@@ -35,8 +35,8 @@ public class CharacterConstants {
   public static final String FN_ENCLOSE = "$$";
   public static final String OPEN_BRACKET = "(";
   public static final String CLOSE_BRACKET = ")";
-  public static final String OPEN_CBRACKET = "{";
-  public static final String CLOSE_CBRACKET = "}";
+  public static final String OPEN_CURLY_BRACKET = "{";
+  public static final String CLOSE_CURLY_BRACKET = "}";
   public static final String COLON = ":";
   public static final String DIVIDE = "/";
   public static final String PIPE = "|";

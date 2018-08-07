@@ -34,7 +34,7 @@ import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.Datastore;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.ResultsModel;
+import com.logistimo.callisto.model.PageResultsModel;
 import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
@@ -72,8 +72,8 @@ public class QueryService implements IQueryService {
   @Autowired private FunctionManager functionManager;
 
   public void saveQuery(QueryText q) {
-    List<QueryText> existing = queryRepository.readQuery(q.getUserId(), q.getQueryId());
-    if (existing == null || existing.isEmpty()) {
+    Optional<QueryText> existing = queryRepository.findOne(q.getUserId(), q.getQueryId());
+    if (!existing.isPresent()) {
       queryRepository.save(q);
     } else {
       throw new DuplicateQueryIdException("Query Id already exists");
@@ -82,9 +82,9 @@ public class QueryService implements IQueryService {
 
   public void updateQuery(QueryText q) {
     try {
-      List<QueryText> queryList = queryRepository.readQuery(q.getUserId(), q.getQueryId());
-      if (queryList != null && queryList.size() == 1) {
-        q.setId(queryList.get(0).getId());
+      Optional<QueryText> queryText = queryRepository.findOne(q.getUserId(), q.getQueryId());
+      if (queryText.isPresent()) {
+        q.setId(queryText.get().getId());
         queryRepository.save(q);
       }
     } catch (Exception e) {
@@ -113,11 +113,11 @@ public class QueryService implements IQueryService {
   }
 
   @Override
-  public ResultsModel searchQueriesLike(String userId, String like, Pageable pageable) {
-    ResultsModel resultsModel = new ResultsModel();
-    resultsModel.result = queryRepository.searchQueriesWithQueryId(userId, like, pageable);
-    resultsModel.totalResultsCount = queryRepository.getSearchQueriesCount(userId, like);
-    return resultsModel;
+  public PageResultsModel searchQueriesLike(String userId, String like, Pageable pageable) {
+    PageResultsModel pageResultsModel = new PageResultsModel();
+    pageResultsModel.setResult(queryRepository.searchQueriesWithQueryId(userId, like, pageable));
+    pageResultsModel.setTotalResultsCount(queryRepository.getSearchQueriesCount(userId, like));
+    return pageResultsModel;
   }
 
   public QueryText readQuery(String userId, String queryId) {
