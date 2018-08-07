@@ -21,25 +21,10 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.repository;
+package com.logistimo.callisto.reports.exception;
 
-import com.logistimo.callisto.model.ReportConfig;
-
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-
-@Repository
-public interface ReportConfigRepository extends MongoRepository<ReportConfig, String> {
-
-  @Query(value = "{'userId': ?0}", fields = "{'type': 1, 'subType': 1}")
-  List<ReportConfig> readAllReportTypes(String userId);
-
-  Optional<ReportConfig> findOneByUserIdAndTypeAndSubType(String userId, String type, String
-      subType);
-
-  List<ReportConfig> findByUserIdAndType(String userId, String type);
+public class ReportNotFoundException extends RuntimeException {
+  public ReportNotFoundException(String message) {
+    super(message);
+  }
 }

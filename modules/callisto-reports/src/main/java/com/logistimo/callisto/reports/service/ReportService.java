@@ -30,11 +30,13 @@ import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.ReportRequestModel;
 import com.logistimo.callisto.reports.core.IReportDataFormatter;
 import com.logistimo.callisto.reports.core.ReportRequestHelper;
+import com.logistimo.callisto.reports.exception.ReportNotFoundException;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 import com.logistimo.callisto.repository.ReportConfigRepository;
 import com.logistimo.callisto.service.IQueryService;
 
+import org.apache.commons.lang.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,7 +45,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+
+import lombok.NonNull;
 
 @Service
 public class ReportService implements IReportService {
@@ -93,9 +98,13 @@ public class ReportService implements IReportService {
 
   @Override
   public ReportResult getReportData(ReportRequestModel reportRequestModel) {
-    ReportConfig reportConfig = reportConfigRepository.findOneByUserIdAndTypeAndSubType
+    Optional<ReportConfig> config = getReportConfig
         (reportRequestModel.getUserId(),
             reportRequestModel.getReportType(), reportRequestModel.getReportSubType());
+    if(!config.isPresent()) {
+      throw new ReportNotFoundException("Report not configured!");
+    }
+    final ReportConfig reportConfig = config.get();
     QueryRequestModel queryRequestModel = reportRequestHelper
         .getQueryRequestModel(reportRequestModel, reportConfig);
     QueryResults rawResults = queryService.readData(queryRequestModel);
@@ -112,6 +121,17 @@ public class ReportService implements IReportService {
         reportDataFormatter.getFormattedResult(reportRequestModel.getUserId(), reportConfig
             .getMetrics().keySet(), derivedResults));
     return reportResult;
+  }
+
+  private Optional<ReportConfig> getReportConfig(@NonNull String userId, String type, String
+      subType) {
+    if(StringUtils.isNotEmpty(type) && StringUtils.isNotEmpty(subType)) {
+      return reportConfigRepository.findOneByUserIdAndTypeAndSubType(userId, type, subType);
+    } else if(StringUtils.isEmpty(subType)) {
+      return reportConfigRepository.findByUserIdAndType(userId, type).stream().filter
+          (reportConfig ->  StringUtils.isEmpty(reportConfig.getSubType())).findFirst();
+    }
+    return Optional.empty();
   }
 
 }
