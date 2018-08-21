@@ -36,6 +36,12 @@ import java.util.Set;
 @Component (value = "json")
 public class ReportDataJsonFormatter extends ReportDataFormatter {
 
+  private static final String METRICS_KEY = "metrics";
+  private static final String DIMENSIONS_KEY = "dimensions";
+
+  private static final String DIMENSION_VALUE_KEY = "value";
+  private static final String DIMENSION_NAME_KEY = "name";
+
   @Override
   public Object getFormattedResult(String userId, Set<String> metricKeys, QueryResults
       queryResults) {
@@ -50,24 +56,26 @@ public class ReportDataJsonFormatter extends ReportDataFormatter {
   private JsonObject getFormattedResult(String userId, Set<String> metricKeys, List<String> row,
                                     List<String> headings) {
     JsonObject result = new JsonObject();
+    JsonObject dimensions = new JsonObject();
     JsonObject metrics = new JsonObject();
     for (int i = 0; i < headings.size(); i++) {
       final String heading = headings.get(i);
       if (!metricKeys.contains(heading)) {
         String name = getRenamedValue(userId, heading, row.get(i));
-        result.add(heading, transformMetadataToJson(row.get(i), name));
+        dimensions.add(heading, transformMetadataToJson(row.get(i), name));
       } else {
         metrics.addProperty(heading, row.get(i));
       }
     }
-    result.add("metrics", metrics);
+    result.add(METRICS_KEY, metrics);
+    result.add(DIMENSIONS_KEY, dimensions);
     return result;
   }
 
   private JsonObject transformMetadataToJson(String value, String name) {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("value", value);
-    jsonObject.addProperty("name", name);
+    jsonObject.addProperty(DIMENSION_VALUE_KEY, value);
+    jsonObject.addProperty(DIMENSION_NAME_KEY, name);
     return jsonObject;
   }
 }

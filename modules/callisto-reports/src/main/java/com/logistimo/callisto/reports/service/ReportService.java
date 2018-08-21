@@ -81,7 +81,7 @@ public class ReportService implements IReportService {
   }
 
   @Autowired
-  @Qualifier("list")
+  @Qualifier("json")
   public void setReportDataFormatter(IReportDataFormatter reportDataFormatter) {
     this.reportDataFormatter = reportDataFormatter;
   }
