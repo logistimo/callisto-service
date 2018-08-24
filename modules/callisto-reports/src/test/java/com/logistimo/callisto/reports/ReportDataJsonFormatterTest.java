@@ -111,10 +111,10 @@ public class ReportDataJsonFormatterTest {
     Assert.assertTrue(!results.get(0).getAsJsonObject().has("boring-metric")
                       && !results.get(1).getAsJsonObject().has("boring-metric"));
 
-    Assert.assertTrue(results.get(0).getAsJsonObject().has("did")
-                      && results.get(1).getAsJsonObject().has("did"));
-    Assert.assertTrue(results.get(0).getAsJsonObject().has("kid")
-                      && results.get(1).getAsJsonObject().has("kid"));
+    Assert.assertTrue(results.get(0).getAsJsonObject().getAsJsonObject("dimensions").has("did")
+                      && results.get(1).getAsJsonObject().getAsJsonObject("dimensions").has("did"));
+    Assert.assertTrue(results.get(0).getAsJsonObject().getAsJsonObject("dimensions").has("kid")
+                      && results.get(1).getAsJsonObject().getAsJsonObject("dimensions").has("kid"));
 
     Assert.assertTrue(results.get(0).getAsJsonObject().get("metrics").getAsJsonObject().has("cool-metric")
                       && results.get(1).getAsJsonObject().get("metrics").getAsJsonObject().has("cool-metric"));
