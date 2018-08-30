@@ -30,7 +30,7 @@ import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.ReportRequestModel;
 import com.logistimo.callisto.reports.core.IReportDataFormatter;
 import com.logistimo.callisto.reports.core.ReportRequestHelper;
-import com.logistimo.callisto.reports.exception.ReportNotFoundException;
+import com.logistimo.callisto.reports.exception.BadReportRequestException;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 import com.logistimo.callisto.repository.ReportConfigRepository;
@@ -102,7 +102,8 @@ public class ReportService implements IReportService {
         (reportRequestModel.getUserId(),
             reportRequestModel.getType(), reportRequestModel.getSubType());
     if(!config.isPresent()) {
-      throw new ReportNotFoundException("Report not configured!");
+      throw new BadReportRequestException(String.format("Report %s not configured for user %s!",
+          reportRequestModel.getType(), reportRequestModel.getUserId()));
     }
     final ReportConfig reportConfig = config.get();
     QueryRequestModel queryRequestModel = reportRequestHelper

@@ -24,6 +24,7 @@
 package com.logistimo.callisto.exception;
 
 import com.logistimo.callisto.reports.exception.ReportNotFoundException;
+import com.logistimo.callisto.reports.exception.BadReportRequestException;
 
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,14 @@ public class CustomizedResponseExcpetionHandler {
     ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
         request.getDescription(false));
     return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(BadReportRequestException.class)
+  public final ResponseEntity<ErrorDetails> handleReportRequestException
+      (BadReportRequestException ex, WebRequest request) {
+    ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
+        request.getDescription(false));
+    return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(Exception.class)

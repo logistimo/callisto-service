@@ -24,6 +24,7 @@
 package com.logistimo.callisto.reports.rest;
 
 import com.logistimo.callisto.reports.ReportRequestModel;
+import com.logistimo.callisto.reports.exception.BadReportRequestException;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 import com.logistimo.callisto.reports.service.IReportService;
@@ -64,7 +65,12 @@ public class ReportsController {
       @RequestHeader(value = "User-Id", defaultValue = "logistimo") String userId,
       @RequestBody ReportRequestModel reportRequestModel,
       @PathVariable String type) {
-    if (reportRequestModel != null && StringUtils.isNotEmpty(type)) {
+    if(reportRequestModel == null) {
+      throw new BadReportRequestException("Report request model not found");
+    } else if(reportRequestModel.getFilters() == null) {
+      throw new BadReportRequestException("Report filters not found");
+    }
+    if (StringUtils.isNotEmpty(type)) {
       reportRequestModel.setType(type);
       reportRequestModel.setUserId(userId);
     }

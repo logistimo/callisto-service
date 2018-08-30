@@ -31,6 +31,7 @@ import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IFilterService;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -42,6 +43,7 @@ public abstract class ReportDataFormatter implements IReportDataFormatter {
 
   private ICallistoFunction linkFunction;
   private IFilterService filterService;
+  private static final Logger logger = Logger.getLogger(ReportDataFormatter.class);
 
   @Autowired
   public void setFilterService(IFilterService filterService) {
@@ -65,18 +67,22 @@ public abstract class ReportDataFormatter implements IReportDataFormatter {
 
   String getRenamedValue(String userId, String key, String value) {
     if(isRenameQueryPresent(userId, key)) {
-      Optional<Filter> filter = filterService.getFilter(userId, key);
-      String renameQueryId = filter.get().getRenameQueryId();
-      if (StringUtils.isNotEmpty(renameQueryId)) {
-        FunctionParam functionParam = new FunctionParam();
-        Map<String, String> filters = new HashMap<>();
-        filters.put(filter.get().getPlaceholder(), value);
-        QueryRequestModel queryRequestModel = new QueryRequestModel();
-        queryRequestModel.userId = userId;
-        queryRequestModel.filters = filters;
-        functionParam.setQueryRequestModel(queryRequestModel);
-        functionParam.function = LinkFunction.getFunctionSyntax(renameQueryId);
-        return linkFunction.getResult(functionParam);
+      try {
+        Optional<Filter> filter = filterService.getFilter(userId, key);
+        String renameQueryId = filter.get().getRenameQueryId();
+        if (StringUtils.isNotEmpty(renameQueryId)) {
+          FunctionParam functionParam = new FunctionParam();
+          Map<String, String> filters = new HashMap<>();
+          filters.put(filter.get().getPlaceholder(), value);
+          QueryRequestModel queryRequestModel = new QueryRequestModel();
+          queryRequestModel.userId = userId;
+          queryRequestModel.filters = filters;
+          functionParam.setQueryRequestModel(queryRequestModel);
+          functionParam.function = LinkFunction.getFunctionSyntax(renameQueryId);
+          return linkFunction.getResult(functionParam);
+        }
+      } catch (Exception e) {
+        logger.error("Error while renaming value", e);
       }
     }
     return null;
