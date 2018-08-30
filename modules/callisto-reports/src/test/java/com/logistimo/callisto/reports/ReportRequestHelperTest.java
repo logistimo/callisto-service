@@ -92,8 +92,8 @@ public class ReportRequestHelperTest {
   public void getQueryRequestModelTest() {
     ReportRequestModel reportRequestModel = new ReportRequestModel();
     reportRequestModel.setUserId("logistimo");
-    reportRequestModel.setReportType("some-report");
-    reportRequestModel.setReportSubType("");
+    reportRequestModel.setType("some-report");
+    reportRequestModel.setSubType("");
     Map<String, String> filters = new HashMap<>();
     filters.put("dimension1", "value1");
     filters.put("dimension2", "value2");

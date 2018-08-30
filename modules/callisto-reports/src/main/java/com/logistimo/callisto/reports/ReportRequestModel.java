@@ -30,7 +30,7 @@ import lombok.Data;
 @Data
 public class ReportRequestModel {
   private String userId;
-  private String reportType;
-  private String reportSubType;
+  private String type;
+  private String subType;
   private Map<String, String> filters;
 }

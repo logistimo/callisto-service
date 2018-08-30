@@ -100,7 +100,7 @@ public class ReportService implements IReportService {
   public ReportResult getReportData(ReportRequestModel reportRequestModel) {
     Optional<ReportConfig> config = getReportConfig
         (reportRequestModel.getUserId(),
-            reportRequestModel.getReportType(), reportRequestModel.getReportSubType());
+            reportRequestModel.getType(), reportRequestModel.getSubType());
     if(!config.isPresent()) {
       throw new ReportNotFoundException("Report not configured!");
     }
@@ -115,8 +115,8 @@ public class ReportService implements IReportService {
         derivedColumns);
     ReportResult reportResult = new ReportResult();
     reportResult.setUserId(reportRequestModel.getUserId());
-    reportResult.setReportType(reportRequestModel.getReportType());
-    reportResult.setReportSubType(reportRequestModel.getReportSubType());
+    reportResult.setReportType(reportRequestModel.getType());
+    reportResult.setReportSubType(reportRequestModel.getSubType());
     reportResult.setResults(
         reportDataFormatter.getFormattedResult(reportRequestModel.getUserId(), reportConfig
             .getMetrics().keySet(), derivedResults));

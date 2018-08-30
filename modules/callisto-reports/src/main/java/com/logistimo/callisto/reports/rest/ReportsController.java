@@ -65,7 +65,7 @@ public class ReportsController {
       @RequestBody ReportRequestModel reportRequestModel,
       @PathVariable String type) {
     if (reportRequestModel != null && StringUtils.isNotEmpty(type)) {
-      reportRequestModel.setReportType(type);
+      reportRequestModel.setType(type);
       reportRequestModel.setUserId(userId);
     }
     ReportResult result = reportService.getReportData(reportRequestModel);
