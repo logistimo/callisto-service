@@ -36,6 +36,10 @@ public class QueryResults {
   private List<List<String>> rows;
   private List<String> rowHeadings;
 
+  public QueryResults() {
+    this.rows = new ArrayList<>();
+  }
+
   public List<String> getHeadings() {
     return headings;
   }

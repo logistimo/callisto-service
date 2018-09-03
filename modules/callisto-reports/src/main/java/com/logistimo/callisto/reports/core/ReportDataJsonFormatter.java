@@ -28,6 +28,7 @@ import com.google.gson.JsonObject;
 
 import com.logistimo.callisto.QueryResults;
 
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -36,6 +37,8 @@ import java.util.Set;
 @Component (value = "json")
 public class ReportDataJsonFormatter extends ReportDataFormatter {
 
+  private static final Logger logger = Logger.getLogger(ReportDataJsonFormatter.class);
+
   private static final String METRICS_KEY = "metrics";
   private static final String DIMENSIONS_KEY = "dimensions";
 
@@ -43,12 +46,17 @@ public class ReportDataJsonFormatter extends ReportDataFormatter {
   private static final String DIMENSION_NAME_KEY = "name";
 
   @Override
-  public Object getFormattedResult(String userId, Set<String> metricKeys, QueryResults
-      queryResults) {
+  public Object getFormattedResult(String userId, Set<String> metricKeys
+      , QueryResults queryResults) {
     JsonArray results = new JsonArray();
-    for(int i=0;i<queryResults.getRows().size();i++) {
-      results.add(getFormattedResult(userId, metricKeys, queryResults.getRows().get(i),
-          queryResults.getHeadings()));
+    if (queryResults != null && queryResults.getRows() != null
+        && queryResults.getRows().size() > 0) {
+      for (int i = 0; i < queryResults.getRows().size(); i++) {
+        results.add(getFormattedResult(userId, metricKeys, queryResults.getRows().get(i),
+            queryResults.getHeadings()));
+      }
+    } else {
+      logger.info("No results found");
     }
     return results;
   }
