@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.NonNull;
 
@@ -110,14 +111,17 @@ public class ReportRequestHelper {
     int minRemainingFiltersInQueryId = Integer.MAX_VALUE;
     String bestQueryId = null;
     for(final String queryId : queryIds) {
+      Set<String> dimensions = Arrays.stream(queryId.split(QUERY_ID_DELIMITER))
+          .filter(StringUtils::isNotEmpty)
+          .map(String::toLowerCase)
+          .collect(Collectors.toSet());
       int filtersFound = 0;
       for(String filterId : filterKeys) {
-        if(StringUtils.containsIgnoreCase(queryId, filterId)) {
+        if(dimensions.contains(filterId.toLowerCase())) {
           filtersFound++;
         }
       }
-      int remainingFiltersInQueryId = getNumberOfDimensionsInQueryId(queryId,
-          QUERY_ID_DELIMITER) - filtersFound;
+      int remainingFiltersInQueryId = dimensions.size() - filtersFound;
       if(maxFiltersFound < filtersFound) {
         maxFiltersFound = filtersFound;
         minRemainingFiltersInQueryId = remainingFiltersInQueryId;
@@ -130,10 +134,5 @@ public class ReportRequestHelper {
       }
     }
     return bestQueryId;
-  }
-
-  private int getNumberOfDimensionsInQueryId(String queryId, String delimiter) {
-    String[] dimensions = queryId.split(delimiter);
-    return (int) Arrays.stream(dimensions).filter(StringUtils::isNotEmpty).count();
   }
 }
