@@ -23,11 +23,13 @@
 
 package com.logistimo.callisto.reports.rest;
 
+import com.logistimo.callisto.model.Filter;
 import com.logistimo.callisto.reports.ReportRequestModel;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 import com.logistimo.callisto.reports.service.IReportService;
+import com.logistimo.callisto.service.IFilterService;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +43,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/reports")
 public class ReportsController {
 
   private IReportService reportService;
+  private IFilterService filterService;
 
   @Autowired
   public void setReportService(IReportService reportService) {
     this.reportService = reportService;
+  }
+
+  @Autowired
+  public void setFilterService(IFilterService filterService) {
+    this.filterService = filterService;
   }
 
   @RequestMapping(value = "", method = RequestMethod.GET)
@@ -70,6 +79,14 @@ public class ReportsController {
     } else if(reportRequestModel.getFilters() == null) {
       throw new BadReportRequestException("Report filters not found");
     }
+    reportRequestModel.getFilters().entrySet().stream()
+        .forEach(filterEntry -> {
+          Optional<Filter> filter = filterService.getFilter(userId, filterEntry.getKey());
+          if (!filter.isPresent()) {
+            throw new BadReportRequestException(String.format("Report filter '%s' not registered!",
+                filterEntry.getKey()));
+          }
+        });
     if (StringUtils.isNotEmpty(type)) {
       reportRequestModel.setType(type);
       reportRequestModel.setUserId(userId);

@@ -82,7 +82,7 @@ public abstract class ReportDataFormatter implements IReportDataFormatter {
           return linkFunction.getResult(functionParam);
         }
       } catch (Exception e) {
-        logger.warn("Error while renaming value", e);
+        logger.warn(String.format("Error while renaming type %s with value %s", key, value));
       }
     }
     return null;
