@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.controller;
 
-import com.logistimo.callisto.SuccessResponseDetails;
+import com.logistimo.callisto.model.SuccessResponseDetails;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.Datastore;
 import com.logistimo.callisto.service.IDatastoreService;
@@ -37,8 +37,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 import javax.annotation.Resource;
 
 /**
@@ -49,12 +47,12 @@ import javax.annotation.Resource;
 public class DatastoreController {
 
   @Resource
-  IDatastoreService datastoreService;
+  private IDatastoreService datastoreService;
 
   @RequestMapping(value = "", method = RequestMethod.GET)
-  public List<Datastore> getDatastoresByUser(@RequestParam String userId)
+  public ResponseEntity getDatastoresByUser(@RequestParam String userId)
       throws CallistoException {
-    return datastoreService.getDatastoresByUser(userId);
+    return new ResponseEntity<>(datastoreService.getDatastoresByUser(userId), HttpStatus.OK);
   }
 
   @RequestMapping(value = "/{datastoreId}", method = RequestMethod.GET)

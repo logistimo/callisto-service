@@ -27,7 +27,8 @@ import com.google.gson.Gson;
 
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
-import com.logistimo.callisto.SuccessResponseDetails;
+import com.logistimo.callisto.model.PagedResults;
+import com.logistimo.callisto.model.SuccessResponseDetails;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
@@ -72,10 +73,10 @@ public class QueryController {
 
   public static final String RESPONSE_TOTAL_SIZE_HEADER_KEY = "size";
 
-  @Resource IQueryService queryService;
-  @Resource IConstantService constantService;
+  @Resource private IQueryService queryService;
+  @Resource private IConstantService constantService;
 
-  @Autowired ResultManager resultManager;
+  @Autowired private ResultManager resultManager;
 
   @RequestMapping(value = "", method = RequestMethod.GET)
   public ResponseEntity getQueries(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
@@ -83,12 +84,10 @@ public class QueryController {
                                     String userId) {
     List<QueryText> queryTexts = queryService.readQueries(userId, pageable);
     Long totalSize = queryService.getTotalNumberOfQueries(userId);
-    MultiValueMap<String, String> headers = new HttpHeaders();
-    if(totalSize != null) {
-      headers.put(RESPONSE_TOTAL_SIZE_HEADER_KEY, Collections.singletonList(String.valueOf
-          (totalSize)));
-    }
-    return new ResponseEntity<>(queryTexts, headers, HttpStatus.OK);
+    PagedResults pagedResults = new PagedResults();
+    pagedResults.setResult(queryTexts);
+    pagedResults.setTotalSize(totalSize);
+    return new ResponseEntity<>(pagedResults, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/search/{like}", method = RequestMethod.GET)

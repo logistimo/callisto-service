@@ -21,20 +21,32 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto;
+package com.logistimo.callisto.model;
 
-public class SuccessResponseDetails {
-  private String msg;
+import com.google.gson.annotations.SerializedName;
 
-  public SuccessResponseDetails(String msg) {
-    this.msg = msg;
+public class PagedResults {
+
+  @SerializedName("result")
+  private Object result;
+
+  //TODO: Change corresponding UI field
+  @SerializedName("total_size")
+  private long totalSize;
+
+  public Object getResult() {
+    return result;
   }
 
-  public String getMsg() {
-    return msg;
+  public void setResult(Object result) {
+    this.result = result;
   }
 
-  public void setMsg(String msg) {
-    this.msg = msg;
+  public long getTotalSize() {
+    return totalSize;
+  }
+
+  public void setTotalSize(long totalSize) {
+    this.totalSize = totalSize;
   }
 }
