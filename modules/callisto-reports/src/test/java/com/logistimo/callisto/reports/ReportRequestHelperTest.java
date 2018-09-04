@@ -62,7 +62,7 @@ public class ReportRequestHelperTest {
     reportRequestHelper.setFilterService(filterService);
     when(queryService.getAllQueryIds("logistimo")).thenReturn(Arrays.asList("DID", "DID_KID",
         "DID_MID", "DID_KID_MID", "DID_KTAG_MID", "DID_KTAG_MID_CN", "DID_KTAG_MID_CN_ST",
-        "DID_KTAG_MID_CN_ST_TALUK"));
+        "DID_KTAG_MID_CN_ST_TALUK","HUB_DHUB_PRODUCT", "HUB_PRODUCT", "DHUB_PRODUCT"));
   }
 
 
@@ -86,6 +86,18 @@ public class ReportRequestHelperTest {
     queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("mid","page","did","ktag","cn","size","st")));
     Assert.assertEquals("DID_KTAG_MID_CN_ST", queryId);
+
+    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+        (Arrays.asList("hub", "product", "dhub")));
+    Assert.assertEquals("HUB_DHUB_PRODUCT", queryId);
+
+    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+        (Arrays.asList("hub", "product")));
+    Assert.assertEquals("HUB_PRODUCT", queryId);
+
+    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+        (Arrays.asList("product", "dhub")));
+    Assert.assertEquals("DHUB_PRODUCT", queryId);
   }
 
   @Test
