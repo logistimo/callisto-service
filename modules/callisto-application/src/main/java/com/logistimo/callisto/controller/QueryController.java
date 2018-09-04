@@ -147,7 +147,7 @@ public class QueryController {
   @RequestMapping(value = "/getdata", method = RequestMethod.POST)
   public String getQueryData(@RequestBody QueryRequestModel model, HttpServletRequest request)
       throws CallistoException {
-    QueryResults results = null;
+    QueryResults results;
     if (StringUtils.isNotEmpty(model.derivedResultsId)) {
       results = queryService.readData(model);
       if (results.getRowHeadings() == null) {
@@ -160,18 +160,7 @@ public class QueryController {
         results = resultManager.getDerivedResults(model, results, derivedColumns);
       }
     } else if (Objects.equals(request.getHeader("X-app-version"), "v2")) {
-      if (model.columnText != null && !model.columnText.isEmpty()) {
-        //expects only one element
-        Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
-        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
-            .parseColumnText(entry.getValue());
-        model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
-        results = queryService.readData(model);
-        if (results.getRowHeadings() == null) {
-          results.setRowHeadings(model.rowHeadings);
-        }
-        results = resultManager.getDerivedResults(model, results, parsedColumnData);
-      }
+      results = queryService.readAndModifyData(model, resultManager);
     } else {
       results = queryService.readData(model);
     }
@@ -180,6 +169,7 @@ public class QueryController {
     }
     return new Gson().toJson(results);
   }
+
 
   @RequestMapping(value = "/run", method = RequestMethod.POST)
   public ResponseEntity runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)

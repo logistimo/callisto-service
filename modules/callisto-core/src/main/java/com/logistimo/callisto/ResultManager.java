@@ -84,9 +84,7 @@ public class ResultManager {
             .toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
                 linkedHashMapMerger, LinkedHashMap::new));
     //TODO: mechanism to identify which column is for rowHeadings,
-    if(rs != null) {
-      rs.fillResults(request.rowHeadings, 0);
-    }
+    rs.fillResults(request.rowHeadings, 0);
     QueryResults derivedResults = new QueryResults();
     derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
     derivedResults.setRowHeadings(rs.getRowHeadings());

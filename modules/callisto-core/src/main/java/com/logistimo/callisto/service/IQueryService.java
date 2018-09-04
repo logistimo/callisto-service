@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto.service;
 
+import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.QueryRequestModel;
@@ -45,6 +46,8 @@ public interface IQueryService {
 
   QueryResults readData(QueryRequestModel requestModel)
       throws CallistoException;
+
+  QueryResults readAndModifyData(QueryRequestModel requestModel, ResultManager resultManager);
 
   void deleteQuery(String userId, String queryId);
 

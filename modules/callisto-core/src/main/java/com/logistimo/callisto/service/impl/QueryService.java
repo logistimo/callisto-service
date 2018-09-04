@@ -27,6 +27,7 @@ import com.logistimo.callisto.DataBaseCollection;
 import com.logistimo.callisto.FunctionManager;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.QueryResults;
+import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.exception.DuplicateQueryIdException;
 import com.logistimo.callisto.function.FunctionParam;
@@ -48,6 +49,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -193,6 +195,23 @@ public class QueryService implements IQueryService {
             request.offset);
     queryResults.setRowHeadings(rowHeadings);
     return queryResults;
+  }
+
+  @Override
+  public QueryResults readAndModifyData(QueryRequestModel requestModel, ResultManager resultManager) {
+      QueryResults results = readData(requestModel);
+      if (requestModel.columnText != null && !requestModel.columnText.isEmpty()) {
+        //expects only one element
+        Map.Entry<String, String> entry = requestModel.columnText.entrySet().iterator().next();
+        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
+            .parseColumnText(entry.getValue());
+        requestModel.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
+        if (results.getRowHeadings() == null) {
+          results.setRowHeadings(requestModel.rowHeadings);
+        }
+        results = resultManager.getDerivedResults(requestModel, results, parsedColumnData);
+      }
+      return results;
   }
 
   private QueryText getQueryText(QueryRequestModel request) {

@@ -100,7 +100,6 @@ public class ReportRequestHelper {
   }
 
   /**
-   *
    * @param userId userId against which the queries are registered
    * @param filterKeys set of filter keys for which the report is requested
    * @return best suitable queryId from the list of all registered queryIds
