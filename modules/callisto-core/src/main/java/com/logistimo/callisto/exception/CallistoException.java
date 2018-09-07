@@ -68,7 +68,7 @@ public class CallistoException extends Exception {
     if(locale == null){
       locale = Locale.ENGLISH;
     }
-    ResourceBundle errors = Resources.get().getBundle("errors",locale);
+    ResourceBundle errors = Resources.getBundle("errors",locale);
     String message;
     try {
       message = errors.getString(code);

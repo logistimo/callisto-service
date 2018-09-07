@@ -89,12 +89,10 @@ public class ResultManager {
     derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
     derivedResults.setRowHeadings(results.getRowHeadings());
     if (results.getHeadings() != null && results.getRows() != null) {
-      Map<String, List<String>>
-          functionsVarsMap =
-          derivedColumnMap.entrySet().stream()
-              .map(e -> Pair.of(e.getKey(), FunctionUtil.getAllFunctionsAndVariables(e.getValue())))
-              .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-      for (List row : results.getRows()) {
+      Map<String, List<String>> functionsVarsMap =
+          derivedColumnMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+              e -> FunctionUtil.getAllFunctionsAndVariables(e.getValue())));
+      for (List<String> row : results.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
         for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String r =
@@ -118,7 +116,7 @@ public class ResultManager {
     if (rowHeadings != null && results != null) {
       Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
       if (results.getRows() != null) {
-        for (List row : results.getRows()) {
+        for (List<String> row : results.getRows()) {
           rowHeadingsSet.remove(row.get(index));
         }
       }
