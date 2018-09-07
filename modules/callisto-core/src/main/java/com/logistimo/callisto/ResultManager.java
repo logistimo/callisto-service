@@ -73,28 +73,27 @@ public class ResultManager {
   public QueryResults getDesiredResult(
       QueryRequestModel request,
       QueryResults rs,
-      LinkedHashMap<String, String> derivedColumnMap)
+      Map<String, String> derivedColumnMap)
       throws CallistoException {
     List<String> headings = rs.getHeadings();
     if (derivedColumnMap == null || derivedColumnMap.isEmpty()) {
       return rs;
     }
-    derivedColumnMap =
-        derivedColumnMap.entrySet().stream().collect(Collectors
-            .toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
-                linkedHashMapMerger, LinkedHashMap::new));
+    Map<String, String> modifiedColumnMap = derivedColumnMap.entrySet().stream().collect(
+        Collectors.toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
+            linkedHashMapMerger, LinkedHashMap::new));
     //TODO: mechanism to identify which column is for rowHeadings,
     QueryResults results = fillResult(rs, request.rowHeadings, 0);
     QueryResults derivedResults = new QueryResults();
-    derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
+    derivedResults.setHeadings(new ArrayList<>(modifiedColumnMap.keySet()));
     derivedResults.setRowHeadings(results.getRowHeadings());
     if (results.getHeadings() != null && results.getRows() != null) {
       Map<String, List<String>> functionsVarsMap =
-          derivedColumnMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+          modifiedColumnMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
               e -> FunctionUtil.getAllFunctionsAndVariables(e.getValue())));
       for (List<String> row : results.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
-        for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
+        for (Map.Entry<String, String> entry : modifiedColumnMap.entrySet()) {
           String r =
               parseDesiredValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
                   headings, row);
@@ -197,14 +196,13 @@ public class ResultManager {
    * @param results original QueryResults
    * @return parsed Map
    */
-  public LinkedHashMap<String, String> getResultFormatMap(String strToParse, QueryResults results) {
+  public Map<String, String> getResultFormatMap(String strToParse, QueryResults results) {
     if (results == null || results.getHeadings() == null) {
       return null;
     }
     Type type = new TypeToken<LinkedHashMap<String, String>>() {
     }.getType();
-    LinkedHashMap<String, String> filterMap;
-    filterMap =
+    Map<String, String> filterMap =
         results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
             .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
                 linkedHashMapMerger, LinkedHashMap::new));

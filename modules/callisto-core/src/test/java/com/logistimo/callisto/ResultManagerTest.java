@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -84,7 +85,7 @@ public class ResultManagerTest {
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
     results.addRow(Arrays.asList("seriously?", "24", "340",
         "{\"key1\":23,\"key2\":10,\"key3\":8,\"key4\":2,\"key5\":25,\"key6\":12,\"key7\":14,\"key8\":17,\"key9\":20}"));
-    LinkedHashMap<String, String> desiredResultFormat = new LinkedHashMap<>();
+    Map<String, String> desiredResultFormat = new LinkedHashMap<>();
     desiredResultFormat.put("Display format of abc", "$abc $def $$math(100/(2.5*2))$$");
     desiredResultFormat.put("Modified 2nd column", "$$math($pqr/$def)$$");
     desiredResultFormat.put("Modified bottom map", "$$bottomx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");

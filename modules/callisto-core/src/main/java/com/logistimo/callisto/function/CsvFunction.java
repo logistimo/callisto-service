@@ -101,7 +101,7 @@ public class CsvFunction implements ICallistoFunction {
       csv.setLength(csv.length() - 1);
     }
 
-    if (queryParams.fill && results != null && results.getRows() != null) {
+    if (queryParams.isFill() && results != null && results.getRows() != null) {
       results.getRows().stream().filter(rows -> StringUtils.isNotEmpty(rows.get(0)))
           .forEach(rows -> param.getRowHeadings().add(rows.get(0)));
     }
@@ -112,10 +112,10 @@ public class CsvFunction implements ICallistoFunction {
                                                    QueryParams function) {
     QueryRequestModel nestedQueryResultModel = new QueryRequestModel();
     nestedQueryResultModel.userId = functionParam.getQueryRequestModel().userId;
-    nestedQueryResultModel.queryId = function.queryID;
+    nestedQueryResultModel.queryId = function.getQueryID();
     nestedQueryResultModel.filters = functionParam.getQueryRequestModel().filters;
-    nestedQueryResultModel.offset = function.offset;
-    nestedQueryResultModel.size = function.size;
+    nestedQueryResultModel.offset = function.getOffset();
+    nestedQueryResultModel.size = function.getSize();
     return nestedQueryResultModel;
   }
 

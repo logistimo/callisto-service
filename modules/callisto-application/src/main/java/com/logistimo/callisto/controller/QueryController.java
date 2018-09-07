@@ -94,7 +94,7 @@ public class QueryController {
       }
       ConstantText constant = constantService.readConstant(model.userId, model.derivedResultsId);
       if (constant != null) {
-        LinkedHashMap<String, String> derivedColumns =
+        Map<String, String> derivedColumns =
             resultManager.getResultFormatMap(constant.getConstant(), q);
         q = resultManager.getDesiredResult(model, q, derivedColumns);
 
@@ -103,7 +103,7 @@ public class QueryController {
       if (model.columnText != null && !model.columnText.isEmpty()) {
         //expects only one element
         Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
-        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
+        Map<String, String> parsedColumnData = FunctionUtil
             .parseColumnText(entry.getValue());
         model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
         q = queryService.readData(model);

@@ -35,11 +35,31 @@ import java.util.Map;
  * @author Mohan Raja
  */
 public class QueryParams {
-  public FunctionType type;
-  public String queryID;
-  public Integer size;
-  public Integer offset;
-  public boolean fill;
+  private FunctionType type;
+  private String queryID;
+  private Integer size;
+  private Integer offset;
+  private boolean fill;
+
+  public FunctionType getType() {
+    return type;
+  }
+
+  public String getQueryID() {
+    return queryID;
+  }
+
+  public Integer getSize() {
+    return size;
+  }
+
+  public Integer getOffset() {
+    return offset;
+  }
+
+  public boolean isFill() {
+    return fill;
+  }
 
   private static final Logger logger = LoggerFactory.getLogger(QueryParams.class);
 

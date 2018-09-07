@@ -238,7 +238,7 @@ public class FunctionUtil {
    * @return Map of modified column names and derived values. Values can contain
    * CallistoFunctions and column references as variables from the original result.
    */
-  public static LinkedHashMap<String, String> parseColumnText(String str) throws CallistoException {
+  public static Map<String, String> parseColumnText(String str) throws CallistoException {
     try {
       String[] splitArr = StringUtils.split(str, CharacterConstants.COMMA);
       for (int i = 0; i < splitArr.length; i++) {
