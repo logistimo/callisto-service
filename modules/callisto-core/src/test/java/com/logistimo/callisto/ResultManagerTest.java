@@ -30,10 +30,10 @@ import com.logistimo.callisto.function.MathFunction;
 import com.logistimo.callisto.function.TopxFunction;
 import com.logistimo.callisto.model.QueryRequestModel;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
@@ -48,22 +48,20 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ResultManagerTest {
 
-  ResultManager resultManager;
+  @Mock
   FunctionManager functionManager;
 
+  @Mock
   MathFunction mathFunction;
+
+  @Mock
   BottomxFunction bottomxFunction;
+
+  @Mock
   TopxFunction topxFunction;
 
-  @Before
-  public void setUp() {
-    functionManager = Mockito.mock(FunctionManager.class);
-    resultManager = new ResultManager();
-    resultManager.setFunctionManager(functionManager);
-    mathFunction = new MathFunction();
-    bottomxFunction = new BottomxFunction();
-    topxFunction = new TopxFunction();
-  }
+  @InjectMocks
+  ResultManager resultManager;
 
   @Test
   public void getDerivedResultTest() throws CallistoException {

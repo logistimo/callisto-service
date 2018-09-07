@@ -25,14 +25,10 @@ package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.function.DateTimeFunction;
-import com.logistimo.callisto.function.FunctionParam;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;

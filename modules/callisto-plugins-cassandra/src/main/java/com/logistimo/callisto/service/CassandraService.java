@@ -44,7 +44,8 @@ import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.ServerConfig;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class CassandraService implements IDataBaseService {
               DataType.tinyint().getName(),
               DataType.varint().getName()));
 
-  private static final Logger logger = Logger.getLogger(CassandraService.class);
+  private static final Logger logger = LoggerFactory.getLogger(CassandraService.class);
 
   @Override
   public QueryResults fetchRows(

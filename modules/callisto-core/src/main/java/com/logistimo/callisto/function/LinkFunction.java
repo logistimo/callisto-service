@@ -34,7 +34,8 @@ import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IQueryService;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,8 +52,10 @@ import java.util.stream.Collectors;
 @Component(value = "link")
 public class LinkFunction implements ICallistoFunction {
 
-  private static final Logger logger = Logger.getLogger(LinkFunction.class);
+  private static final Logger logger = LoggerFactory.getLogger(LinkFunction.class);
   private static final String NAME = "link";
+
+  @Autowired
   IQueryService queryService;
 
   public static List<String> getParameter(String value) {
@@ -138,11 +141,6 @@ public class LinkFunction implements ICallistoFunction {
           "Error while getting result for link function: " + functionParam.function, e1);
     }
     return e;
-  }
-
-  @Autowired
-  public void setQueryService(IQueryService queryService) {
-    this.queryService = queryService;
   }
 
   @Override

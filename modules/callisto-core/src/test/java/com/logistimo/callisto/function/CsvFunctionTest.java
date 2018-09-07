@@ -26,8 +26,6 @@ package com.logistimo.callisto.function;
 import com.logistimo.callisto.CallistoDataType;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.function.CsvFunction;
-import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IQueryService;
 
@@ -43,7 +41,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -112,7 +110,7 @@ public class CsvFunctionTest {
     return queryResults;
   }
 
-  class QueryRequestModelWithQueryId extends ArgumentMatcher<QueryRequestModel> {
+  class QueryRequestModelWithQueryId implements ArgumentMatcher<QueryRequestModel> {
 
     private String queryId;
     QueryRequestModelWithQueryId(String queryId) {
@@ -120,8 +118,7 @@ public class CsvFunctionTest {
     }
 
     @Override
-    public boolean matches(Object o) {
-      QueryRequestModel queryRequestModel = (QueryRequestModel) o;
+    public boolean matches(QueryRequestModel queryRequestModel) {
       return Objects.equals(queryId, queryRequestModel.queryId);
     }
   }

@@ -32,7 +32,8 @@ import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
@@ -54,8 +55,9 @@ import java.util.stream.Collectors;
 @Component
 public class ResultManager {
 
-  private static final Logger logger = Logger.getLogger(ResultManager.class);
+  private static final Logger logger = LoggerFactory.getLogger(ResultManager.class);
 
+  @Autowired
   private FunctionManager functionManager;
 
   public static final BinaryOperator<String> linkedHashMapMerger = (u, v) -> {
@@ -210,10 +212,5 @@ public class ResultManager {
                 linkedHashMapMerger, LinkedHashMap::new));
     filterMap.putAll(new Gson().fromJson(strToParse, type));
     return filterMap;
-  }
-
-  @Autowired
-  public void setFunctionManager(FunctionManager functionManager) {
-    this.functionManager = functionManager;
   }
 }

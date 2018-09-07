@@ -37,7 +37,8 @@ import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -54,14 +55,19 @@ import java.util.Optional;
 @Service
 public class QueryService implements IQueryService {
 
-  private static final Logger logger = Logger.getLogger(QueryService.class);
+  private static final Logger logger = LoggerFactory.getLogger(QueryService.class);
 
-  @Autowired private QueryRepository queryRepository;
+  @Autowired
+  private QueryRepository queryRepository;
 
-  @Autowired private UserService userService;
+  @Autowired
+  private UserService userService;
 
-  @Autowired private DataBaseCollection dataBaseCollection;
-  @Autowired private FunctionManager functionManager;
+  @Autowired
+  private DataBaseCollection dataBaseCollection;
+
+  @Autowired
+  private FunctionManager functionManager;
 
   public String saveQuery(QueryText q) {
     String res = "failure";
@@ -106,7 +112,7 @@ public class QueryService implements IQueryService {
 
   public QueryText readQuery(String userId, String queryId) {
     try {
-      List<QueryText> queryList = queryRepository.readQuery(userId, queryId, new PageRequest(0, 1));
+      List<QueryText> queryList = queryRepository.readQuery(userId, queryId, PageRequest.of(0, 1));
       if (queryList != null && !queryList.isEmpty()) {
         return queryList.get(0);
       }

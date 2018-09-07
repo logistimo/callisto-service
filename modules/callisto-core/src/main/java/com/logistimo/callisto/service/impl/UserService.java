@@ -30,7 +30,8 @@ import com.logistimo.callisto.repository.UserRepository;
 import com.logistimo.callisto.service.IUserService;
 import com.mongodb.DuplicateKeyException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -44,9 +45,10 @@ import java.util.List;
 @Service
 public class UserService implements IUserService {
 
-  private static final Logger logger = Logger.getLogger(UserService.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-  @Autowired private UserRepository repository;
+  @Autowired
+  private UserRepository repository;
 
   public User readUser(String userId) {
     User user = null;
@@ -93,7 +95,7 @@ public class UserService implements IUserService {
   public ServerConfig readServerConfig(String userId, String serverId) {
     ServerConfig serverConfig = null;
     try {
-      List<User> users = repository.readServerConfig(userId, serverId, new PageRequest(0, 1));
+      List<User> users = repository.readServerConfig(userId, serverId, PageRequest.of(0, 1));
       if (users != null && users.size() == 1) {
         List<ServerConfig> serverConfigs = users.get(0).getServerConfigs();
         if (serverConfigs != null) {

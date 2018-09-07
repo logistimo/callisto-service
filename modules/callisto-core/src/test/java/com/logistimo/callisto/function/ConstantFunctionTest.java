@@ -24,8 +24,6 @@
 package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.function.ConstantFunction;
-import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IConstantService;

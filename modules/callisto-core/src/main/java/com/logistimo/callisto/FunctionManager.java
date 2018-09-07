@@ -24,22 +24,18 @@
 package com.logistimo.callisto;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 /**
  * Created by chandrakant on 25/05/17.
  */
-@Configuration
+@Component
 public class FunctionManager {
 
-  Map<String, ICallistoFunction> functions;
-
   @Autowired
-  public void setFunctions(Map<String, ICallistoFunction> functions) {
-    this.functions = functions;
-  }
+  Map<String, ICallistoFunction> functions;
 
   public ICallistoFunction getFunction(String name) {
     return functions.get(name);

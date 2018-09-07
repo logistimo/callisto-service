@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -59,10 +58,14 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/query")
 public class QueryController {
 
-  @Resource IQueryService queryService;
-  @Resource IConstantService constantService;
+  @Autowired
+  IQueryService queryService;
 
-  @Autowired ResultManager resultManager;
+  @Autowired
+  IConstantService constantService;
+
+  @Autowired
+  ResultManager resultManager;
 
   @RequestMapping(value = "/save", method = RequestMethod.PUT)
   public String saveQuery(@RequestBody QueryText queryText) {

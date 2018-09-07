@@ -24,10 +24,11 @@
 package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CharacterConstants;
-import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.service.IConstantService;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
