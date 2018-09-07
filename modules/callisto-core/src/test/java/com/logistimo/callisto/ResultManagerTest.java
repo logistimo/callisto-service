@@ -30,6 +30,7 @@ import com.logistimo.callisto.function.MathFunction;
 import com.logistimo.callisto.function.TopxFunction;
 import com.logistimo.callisto.model.QueryRequestModel;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -51,17 +52,19 @@ public class ResultManagerTest {
   @Mock
   FunctionManager functionManager;
 
-  @Mock
-  MathFunction mathFunction;
-
-  @Mock
-  BottomxFunction bottomxFunction;
-
-  @Mock
-  TopxFunction topxFunction;
-
   @InjectMocks
   ResultManager resultManager;
+
+  MathFunction mathFunction;
+  BottomxFunction bottomxFunction;
+  TopxFunction topxFunction;
+
+  @Before
+  public void setUp() {
+    mathFunction = new MathFunction();
+    bottomxFunction = new BottomxFunction();
+    topxFunction = new TopxFunction();
+  }
 
   @Test
   public void getDerivedResultTest() throws CallistoException {

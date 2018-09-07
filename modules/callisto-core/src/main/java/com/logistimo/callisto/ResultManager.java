@@ -146,26 +146,26 @@ public class ResultManager {
       List<String> row)
       throws CallistoException {
     int index;
-    for (int i = 0; i < functionsVars.size(); i++) {
-      if ((index = variableIndex(functionsVars.get(i), headings)) > -1) {
+    for (String functionsVar : functionsVars) {
+      if ((index = variableIndex(functionsVar, headings)) > -1) {
         if (index > row.size() - 1) {
           return CharacterConstants.EMPTY;
         }
-        str = StringUtils.replaceOnce(str, functionsVars.get(i), row.get(index));
-      } else if (FunctionUtil.isFunction(functionsVars.get(i), false)) {
-        String functionType = FunctionUtil.getFunctionType(functionsVars.get(i));
+        str = StringUtils.replaceOnce(str, functionsVar, row.get(index));
+      } else if (FunctionUtil.isFunction(functionsVar, false)) {
+        String functionType = FunctionUtil.getFunctionType(functionsVar);
         if (functionType != null) {
           ICallistoFunction function = functionManager.getFunction(functionType);
           if (function == null) {
-            throw new CallistoException("Q001", functionsVars.get(i));
+            throw new CallistoException("Q001", functionsVar);
           }
           FunctionParam
               functionParam =
-              new FunctionParam(request, headings, row, functionsVars.get(i));
+              new FunctionParam(request, headings, row, functionsVar);
           str =
-              StringUtils.replaceOnce(str, functionsVars.get(i), function.getResult(functionParam));
+              StringUtils.replaceOnce(str, functionsVar, function.getResult(functionParam));
         } else {
-          throw new CallistoException("Q001", functionsVars.get(i));
+          throw new CallistoException("Q001", functionsVar);
         }
       }
     }
