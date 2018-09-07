@@ -70,12 +70,21 @@ public class CsvFunction implements ICallistoFunction {
    */
   public String getCSV(FunctionParam param, boolean forceEnclose)
       throws CallistoException {
-    StringBuilder csv = new StringBuilder();
-    QueryParams
-        queryParams =
+    QueryParams queryParams =
         QueryParams.getQueryParams(param.function, param.getQueryRequestModel().filters);
     QueryResults results =
         queryService.readData(buildQueryRequestModel(param, queryParams));
+    StringBuilder csv = constructCSV(param, forceEnclose, results);
+    if (queryParams.isFill() && results != null && results.getRows() != null) {
+      results.getRows().stream().filter(rows -> StringUtils.isNotEmpty(rows.get(0)))
+          .forEach(rows -> param.getRowHeadings().add(rows.get(0)));
+    }
+    return csv.toString();
+  }
+
+  private StringBuilder constructCSV(FunctionParam param, boolean forceEnclose,
+                            QueryResults results) {
+    StringBuilder csv = new StringBuilder();
     if (results != null && results.getRows() != null) {
       for (List<String> strings : results.getRows()) {
         if (!forceEnclose
@@ -96,16 +105,11 @@ public class CsvFunction implements ICallistoFunction {
               .append(CharacterConstants.COMMA);
         }
       }
+      if (csv.length() > 0) {
+        csv.setLength(csv.length() - 1);
+      }
     }
-    if (csv.length() > 0 && csv.charAt(csv.length() - 1) == CharacterConstants.COMMA_CHAR) {
-      csv.setLength(csv.length() - 1);
-    }
-
-    if (queryParams.isFill() && results != null && results.getRows() != null) {
-      results.getRows().stream().filter(rows -> StringUtils.isNotEmpty(rows.get(0)))
-          .forEach(rows -> param.getRowHeadings().add(rows.get(0)));
-    }
-    return csv.toString();
+    return csv;
   }
 
   private QueryRequestModel buildQueryRequestModel(FunctionParam functionParam,
