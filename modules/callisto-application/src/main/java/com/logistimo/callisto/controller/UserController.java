@@ -26,7 +26,7 @@ package com.logistimo.callisto.controller;
 import com.logistimo.callisto.model.User;
 import com.logistimo.callisto.service.IUserService;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

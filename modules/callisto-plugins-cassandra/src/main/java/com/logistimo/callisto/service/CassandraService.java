@@ -43,7 +43,7 @@ import com.logistimo.callisto.DataSourceType;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.ServerConfig;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

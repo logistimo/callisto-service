@@ -32,7 +32,7 @@ import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -85,29 +85,30 @@ public class CsvFunction implements ICallistoFunction {
   private StringBuilder constructCSV(FunctionParam param, boolean forceEnclose,
                             QueryResults results) {
     StringBuilder csv = new StringBuilder();
-    if (results != null && results.getRows() != null) {
-      for (List<String> strings : results.getRows()) {
-        if (!forceEnclose
-            && results.getDataTypes() != null
-            && CallistoDataType.NUMBER.equals(results.getDataTypes().get(0))) {
-          csv.append(strings.get(0)).append(CharacterConstants.COMMA);
+    if(results == null || results.getRows() == null) {
+      return csv;
+    }
+    for (List<String> strings : results.getRows()) {
+      if (!forceEnclose
+          && results.getDataTypes() != null
+          && CallistoDataType.NUMBER.equals(results.getDataTypes().get(0))) {
+        csv.append(strings.get(0)).append(CharacterConstants.COMMA);
+      } else {
+        String enclosing;
+        if (strings.get(0).contains(CharacterConstants.SINGLE_QUOTE)
+            && StringUtils.isNotEmpty(param.getEscaping())) {
+          enclosing = param.getEscaping();
         } else {
-          String enclosing;
-          if (strings.get(0).contains(CharacterConstants.SINGLE_QUOTE)
-              && StringUtils.isNotEmpty(param.getEscaping())) {
-            enclosing = param.getEscaping();
-          } else {
-            enclosing = CharacterConstants.SINGLE_QUOTE;
-          }
-          csv.append(enclosing)
-              .append(strings.get(0))
-              .append(enclosing)
-              .append(CharacterConstants.COMMA);
+          enclosing = CharacterConstants.SINGLE_QUOTE;
         }
+        csv.append(enclosing)
+            .append(strings.get(0))
+            .append(enclosing)
+            .append(CharacterConstants.COMMA);
       }
-      if (csv.length() > 0) {
-        csv.setLength(csv.length() - 1);
-      }
+    }
+    if (csv.length() > 0) {
+      csv.setLength(csv.length() - 1);
     }
     return csv;
   }

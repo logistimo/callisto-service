@@ -27,7 +27,7 @@ import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
