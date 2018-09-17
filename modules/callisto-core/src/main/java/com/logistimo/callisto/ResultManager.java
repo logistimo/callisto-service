@@ -31,8 +31,9 @@ import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
@@ -54,8 +55,9 @@ import java.util.stream.Collectors;
 @Component
 public class ResultManager {
 
-  private static final Logger logger = Logger.getLogger(ResultManager.class);
+  private static final Logger logger = LoggerFactory.getLogger(ResultManager.class);
 
+  @Autowired
   private FunctionManager functionManager;
 
   public static final BinaryOperator<String> linkedHashMapMerger = (u, v) -> {
@@ -71,30 +73,27 @@ public class ResultManager {
   public QueryResults getDesiredResult(
       QueryRequestModel request,
       QueryResults rs,
-      LinkedHashMap<String, String> derivedColumnMap)
+      Map<String, String> derivedColumnMap)
       throws CallistoException {
     List<String> headings = rs.getHeadings();
     if (derivedColumnMap == null || derivedColumnMap.isEmpty()) {
       return rs;
     }
-    derivedColumnMap =
-        derivedColumnMap.entrySet().stream().collect(Collectors
-            .toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
-                linkedHashMapMerger, LinkedHashMap::new));
+    Map<String, String> modifiedColumnMap = derivedColumnMap.entrySet().stream().collect(
+        Collectors.toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
+            linkedHashMapMerger, LinkedHashMap::new));
     //TODO: mechanism to identify which column is for rowHeadings,
     QueryResults results = fillResult(rs, request.rowHeadings, 0);
     QueryResults derivedResults = new QueryResults();
-    derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
+    derivedResults.setHeadings(new ArrayList<>(modifiedColumnMap.keySet()));
     derivedResults.setRowHeadings(results.getRowHeadings());
     if (results.getHeadings() != null && results.getRows() != null) {
-      Map<String, List<String>>
-          functionsVarsMap =
-          derivedColumnMap.entrySet().stream()
-              .map(e -> Pair.of(e.getKey(), FunctionUtil.getAllFunctionsAndVariables(e.getValue())))
-              .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-      for (List row : results.getRows()) {
+      Map<String, List<String>> functionsVarsMap =
+          modifiedColumnMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+              e -> FunctionUtil.getAllFunctionsAndVariables(e.getValue())));
+      for (List<String> row : results.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
-        for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
+        for (Map.Entry<String, String> entry : modifiedColumnMap.entrySet()) {
           String r =
               parseDesiredValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
                   headings, row);
@@ -116,7 +115,7 @@ public class ResultManager {
     if (rowHeadings != null && results != null) {
       Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
       if (results.getRows() != null) {
-        for (List row : results.getRows()) {
+        for (List<String> row : results.getRows()) {
           rowHeadingsSet.remove(row.get(index));
         }
       }
@@ -144,26 +143,26 @@ public class ResultManager {
       List<String> row)
       throws CallistoException {
     int index;
-    for (int i = 0; i < functionsVars.size(); i++) {
-      if ((index = variableIndex(functionsVars.get(i), headings)) > -1) {
+    for (String functionsVar : functionsVars) {
+      if ((index = variableIndex(functionsVar, headings)) > -1) {
         if (index > row.size() - 1) {
           return CharacterConstants.EMPTY;
         }
-        str = StringUtils.replaceOnce(str, functionsVars.get(i), row.get(index));
-      } else if (FunctionUtil.isFunction(functionsVars.get(i), false)) {
-        String functionType = FunctionUtil.getFunctionType(functionsVars.get(i));
+        str = StringUtils.replaceOnce(str, functionsVar, row.get(index));
+      } else if (FunctionUtil.isFunction(functionsVar, false)) {
+        String functionType = FunctionUtil.getFunctionType(functionsVar);
         if (functionType != null) {
           ICallistoFunction function = functionManager.getFunction(functionType);
           if (function == null) {
-            throw new CallistoException("Q001", functionsVars.get(i));
+            throw new CallistoException("Q001", functionsVar);
           }
           FunctionParam
               functionParam =
-              new FunctionParam(request, headings, row, functionsVars.get(i));
+              new FunctionParam(request, headings, row, functionsVar);
           str =
-              StringUtils.replaceOnce(str, functionsVars.get(i), function.getResult(functionParam));
+              StringUtils.replaceOnce(str, functionsVar, function.getResult(functionParam));
         } else {
-          throw new CallistoException("Q001", functionsVars.get(i));
+          throw new CallistoException("Q001", functionsVar);
         }
       }
     }
@@ -197,23 +196,17 @@ public class ResultManager {
    * @param results original QueryResults
    * @return parsed Map
    */
-  public LinkedHashMap<String, String> getResultFormatMap(String strToParse, QueryResults results) {
+  public Map<String, String> getResultFormatMap(String strToParse, QueryResults results) {
     if (results == null || results.getHeadings() == null) {
       return null;
     }
     Type type = new TypeToken<LinkedHashMap<String, String>>() {
     }.getType();
-    LinkedHashMap<String, String> filterMap;
-    filterMap =
+    Map<String, String> filterMap =
         results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
             .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
                 linkedHashMapMerger, LinkedHashMap::new));
     filterMap.putAll(new Gson().fromJson(strToParse, type));
     return filterMap;
-  }
-
-  @Autowired
-  public void setFunctionManager(FunctionManager functionManager) {
-    this.functionManager = functionManager;
   }
 }

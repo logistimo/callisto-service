@@ -35,7 +35,7 @@ import com.logistimo.callisto.model.QueryText;
 import com.logistimo.callisto.service.IConstantService;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,12 +43,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -59,10 +57,14 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/query")
 public class QueryController {
 
-  @Resource IQueryService queryService;
-  @Resource IConstantService constantService;
+  @Autowired
+  IQueryService queryService;
 
-  @Autowired ResultManager resultManager;
+  @Autowired
+  IConstantService constantService;
+
+  @Autowired
+  ResultManager resultManager;
 
   @RequestMapping(value = "/save", method = RequestMethod.PUT)
   public String saveQuery(@RequestBody QueryText queryText) {
@@ -91,7 +93,7 @@ public class QueryController {
       }
       ConstantText constant = constantService.readConstant(model.userId, model.derivedResultsId);
       if (constant != null) {
-        LinkedHashMap<String, String> derivedColumns =
+        Map<String, String> derivedColumns =
             resultManager.getResultFormatMap(constant.getConstant(), q);
         q = resultManager.getDesiredResult(model, q, derivedColumns);
 
@@ -100,7 +102,7 @@ public class QueryController {
       if (model.columnText != null && !model.columnText.isEmpty()) {
         //expects only one element
         Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
-        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
+        Map<String, String> parsedColumnData = FunctionUtil
             .parseColumnText(entry.getValue());
         model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
         q = queryService.readData(model);

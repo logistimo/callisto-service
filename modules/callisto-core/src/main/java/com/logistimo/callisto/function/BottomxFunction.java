@@ -30,7 +30,7 @@ import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;

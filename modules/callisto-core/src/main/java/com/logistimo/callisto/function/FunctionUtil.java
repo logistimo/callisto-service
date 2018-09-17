@@ -27,8 +27,9 @@ import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +48,7 @@ import java.util.stream.Stream;
  */
 public class FunctionUtil {
 
-  private static final Logger logger = Logger.getLogger(FunctionUtil.class);
+  private static final Logger logger = LoggerFactory.getLogger(FunctionUtil.class);
   private static final String[]
       delimiters =
       {CharacterConstants.ADD, CharacterConstants.COMMA, CharacterConstants.CLOSE_BRACKET,
@@ -211,20 +212,20 @@ public class FunctionUtil {
   public static String replaceVariables(String val, List<String> headings, List<String> row)
       throws CallistoException {
     List<String> variables = getAllVariables(val, CharacterConstants.DOLLAR);
-    for (int i = 0; i < variables.size(); i++) {
-      int index = ResultManager.variableIndex(variables.get(i), headings);
+    for (String variable : variables) {
+      int index = ResultManager.variableIndex(variable, headings);
       if (index != -1) {
-        if(StringUtils.isNotEmpty(row.get(index))){
-          val = StringUtils.replace(val, variables.get(i), row.get(index));
-        }else{
-          val = StringUtils.replace(val, variables.get(i), CharacterConstants.EMPTY);
+        if (StringUtils.isNotEmpty(row.get(index))) {
+          val = StringUtils.replace(val, variable, row.get(index));
+        } else {
+          val = StringUtils.replace(val, variable, CharacterConstants.EMPTY);
         }
       } else {
         if (row.size() == headings.size()) {
           logger.warn("Unknown variable found in Math function: " + val);
-          throw new CallistoException("Q102", variables.get(i), headings.toString());
+          throw new CallistoException("Q102", variable, headings.toString());
         }
-        val = StringUtils.replace(val, variables.get(i), CharacterConstants.EMPTY);
+        val = StringUtils.replace(val, variable, CharacterConstants.EMPTY);
       }
     }
     return val;
@@ -237,7 +238,7 @@ public class FunctionUtil {
    * @return Map of modified column names and derived values. Values can contain
    * CallistoFunctions and column references as variables from the original result.
    */
-  public static LinkedHashMap<String, String> parseColumnText(String str) throws CallistoException {
+  public static Map<String, String> parseColumnText(String str) throws CallistoException {
     try {
       String[] splitArr = StringUtils.split(str, CharacterConstants.COMMA);
       for (int i = 0; i < splitArr.length; i++) {

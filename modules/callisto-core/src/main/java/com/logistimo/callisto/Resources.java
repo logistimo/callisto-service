@@ -26,20 +26,18 @@ package com.logistimo.callisto;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
  * @author Mohan Raja
  */
-public class Resources {
+public final class Resources {
 
-  private static final Resources SINGLETON = new Resources();
-  private final Map<String,ResourceBundle> rmap = new HashMap<>();
+  private Resources(){}
 
-  public static Resources get() { return SINGLETON; }
+  private static final Map<String,ResourceBundle> rmap = new HashMap<>();
 
-  public ResourceBundle getBundle( String baseName, Locale locale ) {
+  public static ResourceBundle getBundle( String baseName, Locale locale ) {
     if ( baseName == null || locale == null ) {
       return null;
     }

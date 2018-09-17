@@ -26,7 +26,8 @@ package com.logistimo.callisto;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionType;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -34,13 +35,33 @@ import java.util.Map;
  * @author Mohan Raja
  */
 public class QueryParams {
-  public FunctionType type;
-  public String queryID;
-  public Integer size;
-  public Integer offset;
-  public boolean fill;
+  private FunctionType type;
+  private String queryID;
+  private Integer size;
+  private Integer offset;
+  private boolean fill;
 
-  private static final Logger logger = Logger.getLogger(QueryParams.class);
+  public FunctionType getType() {
+    return type;
+  }
+
+  public String getQueryID() {
+    return queryID;
+  }
+
+  public Integer getSize() {
+    return size;
+  }
+
+  public Integer getOffset() {
+    return offset;
+  }
+
+  public boolean isFill() {
+    return fill;
+  }
+
+  private static final Logger logger = LoggerFactory.getLogger(QueryParams.class);
 
   public static QueryParams getQueryParams(String functionText, Map<String, String> filters)
       throws CallistoException {

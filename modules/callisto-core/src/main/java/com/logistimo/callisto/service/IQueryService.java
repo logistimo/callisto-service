@@ -23,8 +23,8 @@
 
 package com.logistimo.callisto.service;
 
-import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.QueryResults;
+import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
 

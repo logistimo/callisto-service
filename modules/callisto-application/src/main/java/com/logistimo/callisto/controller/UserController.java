@@ -26,17 +26,24 @@ package com.logistimo.callisto.controller;
 import com.logistimo.callisto.model.User;
 import com.logistimo.callisto.service.IUserService;
 
-import org.apache.commons.lang.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /** @author Chandrakant */
 @RestController
 @RequestMapping("/user")
 public class UserController {
-  @Resource IUserService userService;
+
+  @Autowired
+  IUserService userService;
 
   @RequestMapping(value = "/get", method = RequestMethod.GET)
   public @ResponseBody User getUser(@RequestParam(defaultValue = "logistimo") String userId) {

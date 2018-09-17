@@ -26,19 +26,22 @@ package com.logistimo.callisto.service.impl;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.repository.ConstantRepository;
 import com.logistimo.callisto.service.IConstantService;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /** Created by chandrakant on 19/05/17. */
 @Service
 public class ConstantService implements IConstantService {
 
-  private static final Logger logger = Logger.getLogger(UserService.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-  @Resource private ConstantRepository repository;
+  @Autowired
+  private ConstantRepository repository;
 
   @Override
   public ConstantText readConstant(String userId, String constId) {

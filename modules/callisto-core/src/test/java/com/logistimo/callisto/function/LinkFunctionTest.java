@@ -25,16 +25,14 @@ package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.function.FunctionParam;
-import com.logistimo.callisto.function.LinkFunction;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Arrays;
@@ -43,21 +41,17 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class LinkFunctionTest {
 
-  LinkFunction linkFunction;
+  @Mock
   IQueryService queryService;
 
-  @Before
-  public void setUp() {
-    queryService = Mockito.mock(IQueryService.class);
-    linkFunction = new LinkFunction();
-    linkFunction.setQueryService(queryService);
-  }
+  @InjectMocks
+  LinkFunction linkFunction;
 
   @Test
   public void linkFunctionTestInit() throws CallistoException {
@@ -65,8 +59,9 @@ public class LinkFunctionTest {
     FunctionParam param = new FunctionParam();
     param.setQueryRequestModel(new QueryRequestModel());
     param.function = fun;
-    QueryResults queryResults = generateQueryResultsModel(Arrays.asList("h1"), Arrays.asList
-        (Arrays.asList("This is the expected result")));
+    QueryResults queryResults = generateQueryResultsModel(
+        Collections.singletonList("h1"),
+        Collections.singletonList(Collections.singletonList("This is the expected result")));
     when(queryService.readData(argThat(new QueryRequestModelWithQueryId("query_id1"))))
         .thenReturn(queryResults);
     String result = linkFunction.getResult(param);
@@ -79,8 +74,10 @@ public class LinkFunctionTest {
     FunctionParam param = new FunctionParam();
     param.setQueryRequestModel(new QueryRequestModel());
     param.function = fun;
-    QueryResults queryResults = generateQueryResultsModel(Arrays.asList("h1"), Arrays.asList
-        (Arrays.asList("This is the expected result"),Arrays.asList("This is the second result")));
+    QueryResults queryResults = generateQueryResultsModel(
+        Collections.singletonList("h1"), Arrays.asList
+        (Collections.singletonList("This is the expected result"),
+            Collections.singletonList("This is the second result")));
     when(queryService.readData(argThat(new QueryRequestModelWithQueryId("query_id1"))))
         .thenReturn(queryResults);
     String result = linkFunction.getResult(param);
@@ -94,7 +91,7 @@ public class LinkFunctionTest {
     FunctionParam param = new FunctionParam();
     param.setQueryRequestModel(new QueryRequestModel());
     param.function = fun;
-    QueryResults queryResults = generateQueryResultsModel(Arrays.asList("h1"),
+    QueryResults queryResults = generateQueryResultsModel(Collections.singletonList("h1"),
         Collections.emptyList());
     when(queryService.readData(argThat(new QueryRequestModelWithQueryId("query_id1"))))
         .thenReturn(queryResults);
@@ -109,7 +106,7 @@ public class LinkFunctionTest {
     return queryResults;
   }
 
-  class QueryRequestModelWithQueryId extends ArgumentMatcher<QueryRequestModel> {
+  class QueryRequestModelWithQueryId implements ArgumentMatcher<QueryRequestModel> {
 
     private String queryId;
     QueryRequestModelWithQueryId(String queryId) {
@@ -117,8 +114,7 @@ public class LinkFunctionTest {
     }
 
     @Override
-    public boolean matches(Object o) {
-      QueryRequestModel queryRequestModel = (QueryRequestModel) o;
+    public boolean matches(QueryRequestModel queryRequestModel) {
       return Objects.equals(queryId, queryRequestModel.queryId);
     }
   }

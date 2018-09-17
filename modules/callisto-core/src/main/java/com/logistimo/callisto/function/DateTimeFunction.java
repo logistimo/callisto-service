@@ -27,10 +27,11 @@ import com.logistimo.callisto.CharacterConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ import java.util.Objects;
 @Component(value = "datetime")
 public class DateTimeFunction implements ICallistoFunction {
 
-  private static final Logger logger = Logger.getLogger(DateTimeFunction.class);
+  private static final Logger logger = LoggerFactory.getLogger(DateTimeFunction.class);
   private static final String NAME = "datetime";
   private static final Integer ARGS_LENGTH = 3;
 
