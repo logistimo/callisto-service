@@ -56,9 +56,7 @@ export class DataService {
     reqOptions['observe'] = 'response';
     return this.http.get('query', reqOptions)
         .map(res => {
-          return Utils.checkNotNullEmpty(res['body']) ?
-          { result: res['body'], totalSize: res['headers'].get('size')} :
-          { result: null, totalSize: 0 }
+          return res['body'];
         });
   }
 
@@ -69,9 +67,7 @@ export class DataService {
     reqOptions['observe'] = 'response';
     return this.http.get('query/search/' + term, reqOptions)
         .map(res => {
-          return Utils.checkNotNullEmpty(res['body']) ?
-          {result: res['body'], totalSize: res['headers'].get('size')} :
-          { result: null, totalSize: 0 };
+          return res['body'];
         });
   }
 

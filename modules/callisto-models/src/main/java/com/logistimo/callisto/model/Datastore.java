@@ -23,10 +23,9 @@
 
 package com.logistimo.callisto.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.util.List;
 
@@ -38,31 +37,31 @@ public class Datastore {
   @Id
   private String id;
 
-  @JsonProperty("userId")
+  @SerializedName("userId")
   private String userId;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name;
 
-  @JsonProperty("hosts")
+  @SerializedName("hosts")
   private List<String> hosts;
 
-  @JsonProperty("port")
+  @SerializedName("port")
   private Integer port;
 
-  @JsonProperty("username")
+  @SerializedName("username")
   private String username;
 
-  @JsonProperty("password")
+  @SerializedName("password")
   private String password;
 
-  @JsonProperty("schema")
+  @SerializedName("schema")
   private String schema;
 
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type;
 
-  @JsonProperty("escaping")
+  @SerializedName("escaping")
   private String escaping;
 
   public String getId() {

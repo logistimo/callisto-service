@@ -33,9 +33,9 @@ import com.logistimo.callisto.exception.DuplicateQueryIdException;
 import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.Datastore;
+import com.logistimo.callisto.model.PagedResults;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.PageResultsModel;
 import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
@@ -115,11 +115,11 @@ public class QueryService implements IQueryService {
   }
 
   @Override
-  public PageResultsModel searchQueriesLike(String userId, String like, Pageable pageable) {
-    PageResultsModel pageResultsModel = new PageResultsModel();
-    pageResultsModel.setResult(queryRepository.searchQueriesWithQueryId(userId, like, pageable));
-    pageResultsModel.setTotalResultsCount(queryRepository.getSearchQueriesCount(userId, like));
-    return pageResultsModel;
+  public PagedResults searchQueriesLike(String userId, String like, Pageable pageable) {
+    PagedResults<QueryText> pagedResults = new PagedResults();
+    pagedResults.setResult(queryRepository.searchQueriesWithQueryId(userId, like, pageable));
+    pagedResults.setTotalSize(queryRepository.getSearchQueriesCount(userId, like));
+    return pagedResults;
   }
 
   public QueryText readQuery(String userId, String queryId) {

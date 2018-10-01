@@ -23,6 +23,8 @@
 
 package com.logistimo.callisto.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.data.annotation.Id;
@@ -39,25 +41,25 @@ public class Filter {
   private String id;
 
   @Indexed
-  @JsonProperty("filter_id")
+  @SerializedName("filter_id")
   private String filterId;
 
-  @JsonProperty("user_id")
+  @SerializedName("user_id")
   private String userId;
 
-  @JsonProperty("placeholder")
+  @SerializedName("placeholder")
   private String placeholder;
 
-  @JsonProperty("name")
+  @SerializedName("name")
   private String name;
 
-  @JsonProperty("auto_complete_config")
+  @SerializedName("auto_complete_config")
   private FilterAutoCompleteConfigModel autoCompleteConfig;
 
-  @JsonProperty("is_column_filter")
+  @SerializedName("is_column_filter")
   private boolean isColumnFilter;
 
-  @JsonProperty("rename_query_id")
+  @SerializedName("rename_query_id")
   private String renameQueryId;
 
   public String getDefaultAutoCompleteQueryId() {

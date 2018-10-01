@@ -23,7 +23,8 @@
 
 package com.logistimo.callisto.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
+
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -38,20 +39,20 @@ public class QueryText {
 
   @Id private String id;
 
-  @JsonProperty("user_id")
+  @SerializedName("user_id")
   private String userId = "logistimo";
 
   @Indexed
-  @JsonProperty("query_id")
+  @SerializedName("query_id")
   private String queryId;
 
-  @JsonProperty("query")
+  @SerializedName("query")
   private String query;
 
-  @JsonProperty("columns")
+  @SerializedName("columns")
   private String columns;
 
-  @JsonProperty("datastore_id")
+  @SerializedName("datastore_id")
   private String datastoreId;
 
   public String getId() {

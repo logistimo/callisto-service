@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -38,7 +38,7 @@ public class User {
   @Id private String id;
 
   @Indexed(unique = true)
-  @JsonProperty("user_id")
+  @SerializedName("user_id")
   private String userId = "logistimo";
 
   public String getId() {

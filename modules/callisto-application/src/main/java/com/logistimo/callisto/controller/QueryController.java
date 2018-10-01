@@ -34,7 +34,6 @@ import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
-import com.logistimo.callisto.model.PageResultsModel;
 import com.logistimo.callisto.service.IConstantService;
 import com.logistimo.callisto.service.IQueryService;
 
@@ -84,7 +83,7 @@ public class QueryController {
                                     String userId) {
     List<QueryText> queryTexts = queryService.readQueries(userId, pageable);
     Long totalSize = queryService.getTotalNumberOfQueries(userId);
-    PagedResults pagedResults = new PagedResults();
+    PagedResults<QueryText> pagedResults = new PagedResults<>();
     pagedResults.setResult(queryTexts);
     pagedResults.setTotalSize(totalSize);
     return new ResponseEntity<>(pagedResults, HttpStatus.OK);
@@ -94,14 +93,9 @@ public class QueryController {
   public ResponseEntity getQueriesLike(@PageableDefault(page = 0, size = Integer.MAX_VALUE)
                                     Pageable pageable, @RequestParam(defaultValue = "logistimo")
                                     String userId, @PathVariable String like) {
-    PageResultsModel pageResultsModel = queryService.searchQueriesLike(userId, like, pageable);
+    PagedResults pageResultsModel = queryService.searchQueriesLike(userId, like, pageable);
     MultiValueMap<String, String> headers = new HttpHeaders();
-    Long totalSize = pageResultsModel.getTotalResultsCount();
-    if(totalSize != null) {
-      headers.put(RESPONSE_TOTAL_SIZE_HEADER_KEY, Collections.singletonList(String.valueOf
-          (totalSize)));
-    }
-    return new ResponseEntity<>(pageResultsModel.getResult(), headers, HttpStatus.OK);
+    return new ResponseEntity<>(pageResultsModel, headers, HttpStatus.OK);
   }
 
   @RequestMapping(value = "/ids", method = RequestMethod.GET)

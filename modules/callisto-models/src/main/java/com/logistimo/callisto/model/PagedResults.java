@@ -25,20 +25,21 @@ package com.logistimo.callisto.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class PagedResults {
+import java.util.List;
+
+public class PagedResults<T> {
 
   @SerializedName("result")
-  private Object result;
+  private List<? extends T> result;
 
-  //TODO: Change corresponding UI field
   @SerializedName("total_size")
   private long totalSize;
 
-  public Object getResult() {
+  public List<? extends T> getResult() {
     return result;
   }
 
-  public void setResult(Object result) {
+  public void setResult(List<? extends T> result) {
     this.result = result;
   }
 

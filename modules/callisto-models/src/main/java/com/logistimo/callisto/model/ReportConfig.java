@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -40,19 +40,19 @@ public class ReportConfig {
   @Id
   private String id;
 
-  @JsonProperty("user_id")
+  @SerializedName("user_id")
   private String userId;
 
   @Indexed
-  @JsonProperty("type")
+  @SerializedName("type")
   private String type;
 
-  @JsonProperty("sub_type")
+  @SerializedName("sub_type")
   private String subType;
 
-  @JsonProperty("metrics")
+  @SerializedName("metrics")
   private Map<String, String> metrics;
 
-  @JsonProperty("column_filter_id")
+  @SerializedName("column_filter_id")
   private String columnFilterId;
 }

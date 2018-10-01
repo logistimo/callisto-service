@@ -23,7 +23,8 @@
 
 package com.logistimo.callisto.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -35,13 +36,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class ConstantText {
 
     @Id
-    @JsonProperty("id")
+    @SerializedName("id")
     private String id;
 
-    @JsonProperty("user_id")
+    @SerializedName("user_id")
     private String userId = "logistimo";
 
-    @JsonProperty("constant")
+    @SerializedName("constant")
     private String constant;
 
     public String getConstant(){

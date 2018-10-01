@@ -74,7 +74,7 @@ export class QueryListingComponent implements OnInit {
         ? this.dataService.getQueries(page, pageSize) : this.dataService.searchQueriesLike(searchQueryId, page, pageSize);
     queries
         .map(res => {
-          this.totalDataSize = res.totalSize;
+          this.totalDataSize = res['total_size'];
           return Utils.checkNotNullEmpty(res.result) ? res.result : []
         })
         .map(queries => {
