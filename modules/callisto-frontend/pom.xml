@@ -38,7 +38,7 @@
     <build>
         <resources>
             <resource>
-                <directory>dist</directory>
+                <directory>callisto-angular/dist</directory>
             </resource>
         </resources>
         <plugins>

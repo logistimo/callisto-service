@@ -81,10 +81,14 @@ export class QueryComponent implements OnInit {
   populateFilters() {
     const _filters : any = {};
     for(let key in this.filterDisplayNames) {
+      var placeholder = this.getPlaceholderFromFilterId(key, this.domainFilters);
+      if(Utils.checkNullEmpty(placeholder)) {
+        continue;
+      }
       if(this.filters[key] instanceof FilterResult) {
-        _filters[key] = (this.filters[key] as FilterResult).value;
+        _filters[placeholder] = (this.filters[key] as FilterResult).value;
       } else {
-        _filters[key] = this.filterDisplayNames[key];
+        _filters[placeholder] = this.filterDisplayNames[key];
       }
     }
     return _filters;
@@ -158,7 +162,7 @@ export class QueryComponent implements OnInit {
         break;
       }
       const filterId = query.substr(startIndex, endIndex-startIndex+filterIdentifierPrefix.length).slice(2,-2);
-      const filter : Filter = this.findFilterFromFilterId(filterId, this.domainFilters);
+      const filter : Filter = this.findFilterFromPlaceholder(filterId, this.domainFilters);
 
       const formControl = new FormControl();
       if(filter.is_column_filter) {
@@ -176,13 +180,22 @@ export class QueryComponent implements OnInit {
     const functionIdentifierSuffix = "$$";
   }
 
-  private findFilterFromFilterId(filterId, filters: Filter[]) {
+  private findFilterFromPlaceholder(placeholder, filters: Filter[]) {
     for (var i = 0; i < filters.length; i++) {
-      if(filterId == filters[i].filter_id) {
+      if(placeholder == filters[i].placeholder) {
         return filters[i];
       }
     }
     return new Filter();
+  }
+
+  private getPlaceholderFromFilterId(filterId, filters: Filter[]) {
+    for (var i = 0; i < filters.length; i++) {
+      if(filterId == filters[i].filter_id) {
+        return filters[i].placeholder;
+      }
+    }
+    return null;
   }
 
   private filterValueSelected(event, filterId) {

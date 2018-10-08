@@ -27,13 +27,13 @@ import com.google.gson.Gson;
 
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
-import com.logistimo.callisto.model.PagedResults;
-import com.logistimo.callisto.model.SuccessResponseDetails;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.ConstantText;
+import com.logistimo.callisto.model.PagedResults;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
+import com.logistimo.callisto.model.SuccessResponseDetails;
 import com.logistimo.callisto.service.IConstantService;
 import com.logistimo.callisto.service.IQueryService;
 
@@ -52,7 +52,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -168,25 +167,23 @@ public class QueryController {
   public ResponseEntity runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)
       throws CallistoException {
     QueryResults results = null;
-    if (Objects.equals(request.getHeader("X-app-version"), "v2")) {
-      if (model.columnText != null && !model.columnText.isEmpty()) {
-        //expects only one element
-        Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
-        LinkedHashMap<String, String> parsedColumnData = new LinkedHashMap<>();
-        if (StringUtils.isNotEmpty(entry.getKey()) && StringUtils.isNotEmpty(entry.getValue())) {
-          parsedColumnData = FunctionUtil
-              .parseColumnText(entry.getValue());
-          if (model.filters == null) {
-            model.filters = new HashMap<>();
-          }
-          model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
+    if (model.columnText != null && !model.columnText.isEmpty()) {
+      //expects only one element
+      Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
+      LinkedHashMap<String, String> parsedColumnData = new LinkedHashMap<>();
+      if (StringUtils.isNotEmpty(entry.getKey()) && StringUtils.isNotEmpty(entry.getValue())) {
+        parsedColumnData = FunctionUtil
+            .parseColumnText(entry.getValue());
+        if (model.filters == null) {
+          model.filters = new HashMap<>();
         }
-        results = queryService.readData(model);
-        if (results.getRowHeadings() == null) {
-          results.setRowHeadings(model.rowHeadings);
-        }
-        results = resultManager.getDerivedResults(model, results, parsedColumnData);
+        model.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
       }
+      results = queryService.readData(model);
+      if (results.getRowHeadings() == null) {
+        results.setRowHeadings(model.rowHeadings);
+      }
+      results = resultManager.getDerivedResults(model, results, parsedColumnData);
     } else if (model.query != null) {
       results = queryService.readData(model);
     }

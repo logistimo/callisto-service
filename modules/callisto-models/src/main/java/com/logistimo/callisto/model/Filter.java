@@ -94,24 +94,24 @@ public class Filter {
 
   public class FilterAutoCompleteConfigModel {
 
-    @JsonProperty("placeholder")
+    @SerializedName("placeholder")
     private String placeholder;
 
-    @JsonProperty("value_column_name")
+    @SerializedName("value_column_name")
     private String valueColumnName;
 
-    @JsonProperty("display_column_name")
+    @SerializedName("display_column_name")
     private String displayColumnName;
 
-    @JsonProperty("auto_complete_queries")
+    @SerializedName("auto_complete_queries")
     private List<FilterAutoCompleteQueries> queries;
 
     public class FilterAutoCompleteQueries {
 
-      @JsonProperty("filter_ids")
+      @SerializedName("filter_ids")
       Set<String> filterIds;
 
-      @JsonProperty("query_id")
+      @SerializedName("query_id")
       String queryId;
     }
 

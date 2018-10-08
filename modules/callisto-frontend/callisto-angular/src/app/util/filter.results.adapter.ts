@@ -8,9 +8,9 @@ export class FilterResultsAdapterUtils {
 
     public static getFilterResultsFromQueryResults(queryResults:QueryResults, filter:Filter) : FilterResult[] {
         const filterResults: FilterResult[] = new Array();
-        if(Utils.checkNotNullEmpty(queryResults) && Utils.checkNotNullEmpty(queryResults.rows)) {
-            const filterDisplayColumnIndex = this.getIndexOfColumn(filter.filter_display_column_name, queryResults);
-            const filterValueColumnIndex = this.getIndexOfColumn(filter.filter_value_column_name, queryResults);
+        if(Utils.checkNotNullEmpty(queryResults) && Utils.checkNotNullEmpty(queryResults.rows) && Utils.checkNotNullEmpty(filter.auto_complete_config)) {
+            const filterDisplayColumnIndex = this.getIndexOfColumn(filter.auto_complete_config.display_column_name, queryResults);
+            const filterValueColumnIndex = this.getIndexOfColumn(filter.auto_complete_config.value_column_name, queryResults);
             for(var i=0;i<queryResults.rows.length;i++) {
                 const filterResult = new FilterResult();
                 filterResult.name = queryResults.rows[i][filterDisplayColumnIndex];
