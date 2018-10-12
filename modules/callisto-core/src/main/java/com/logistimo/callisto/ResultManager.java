@@ -111,30 +111,6 @@ public class ResultManager {
   }
 
   /**
-   * @param results QueryResults to be filled
-   * @param index   index of rowHeading element
-   * @return QueryResults after filling dummy rows for the all absent rowHeading elements
-   */
-  private static QueryResults fillResult(QueryResults results, List<String> rowHeadings,
-                                         Integer index) {
-    if (rowHeadings != null && results != null) {
-      Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
-      if (results.getRows() != null) {
-        for (List row : results.getRows()) {
-          rowHeadingsSet.remove(row.get(index));
-        }
-      }
-      for (String heading : rowHeadings) {
-        String[] nRow = new String[index + 1];
-        Arrays.fill(nRow, CharacterConstants.EMPTY);
-        nRow[index] = heading;
-        results.addRow(Arrays.asList(nRow));
-      }
-    }
-    return results;
-  }
-
-  /**
    * Function to parse a expression which can contain all CallistoFunctions and Variables
    *
    * @param request  QueryRequestModel by the User

@@ -70,6 +70,9 @@ public abstract class ReportDataFormatter implements IReportDataFormatter {
     if(isRenameQueryPresent(userId, key)) {
       try {
         Optional<Filter> filter = filterService.getFilter(userId, key);
+        if(!filter.isPresent()) {
+          return null;
+        }
         String renameQueryId = filter.get().getRenameQueryId();
         if (StringUtils.isNotEmpty(renameQueryId)) {
           FunctionParam functionParam = new FunctionParam();
