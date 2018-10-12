@@ -28,7 +28,8 @@ import com.google.gson.JsonObject;
 
 import com.logistimo.callisto.QueryResults;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -37,7 +38,7 @@ import java.util.Set;
 @Component (value = "json")
 public class ReportDataJsonFormatter extends ReportDataFormatter {
 
-  private static final Logger logger = Logger.getLogger(ReportDataJsonFormatter.class);
+  private static final Logger logger = LoggerFactory.getLogger(ReportDataJsonFormatter.class);
 
   private static final String METRICS_KEY = "metrics";
   private static final String DIMENSIONS_KEY = "dimensions";

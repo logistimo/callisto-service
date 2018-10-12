@@ -31,7 +31,7 @@ import com.logistimo.callisto.reports.model.ReportResult;
 import com.logistimo.callisto.reports.service.IReportService;
 import com.logistimo.callisto.service.IFilterService;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -167,7 +167,7 @@ public class QueryController {
     if (model.columnText != null && !model.columnText.isEmpty()) {
       //expects only one element
       Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
-      LinkedHashMap<String, String> parsedColumnData = new LinkedHashMap<>();
+      Map<String, String> parsedColumnData = new LinkedHashMap<>();
       if (StringUtils.isNotEmpty(entry.getKey()) && StringUtils.isNotEmpty(entry.getValue())) {
         parsedColumnData = FunctionUtil
             .parseColumnText(entry.getValue());

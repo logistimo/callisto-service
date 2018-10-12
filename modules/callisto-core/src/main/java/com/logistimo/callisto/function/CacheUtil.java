@@ -28,7 +28,8 @@ import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,8 @@ import java.util.Map;
 
 @Component
 public class CacheUtil {
-  private static final Logger logger = Logger.getLogger(CacheUtil.class);
+
+  private static final Logger logger = LoggerFactory.getLogger(CacheUtil.class);
 
   @Cacheable(value = "links", key = "#cacheKey")
   public String getLinkResult(LinkFunction linkFunction, FunctionParam functionParam, String

@@ -30,13 +30,13 @@ import com.logistimo.callisto.reports.core.ReportRequestHelper;
 import com.logistimo.callisto.service.IFilterService;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ReportRequestHelperTest {
 
   private IQueryService queryService;
@@ -142,7 +142,7 @@ public class ReportRequestHelperTest {
     Assert.assertEquals(4, Arrays.asList(StringUtils.split(queryRequestModel.filters.get
             ("PLACEHOLDER_COLUMNS"), ",")).size());
     Assert.assertTrue(Arrays.asList(StringUtils.split(queryRequestModel.filters.get
-            ("PLACEHOLDER_COLUMNS"), ",")).contains("m1"));
+        ("PLACEHOLDER_COLUMNS"), ",")).contains("m1"));
     Assert.assertTrue(Arrays.asList(StringUtils.split(queryRequestModel.filters.get
             ("PLACEHOLDER_COLUMNS"), ",")).contains("m2"));
     Assert.assertTrue(Arrays.asList(StringUtils.split(queryRequestModel.filters.get

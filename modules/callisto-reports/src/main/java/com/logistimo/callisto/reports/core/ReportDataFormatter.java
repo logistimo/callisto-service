@@ -30,8 +30,9 @@ import com.logistimo.callisto.model.Filter;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IFilterService;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -43,7 +44,7 @@ public abstract class ReportDataFormatter implements IReportDataFormatter {
 
   private ICallistoFunction linkFunction;
   private IFilterService filterService;
-  private static final Logger logger = Logger.getLogger(ReportDataFormatter.class);
+  private static final Logger logger = LoggerFactory.getLogger(ReportDataFormatter.class);
 
   @Autowired
   public void setFilterService(IFilterService filterService) {

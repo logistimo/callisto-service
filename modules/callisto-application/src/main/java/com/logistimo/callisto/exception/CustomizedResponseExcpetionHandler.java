@@ -23,10 +23,11 @@
 
 package com.logistimo.callisto.exception;
 
-import com.logistimo.callisto.reports.exception.ReportNotFoundException;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
+import com.logistimo.callisto.reports.exception.ReportNotFoundException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -40,7 +41,7 @@ import java.util.Date;
 @RestController
 public class CustomizedResponseExcpetionHandler {
 
-  private static final Logger logger = Logger.getLogger(CustomizedResponseExcpetionHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(CustomizedResponseExcpetionHandler.class);
 
   @ExceptionHandler(CallistoSyntaxErrorException.class)
   public final ResponseEntity<ErrorDetails> handleQuerySyntaxErrorException

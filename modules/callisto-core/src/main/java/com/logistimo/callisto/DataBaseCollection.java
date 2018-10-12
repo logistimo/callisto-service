@@ -25,7 +25,6 @@ package com.logistimo.callisto;
 
 import com.logistimo.callisto.service.IDataBaseService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

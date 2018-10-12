@@ -38,7 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -48,7 +48,7 @@ import java.util.Set;
 
 import static org.mockito.Matchers.argThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ReportDataJsonFormatterTest {
 
   private ReportDataJsonFormatter reportDataJsonFormatter;
@@ -134,7 +134,7 @@ public class ReportDataJsonFormatterTest {
     return filter;
   }
 
-  class FunctionParamArgumentMatcher extends ArgumentMatcher<FunctionParam> {
+  class FunctionParamArgumentMatcher implements ArgumentMatcher<FunctionParam> {
 
     private String function;
     private String filterKey;
@@ -146,11 +146,10 @@ public class ReportDataJsonFormatterTest {
     }
 
     @Override
-    public boolean matches(Object o) {
-      if(o == null) {
+    public boolean matches(FunctionParam functionParam) {
+      if(functionParam == null) {
         return false;
       }
-      FunctionParam functionParam = (FunctionParam) o;
       return Objects.equals(function, functionParam.function)
              && Objects.equals(functionParam.getQueryRequestModel().filters.get(filterKey),
           filterValue);

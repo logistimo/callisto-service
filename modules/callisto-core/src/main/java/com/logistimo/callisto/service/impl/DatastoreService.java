@@ -28,7 +28,8 @@ import com.logistimo.callisto.model.Datastore;
 import com.logistimo.callisto.repository.DatastoreRepository;
 import com.logistimo.callisto.service.IDatastoreService;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ import java.util.List;
 @Service
 public class DatastoreService implements IDatastoreService {
 
-  private static final Logger logger = Logger.getLogger(DatastoreService.class);
+  private static final Logger logger = LoggerFactory.getLogger(DatastoreService.class);
 
   @Autowired private DatastoreRepository repository;
 

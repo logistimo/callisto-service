@@ -40,6 +40,7 @@ import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -209,7 +209,7 @@ public class QueryService implements IQueryService {
       if (requestModel.columnText != null && !requestModel.columnText.isEmpty()) {
         //expects only one element
         Map.Entry<String, String> entry = requestModel.columnText.entrySet().iterator().next();
-        LinkedHashMap<String, String> parsedColumnData = FunctionUtil
+        Map<String, String> parsedColumnData = FunctionUtil
             .parseColumnText(entry.getValue());
         requestModel.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
         if (results.getRowHeadings() == null) {

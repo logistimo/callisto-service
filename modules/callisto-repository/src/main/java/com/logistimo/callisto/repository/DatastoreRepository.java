@@ -44,4 +44,7 @@ public interface DatastoreRepository extends MongoRepository<Datastore, String> 
   @Query(value = "{ 'userId': ?0}")
   List<Datastore> findByUserId(String userId);
 
+  @Query(value = "{ 'id': ?0}")
+  Datastore findOne(String datastoreId);
+
 }
