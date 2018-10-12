@@ -45,8 +45,9 @@ import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoSyntaxErrorException;
 import com.logistimo.callisto.model.Datastore;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class CassandraService implements IDataBaseService {
               DataType.tinyint().getName(),
               DataType.varint().getName()));
 
-  private final Logger logger = Logger.getLogger(CassandraService.class);
+  private static final Logger logger = LoggerFactory.getLogger(CassandraService.class);
 
   @Override
   public QueryResults fetchRows(
@@ -239,7 +240,6 @@ public class CassandraService implements IDataBaseService {
                   .withPort(config.getPort())
                   .build();
         }
-
       }
       session = cluster.connect(config.getSchema());
       serverConfigHash = new Gson().toJson(config).hashCode();

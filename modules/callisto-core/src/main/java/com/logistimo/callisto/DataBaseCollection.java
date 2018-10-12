@@ -25,25 +25,21 @@ package com.logistimo.callisto;
 
 import com.logistimo.callisto.service.IDataBaseService;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Mohan Raja
  */
-@Configuration
+@Component
 public class DataBaseCollection {
 
   private Map<String, IDataBaseService> databaseServices;
 
-  private Map<String, DataSourceType> metaFields;
-
   DataBaseCollection(Map<String, IDataBaseService> databaseServices) {
     this.databaseServices = databaseServices;
-    registerAllPluginMetafields();
   }
 
   public IDataBaseService getDataBaseService(String serviceName) {
@@ -51,12 +47,5 @@ public class DataBaseCollection {
       return databaseServices.get(serviceName);
     }
     throw new UnsupportedOperationException("unsupported database");
-  }
-
-  public void registerAllPluginMetafields() {
-    metaFields = new HashMap<>(databaseServices.size());
-    for (Map.Entry<String, IDataBaseService> entry : databaseServices.entrySet()) {
-      metaFields.put(entry.getKey(), entry.getValue().getMetaFields());
-    }
   }
 }

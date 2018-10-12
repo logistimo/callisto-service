@@ -37,7 +37,7 @@ import com.logistimo.callisto.model.SuccessResponseDetails;
 import com.logistimo.callisto.service.IConstantService;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -69,10 +68,8 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/query")
 public class QueryController {
 
-  public static final String RESPONSE_TOTAL_SIZE_HEADER_KEY = "size";
-
-  @Resource private IQueryService queryService;
-  @Resource private IConstantService constantService;
+  @Autowired IQueryService queryService;
+  @Autowired IConstantService constantService;
 
   @Autowired private ResultManager resultManager;
 

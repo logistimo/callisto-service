@@ -28,17 +28,28 @@ import com.logistimo.callisto.DataSourceType;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.Datastore;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /** @author Mohan Raja */
 @Service(value = "mysql")
 public class MysqlService implements IDataBaseService {
 
-  private static final Logger logger = Logger.getLogger(MysqlService.class);
+  private static final Logger logger = LoggerFactory.getLogger(MysqlService.class);
 
   private static final List<Integer> integerDataTypes =
       new ArrayList<>(

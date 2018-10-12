@@ -29,8 +29,9 @@ import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IConstantService;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
@@ -51,7 +52,7 @@ import javax.annotation.Resource;
 @Component(value = "math")
 public class MathFunction implements ICallistoFunction {
 
-  private static final Logger logger = Logger.getLogger(MathFunction.class);
+  private static final Logger logger = LoggerFactory.getLogger(MathFunction.class);
   private static final String NAME = "math";
   @Resource IConstantService constantService;
 
@@ -221,9 +222,9 @@ public class MathFunction implements ICallistoFunction {
         StringBuilder result = new StringBuilder();
         int after = 0;
         List<Pair> parenths = getParenths(substr);
-        for (int i = 0; i < parenths.size(); i++) {
-          int sIndex = (int) parenths.get(i).getFirst();
-          int eIndex = (int) parenths.get(i).getSecond();
+        for (Pair parenth : parenths) {
+          int sIndex = (int) parenth.getFirst();
+          int eIndex = (int) parenth.getSecond();
           if (sIndex != -1 && eIndex != -1) {
             result.append(StringUtils.substring(substr, after, sIndex));
             result.append(getParenthesisValue(StringUtils.substring(substr, sIndex, eIndex + 1)));

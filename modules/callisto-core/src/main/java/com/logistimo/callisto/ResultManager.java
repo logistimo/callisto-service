@@ -31,8 +31,9 @@ import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.util.Pair;
@@ -55,7 +56,7 @@ import java.util.stream.Collectors;
 @Component
 public class ResultManager {
 
-  private static final Logger logger = Logger.getLogger(ResultManager.class);
+  private static final Logger logger = LoggerFactory.getLogger(ResultManager.class);
 
   private FunctionManager functionManager;
 
@@ -109,6 +110,30 @@ public class ResultManager {
   }
 
   /**
+   * @param results QueryResults to be filled
+   * @param index   index of rowHeading element
+   * @return QueryResults after filling dummy rows for the all absent rowHeading elements
+   */
+  private static QueryResults fillResult(QueryResults results, List<String> rowHeadings,
+                                         Integer index) {
+    if (rowHeadings != null && results != null) {
+      Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
+      if (results.getRows() != null) {
+        for (List row : results.getRows()) {
+          rowHeadingsSet.remove(row.get(index));
+        }
+      }
+      for (String heading : rowHeadings) {
+        String[] nRow = new String[index + 1];
+        Arrays.fill(nRow, CharacterConstants.EMPTY);
+        nRow[index] = heading;
+        results.addRow(Arrays.asList(nRow));
+      }
+    }
+    return results;
+  }
+
+  /**
    * Function to parse a expression which can contain all CallistoFunctions and Variables
    *
    * @param request  QueryRequestModel by the User
@@ -122,26 +147,26 @@ public class ResultManager {
       List<String> row)
       throws CallistoException {
     int index;
-    for (int i = 0; i < functionsVars.size(); i++) {
-      if ((index = variableIndex(functionsVars.get(i), headings)) > -1) {
+    for (String functionsVar : functionsVars) {
+      if ((index = variableIndex(functionsVar, headings)) > -1) {
         if (index > row.size() - 1) {
           return CharacterConstants.EMPTY;
         }
-        str = StringUtils.replaceOnce(str, functionsVars.get(i), row.get(index));
-      } else if (FunctionUtil.isFunction(functionsVars.get(i), false)) {
-        String functionType = FunctionUtil.getFunctionType(functionsVars.get(i));
+        str = StringUtils.replaceOnce(str, functionsVar, row.get(index));
+      } else if (FunctionUtil.isFunction(functionsVar, false)) {
+        String functionType = FunctionUtil.getFunctionType(functionsVar);
         if (functionType != null) {
           ICallistoFunction function = functionManager.getFunction(functionType);
           if (function == null) {
-            throw new CallistoException("Q001", functionsVars.get(i));
+            throw new CallistoException("Q001", functionsVar);
           }
           FunctionParam
               functionParam =
-              new FunctionParam(request, headings, row, functionsVars.get(i));
+              new FunctionParam(request, headings, row, functionsVar);
           str =
-              StringUtils.replaceOnce(str, functionsVars.get(i), function.getResult(functionParam));
+              StringUtils.replaceOnce(str, functionsVar, function.getResult(functionParam));
         } else {
-          throw new CallistoException("Q001", functionsVars.get(i));
+          throw new CallistoException("Q001", functionsVar);
         }
       }
     }

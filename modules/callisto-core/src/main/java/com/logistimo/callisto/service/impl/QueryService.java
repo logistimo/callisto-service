@@ -40,8 +40,8 @@ import com.logistimo.callisto.repository.QueryRepository;
 import com.logistimo.callisto.service.IDataBaseService;
 import com.logistimo.callisto.service.IQueryService;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -62,16 +62,22 @@ import java.util.stream.Collectors;
 @Service
 public class QueryService implements IQueryService {
 
-  private static final Logger logger = Logger.getLogger(QueryService.class);
+  private static final Logger logger = LoggerFactory.getLogger(QueryService.class);
 
-  @Autowired private QueryRepository queryRepository;
+  @Autowired
+  private QueryRepository queryRepository;
 
-  @Autowired private UserService userService;
+  @Autowired
+  private UserService userService;
 
-  @Autowired private  DatastoreService datastoreService;
+  @Autowired 
+  private  DatastoreService datastoreService;
 
-  @Autowired private DataBaseCollection dataBaseCollection;
-  @Autowired private FunctionManager functionManager;
+  @Autowired 
+  private DataBaseCollection dataBaseCollection;
+  
+  @Autowired 
+  private FunctionManager functionManager;
 
   public void saveQuery(QueryText q) {
     Optional<QueryText> existing = queryRepository.findOne(q.getUserId(), q.getQueryId());
