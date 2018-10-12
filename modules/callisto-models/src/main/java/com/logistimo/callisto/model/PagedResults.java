@@ -30,16 +30,16 @@ import java.util.List;
 public class PagedResults<T> {
 
   @SerializedName("result")
-  private List<? extends T> result;
+  private List<T> result;
 
   @SerializedName("total_size")
   private long totalSize;
 
-  public List<? extends T> getResult() {
+  public List<T> getResult() {
     return result;
   }
 
-  public void setResult(List<? extends T> result) {
+  public void setResult(List<T> result) {
     this.result = result;
   }
 

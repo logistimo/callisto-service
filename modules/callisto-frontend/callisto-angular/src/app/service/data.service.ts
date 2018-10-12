@@ -25,6 +25,7 @@ export class DataService {
       headers: {}
     };
     reqOptions.headers['X-app-version'] = 'v2';
+    reqOptions.headers['User-Id'] = this.defaultUserName;
     reqOptions.params['userId'] = this.defaultUserName;
     return reqOptions
   }
@@ -122,6 +123,12 @@ export class DataService {
     datastoreModel.userId = this.defaultUserName;
     const reqOptions = this.getDefaultRequestOptions();
     return this.http.put('datastore', datastoreModel, reqOptions)
+        .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
+  }
+
+  getReports():any {
+    const reqOptions = this.getDefaultRequestOptions();
+    return this.http.get('reports', reqOptions)
         .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
   }
 }

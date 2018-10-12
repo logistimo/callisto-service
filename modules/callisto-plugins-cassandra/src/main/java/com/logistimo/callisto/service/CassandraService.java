@@ -80,7 +80,7 @@ public class CassandraService implements IDataBaseService {
               DataType.tinyint().getName(),
               DataType.varint().getName()));
 
-  private static final Logger logger = Logger.getLogger(CassandraService.class);
+  private final Logger logger = Logger.getLogger(CassandraService.class);
 
   @Override
   public QueryResults fetchRows(
@@ -113,14 +113,16 @@ public class CassandraService implements IDataBaseService {
       ColumnDefinitions columnDefinitions = rs.getColumnDefinitions();
       results = setResultMetaData(results, columnDefinitions);
       List<String> headers = results.getHeadings();
-      for (Row row : rs) {
-        List<String> rowVal = new ArrayList<>(headers.size());
-        for (int i = 0; i < headers.size(); i++) {
-          rowVal.add(getRowElement(columnDefinitions, row, i));
-        }
-        results.addRow(rowVal);
-        if (size.isPresent() && results.getRows().size() >= size.get()) {
-          break;
+      if (!rs.isFullyFetched()) {
+        for (Row row : rs) {
+          List<String> rowVal = new ArrayList<>(headers.size());
+          for (int i = 0; i < headers.size(); i++) {
+            rowVal.add(getRowElement(columnDefinitions, row, i));
+          }
+          results.addRow(rowVal);
+          if (size.isPresent() && results.getRows().size() >= size.get()) {
+            break;
+          }
         }
       }
     } catch (InvalidQueryException | SyntaxError e) {
@@ -148,6 +150,9 @@ public class CassandraService implements IDataBaseService {
 
   private QueryResults setResultMetaData(QueryResults results,
                                          ColumnDefinitions columnDefinitions) {
+    if (columnDefinitions == null || columnDefinitions.size() == 0) {
+      return results;
+    }
     List<String> headers = new ArrayList<>(columnDefinitions.size());
     List<CallistoDataType> dataTypes = new ArrayList<>(columnDefinitions.size());
     for (ColumnDefinitions.Definition definition : columnDefinitions) {
@@ -202,7 +207,7 @@ public class CassandraService implements IDataBaseService {
     return dataSourceType;
   }
 
-  public Session getSession(Datastore datastore) {
+  private Session getSession(Datastore datastore) {
     Integer sHash = new Gson().toJson(datastore).hashCode();
     if (!Objects.equals(serverConfigHash, sHash)) {
       connect(datastore, true);
@@ -217,7 +222,8 @@ public class CassandraService implements IDataBaseService {
       if (cluster == null || cluster.isClosed() || reconnect) {
         String username = config.getUsername();
         String password = config.getPassword();
-        if (StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(password)) {
+        if (StringUtils.isNotEmpty(username)
+            && StringUtils.isNotEmpty(password)) {
           String[] hostArray = new String[config.getHosts().size()];
           cluster =
               Cluster.builder()
@@ -233,15 +239,16 @@ public class CassandraService implements IDataBaseService {
                   .withPort(config.getPort())
                   .build();
         }
+
       }
       session = cluster.connect(config.getSchema());
       serverConfigHash = new Gson().toJson(config).hashCode();
       Metadata metadata = cluster.getMetadata();
       logger.info(
           "Connected to cluster: "
-              + metadata.getClusterName()
-              + " with partitioner: "
-              + metadata.getPartitioner());
+          + metadata.getClusterName()
+          + " with partitioner: "
+          + metadata.getPartitioner());
     } catch (NoHostAvailableException e) {
       throw new DriverException("No host available exception", e);
     } catch (Exception e) {

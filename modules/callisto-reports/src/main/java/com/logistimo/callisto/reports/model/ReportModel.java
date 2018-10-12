@@ -23,10 +23,15 @@
 
 package com.logistimo.callisto.reports.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import lombok.Data;
 
 @Data
 public class ReportModel {
+  @SerializedName("type")
   private String type;
+
+  @SerializedName("sub_type")
   private String subType;
 }
