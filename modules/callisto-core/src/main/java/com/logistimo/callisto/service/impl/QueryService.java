@@ -64,20 +64,31 @@ public class QueryService implements IQueryService {
 
   private static final Logger logger = LoggerFactory.getLogger(QueryService.class);
 
-  @Autowired
   private QueryRepository queryRepository;
 
-  @Autowired
-  private UserService userService;
+  private DatastoreService datastoreService;
 
-  @Autowired 
-  private  DatastoreService datastoreService;
-
-  @Autowired 
-  private DataBaseCollection dataBaseCollection;
-  
-  @Autowired 
   private FunctionManager functionManager;
+
+  private DataBaseCollection dataBaseCollection;
+
+  @Autowired
+  public QueryService(QueryRepository queryRepository, DatastoreService datastoreService) {
+    this.queryRepository = queryRepository;
+    this.datastoreService = datastoreService;
+  }
+
+  @Override
+  @Autowired
+  public void setFunctionManager(FunctionManager functionManager) {
+    this.functionManager = functionManager;
+  }
+
+  @Override
+  @Autowired
+  public void setDatabaseCollection(DataBaseCollection databaseCollection) {
+    this.dataBaseCollection = databaseCollection;
+  }
 
   public void saveQuery(QueryText q) {
     Optional<QueryText> existing = queryRepository.findOne(q.getUserId(), q.getQueryId());
@@ -121,8 +132,8 @@ public class QueryService implements IQueryService {
   }
 
   @Override
-  public PagedResults searchQueriesLike(String userId, String like, Pageable pageable) {
-    PagedResults<QueryText> pagedResults = new PagedResults();
+  public PagedResults<QueryText> searchQueriesLike(String userId, String like, Pageable pageable) {
+    PagedResults<QueryText> pagedResults = new PagedResults<>();
     pagedResults.setResult(queryRepository.searchQueriesWithQueryId(userId, like, pageable));
     pagedResults.setTotalSize(queryRepository.getSearchQueriesCount(userId, like));
     return pagedResults;
@@ -146,14 +157,14 @@ public class QueryService implements IQueryService {
     try {
       List<QueryText> queryList;
       String likeRegex = "";
-      if(StringUtils.isNotEmpty(like)){
+      if (StringUtils.isNotEmpty(like)) {
         likeRegex = like;
       }
-      if(StringUtils.isNotEmpty(like) && pageable != null) {
+      if (StringUtils.isNotEmpty(like) && pageable != null) {
         queryList = queryRepository.readQueryIds(userId, likeRegex, pageable);
       } else if (StringUtils.isNotEmpty(like)) {
         queryList = queryRepository.readQueryIds(userId, likeRegex);
-      } else if(pageable != null) {
+      } else if (pageable != null) {
         queryList = queryRepository.readQueryIds(userId, pageable);
       } else {
         queryList = queryRepository.readQueryIds(userId);
@@ -204,20 +215,21 @@ public class QueryService implements IQueryService {
   }
 
   @Override
-  public QueryResults readAndModifyData(QueryRequestModel requestModel, ResultManager resultManager) {
-      QueryResults results = readData(requestModel);
-      if (requestModel.columnText != null && !requestModel.columnText.isEmpty()) {
-        //expects only one element
-        Map.Entry<String, String> entry = requestModel.columnText.entrySet().iterator().next();
-        Map<String, String> parsedColumnData = FunctionUtil
-            .parseColumnText(entry.getValue());
-        requestModel.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
-        if (results.getRowHeadings() == null) {
-          results.setRowHeadings(requestModel.rowHeadings);
-        }
-        results = resultManager.getDerivedResults(requestModel, results, parsedColumnData);
+  public QueryResults readAndModifyData(QueryRequestModel requestModel,
+                                        ResultManager resultManager) {
+    QueryResults results = readData(requestModel);
+    if (requestModel.columnText != null && !requestModel.columnText.isEmpty()) {
+      //expects only one element
+      Map.Entry<String, String> entry = requestModel.columnText.entrySet().iterator().next();
+      Map<String, String> parsedColumnData = FunctionUtil
+          .parseColumnText(entry.getValue());
+      requestModel.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
+      if (results.getRowHeadings() == null) {
+        results.setRowHeadings(requestModel.rowHeadings);
       }
-      return results;
+      results = resultManager.getDerivedResults(requestModel, results, parsedColumnData);
+    }
+    return results;
   }
 
   private QueryText getQueryText(QueryRequestModel request) {

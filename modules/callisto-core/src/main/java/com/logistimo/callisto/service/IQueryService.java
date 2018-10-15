@@ -23,6 +23,8 @@
 
 package com.logistimo.callisto.service;
 
+import com.logistimo.callisto.DataBaseCollection;
+import com.logistimo.callisto.FunctionManager;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
@@ -38,6 +40,10 @@ import java.util.List;
 public interface IQueryService {
 
   void saveQuery(QueryText q);
+
+  void setFunctionManager(FunctionManager functionManager);
+
+  void setDatabaseCollection(DataBaseCollection databaseCollection);
 
   void updateQuery(QueryText q);
 
@@ -58,5 +64,5 @@ public interface IQueryService {
 
   Long getTotalNumberOfQueries(String userId);
 
-  PagedResults searchQueriesLike(String userId, String like, Pageable pageable);
+  PagedResults<QueryText> searchQueriesLike(String userId, String like, Pageable pageable);
 }
