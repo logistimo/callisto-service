@@ -100,7 +100,7 @@ public class CassandraService implements IDataBaseService {
       String finalQuery = constructQuery(query, filters);
       logger.info("Fetching cassandra results: " + finalQuery);
       logger.info("Cassandra query filters: " + filters);
-      Statement statement = new SimpleStatement(finalQuery);
+      Statement statement = getStatement(finalQuery);
       statement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
       offset = Optional.of(offset.orElse(0));
       if (size.isPresent()) {
@@ -227,18 +227,10 @@ public class CassandraService implements IDataBaseService {
             && StringUtils.isNotEmpty(password)) {
           String[] hostArray = new String[config.getHosts().size()];
           cluster =
-              Cluster.builder()
-                  .addContactPoints(config.getHosts().toArray(hostArray))
-                  .withPort(config.getPort())
-                  .withCredentials(username, password)
-                  .build();
+              buildCluster(config, username, password, hostArray);
         } else {
           String[] hostArray = new String[config.getHosts().size()];
-          cluster =
-              Cluster.builder()
-                  .addContactPoints(config.getHosts().toArray(hostArray))
-                  .withPort(config.getPort())
-                  .build();
+          cluster = buildCluster(config, hostArray);
         }
       }
       session = cluster.connect(config.getSchema());
@@ -255,6 +247,26 @@ public class CassandraService implements IDataBaseService {
       serverConfigHash = null;
       logger.error("Exception in cassandra Connection", e);
     }
+  }
+
+  protected Cluster buildCluster(Datastore config, String username, String password,
+                               String[] hostArray) {
+    return Cluster.builder()
+        .addContactPoints(config.getHosts().toArray(hostArray))
+        .withPort(config.getPort())
+        .withCredentials(username, password)
+        .build();
+  }
+
+  protected Cluster buildCluster(Datastore config, String[] hostArray) {
+    return Cluster.builder()
+        .addContactPoints(config.getHosts().toArray(hostArray))
+        .withPort(config.getPort())
+        .build();
+  }
+
+  protected Statement getStatement(String query) {
+    return new SimpleStatement(query);
   }
 
   private String constructQuery(String query, Map<String, String> filters) {

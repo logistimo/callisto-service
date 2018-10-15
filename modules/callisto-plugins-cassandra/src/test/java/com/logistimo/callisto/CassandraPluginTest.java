@@ -36,35 +36,30 @@ import com.logistimo.callisto.service.CassandraService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyNew;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({CassandraService.class, Logger.class, Cluster.class, SimpleStatement.class})
-@PowerMockIgnore("javax.management.*")
+@RunWith(MockitoJUnitRunner.class)
 public class CassandraPluginTest {
 
+  public static final String DEFAULT_SCHEMA = "some-schema";
   @Mock
   Cluster cluster;
 
@@ -76,9 +71,23 @@ public class CassandraPluginTest {
 
   private ResultSet rs;
   private SimpleStatement statement;
+  private String query;
 
-  @InjectMocks
-  private CassandraService cassandraService = new CassandraService();
+  private CassandraService cassandraService = new CassandraService() {
+    protected Cluster buildCluster(Datastore config, String username, String password,
+                                   String[] hostArray) {
+      return cluster;
+    }
+
+    protected Cluster buildCluster(Datastore config, String[] hostArray) {
+      return cluster;
+    }
+
+    protected Statement getStatement(String _query) {
+      query = _query;
+      return statement;
+    }
+  };
 
   @Before
   public void setup() throws Exception {
@@ -90,7 +99,7 @@ public class CassandraPluginTest {
     when(rs.isFullyFetched()).thenReturn(true);
     when(rs.getColumnDefinitions()).thenReturn(mock(ColumnDefinitions.class));
     when(session.execute(any(Statement.class))).thenReturn(rs);
-    whenNew(SimpleStatement.class).withAnyArguments().thenReturn(statement);
+    when(cluster.connect("some-schema")).thenReturn(session);
   }
 
   @Test
@@ -102,19 +111,20 @@ public class CassandraPluginTest {
     datastore.setHosts(Collections.singletonList("localhost"));
     datastore.setPort(27017);
     datastore.setSchema("some-schema");
-    mockStatic(Cluster.class);
+    when(cluster.connect("some-schema")).thenReturn(session);
     cassandraService.fetchRows(datastore, null, null, Optional.empty(), Optional.empty());
-    verifyStatic(times(1));
-    Cluster.builder();
+    verify(cluster, times(1)).connect("some-schema");
+
+    reset(cluster);
+    when(cluster.connect("some-schema")).thenReturn(session);
     cassandraService.fetchRows(datastore, null, null, Optional.empty(), Optional.empty());
-    mockStatic(Cluster.class);
-    verifyStatic(never());
-    Cluster.builder();
-    mockStatic(Cluster.class);
-    datastore.setHosts(Collections.singletonList("127.0.0.1"));
+    verify(cluster, never()).connect(any());
+
+    datastore.setSchema("some-other-schema");
+    reset(cluster);
+    when(cluster.connect("some-other-schema")).thenReturn(session);
     cassandraService.fetchRows(datastore, null, null, Optional.empty(), Optional.empty());
-    verifyStatic(times(1));
-    Cluster.builder();
+    verify(cluster, times(1)).connect("some-other-schema");
   }
 
   @Test
@@ -126,8 +136,6 @@ public class CassandraPluginTest {
     datastore.setHosts(Collections.singletonList("localhost"));
     datastore.setPort(27017);
     datastore.setSchema("some-schema");
-    PowerMockito.mockStatic(Cluster.class);
-    PowerMockito.doThrow(new RuntimeException()).when(Cluster.class);
     cassandraService.fetchRows(datastore, null, null, Optional.empty(), Optional.of(15));
     verify(rs, times(15)).one();
   }
@@ -140,9 +148,7 @@ public class CassandraPluginTest {
     datastore.setType("cassandra");
     datastore.setHosts(Collections.singletonList("localhost"));
     datastore.setPort(27017);
-    datastore.setSchema("some-schema");
-    PowerMockito.mockStatic(Cluster.class);
-    PowerMockito.doThrow(new RuntimeException()).when(Cluster.class);
+    datastore.setSchema(DEFAULT_SCHEMA);
     cassandraService.fetchRows(datastore, null, null, Optional.of(50), Optional.of(4000));
     verify(rs, times(4000)).one();
     verify(statement, times(1)).setFetchSize(4000);
@@ -157,8 +163,6 @@ public class CassandraPluginTest {
     datastore.setHosts(Collections.singletonList("localhost"));
     datastore.setPort(27017);
     datastore.setSchema("some-schema");
-    PowerMockito.mockStatic(Cluster.class);
-    PowerMockito.doThrow(new RuntimeException()).when(Cluster.class);
     cassandraService.fetchRows(datastore, null, null, Optional.empty(), Optional.of(9500));
     verify(rs, times(9500)).one();
   }
@@ -172,15 +176,27 @@ public class CassandraPluginTest {
     datastore.setHosts(Collections.singletonList("localhost"));
     datastore.setPort(27017);
     datastore.setSchema("some-schema");
-    PowerMockito.mockStatic(Cluster.class);
-    PowerMockito.doThrow(new RuntimeException()).when(Cluster.class);
     String query = "select this, that from some-table where other in ({{I_DONT_KNOW}}) and "
                    + "some-other in {{I_KNOW}}";
     Map<String, String> filters = new HashMap<>();
     filters.put("I_DONT_KNOW", "439843");
     filters.put("I_KNOW", "'some-value'");
     cassandraService.fetchRows(datastore, query, filters, Optional.empty(), Optional.of(9500));
-    verifyNew(SimpleStatement.class).withArguments("select this, that from some-table where other in (439843) and some-other in 'some-value'");
+    assertEquals("select this, that from some-table where other in (439843) and some-other in "
+                 + "'some-value'", this.query);
     verify(rs, times(9500)).one();
+  }
+
+  private class StatementQueryArgMatcher implements ArgumentMatcher<Statement> {
+    private String query;
+
+    private StatementQueryArgMatcher(String query) {
+      this.query = query;
+    }
+
+    @Override
+    public boolean matches(Statement argument) {
+      return Objects.equals(statement.getQueryString(), query);
+    }
   }
 }
