@@ -57,6 +57,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * @author Chandrakant
  */
@@ -118,7 +120,12 @@ public class CassandraService implements IDataBaseService {
         for (Row row : rs) {
           List<String> rowVal = new ArrayList<>(headers.size());
           for (int i = 0; i < headers.size(); i++) {
-            rowVal.add(getRowElement(columnDefinitions, row, i));
+            Optional<String> rowElem = getRowElement(columnDefinitions, row, i);
+            if(rowElem.isPresent()) {
+              rowVal.add(rowElem.get());
+            } else {
+              rowVal.add("");
+            }
           }
           results.addRow(rowVal);
           if (size.isPresent() && results.getRows().size() >= size.get()) {
@@ -133,19 +140,20 @@ public class CassandraService implements IDataBaseService {
     return results;
   }
 
-  private String getRowElement(ColumnDefinitions columnDefinitions, Row row, int i) {
+  private Optional<String> getRowElement(ColumnDefinitions columnDefinitions, Row row, int i) {
     if (row.getObject(i) != null) {
       switch (columnDefinitions.getType(i).getName()) {
         case MAP:
-          return new Gson().toJson(row.getMap(i, DataStaxUtil.DATA_TYPE_MAPPING.get(
+          String result =  new Gson().toJson(row.getMap(i, DataStaxUtil.DATA_TYPE_MAPPING.get(
                   columnDefinitions.getType(i).getTypeArguments().get(0).getName()),
               DataStaxUtil.DATA_TYPE_MAPPING
                   .get(columnDefinitions.getType(i).getTypeArguments().get(1).getName())));
+          return Optional.of(result);
         default:
-          return row.getObject(i).toString();
+          return Optional.ofNullable(row.getObject(i).toString());
       }
     } else {
-      return "";
+      return Optional.empty();
     }
   }
 

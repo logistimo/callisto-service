@@ -28,12 +28,16 @@ import com.logistimo.callisto.service.IUserService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -46,17 +50,19 @@ public class UserController {
   IUserService userService;
 
   @RequestMapping(value = "/get", method = RequestMethod.GET)
-  public @ResponseBody User getUser(@RequestParam(defaultValue = "logistimo") String userId) {
-    return userService.readUser(userId);
+  public @ResponseBody ResponseEntity getUser(@RequestParam(defaultValue = "logistimo") String userId) {
+    Optional<User> user = userService.readUser(userId);
+    return user.isPresent() ?
+        new ResponseEntity<>(user.get(), HttpStatus.OK) :
+        new ResponseEntity(HttpStatus.NOT_FOUND);
   }
 
   @RequestMapping(value = "/register", method = RequestMethod.POST)
-  public String register(@RequestBody User data, HttpServletRequest request) {
-    String response = null;
+  public ResponseEntity register(@RequestBody User data, HttpServletRequest request) {
     if (StringUtils.isNotEmpty(data.getUserId())) {
-      response = userService.saveUser(data);
+      userService.saveUser(data);
     }
-    return response;
+    return new ResponseEntity(HttpStatus.OK);
   }
 
   @RequestMapping(value = "/update", method = RequestMethod.POST)

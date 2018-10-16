@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Chandrakant
@@ -45,42 +46,33 @@ public class UserService implements IUserService {
 
   private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-  @Autowired 
   private UserRepository repository;
 
-  public User readUser(String userId) {
-    User user = null;
-    try {
-      List<User> userList = repository.findByUserId(userId);
-      if (userList != null && userList.size() == 1) {
-        user = userList.get(0);
-      }
-    } catch (Exception e) {
-      logger.error("Error while reading user " + userId, e);
-    }
-    return user;
+  @Autowired
+  public void setUserRepository(UserRepository repository) {
+    this.repository = repository;
   }
 
-  public String saveUser(User user) {
-    String res = CallistoException.RESULT_FAILURE;
+  public Optional<User> readUser(String userId) {
+    return repository.findOneByUserId(userId);
+  }
+
+  public void saveUser(User user) {
     try {
       repository.insert(user);
-      res = "success";
     } catch (DuplicateKeyException e) {
       logger.warn("Duplicate userId", e);
-      return "Duplicate userId";
     } catch (Exception e) {
       logger.error("Error while creating user", e);
     }
-    return res;
   }
 
   public String updateUser(User user) {
     String res = CallistoException.RESULT_FAILURE;
     try {
-      List<User> userList = repository.findByUserId(user.getUserId());
-      if (userList != null && userList.size() == 1) {
-        user.setId(userList.get(0).getId());
+      Optional<User> userDb = repository.findOneByUserId(user.getUserId());
+      if (userDb.isPresent()) {
+        user.setId(userDb.get().getId());
         repository.save(user);
         res = "User successfully updated";
       }
@@ -93,9 +85,9 @@ public class UserService implements IUserService {
   public String deleteUser(String userId) {
     String res = CallistoException.RESULT_FAILURE;
     try {
-      List<User> userList = repository.findByUserId(userId);
-      if (userList != null && userList.size() == 1) {
-        repository.delete(userList.get(0));
+      Optional<User> userDb = repository.findOneByUserId(userId);
+      if (userDb.isPresent()) {
+        repository.delete(userDb.get());
         res = "success";
       }
     } catch (Exception e) {

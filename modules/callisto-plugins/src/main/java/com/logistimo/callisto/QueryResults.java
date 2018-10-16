@@ -29,7 +29,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** @author Mohan Raja */
+/**
+ * @author Mohan Raja
+ */
 public class QueryResults {
   private List<String> headings;
   private List<CallistoDataType> dataTypes;
@@ -72,14 +74,12 @@ public class QueryResults {
   }
 
   public void setRowHeadings(List<String> rowHeadings) {
-    if(rowHeadings != null && !rowHeadings.isEmpty()){
+    if (rowHeadings != null && !rowHeadings.isEmpty()) {
       this.rowHeadings = rowHeadings;
     }
   }
 
   /**
-   *
-   * @param rowHeadings
    * @param index index of rowHeading element
    * @return QueryResults after filling dummy rows for the all absent rowHeading elements
    */
@@ -91,12 +91,14 @@ public class QueryResults {
           rowHeadingsSet.remove(row.get(index));
         }
       }
-      for (String heading : rowHeadings) {
-        String[] nRow = new String[index + 1];
-        Arrays.fill(nRow, "");
-        nRow[index] = heading;
-        addRow(Arrays.asList(nRow));
-      }
+      rowHeadings.stream()
+          .filter(rowHeadingsSet::contains)
+          .forEach(heading -> {
+            String[] nRow = new String[headings.size()];
+            Arrays.fill(nRow, "");
+            nRow[index] = heading;
+            addRow(Arrays.asList(nRow));
+          });
     }
   }
 }

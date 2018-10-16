@@ -147,9 +147,10 @@ public class MathFunction implements ICallistoFunction {
   }
 
   private static String replaceLinks(
-      QueryRequestModel request, List<String> headings, List<String> row, String val,
+      QueryRequestModel request, List<String> headings, List<String> row, final String val,
       ICallistoFunction linkFunction)
       throws CallistoException {
+    String result = val;
     try {
       int linkCount =
           StringUtils.countMatches(
@@ -164,19 +165,20 @@ public class MathFunction implements ICallistoFunction {
         //TODO if Link function supports '(' inside parameters in future then eIndex needs to be changed
         int eIndex = val.indexOf(CharacterConstants.CLOSE_BRACKET, after);
         after = eIndex + 1;
+        String functionText = val.substring(sIndex, eIndex + 1);
         FunctionParam param =
             new FunctionParam(request, headings, row,
-                val.substring(sIndex - FunctionType.LINK.toString().length(), eIndex + 1));
-        val =
+                CharacterConstants.FN_ENCLOSE + functionText + CharacterConstants.FN_ENCLOSE);
+        result =
             StringUtils.replace(
                 val,
-                val.substring(sIndex - FunctionType.LINK.toString().length(), eIndex + 1),
+                functionText,
                 linkFunction.getResult(param));
       }
     } catch (Exception e) {
       logger.warn("Error while replacing links in expression :" + val, e);
     }
-    return val;
+    return result;
   }
 
   private static String replaceConstants(

@@ -125,7 +125,7 @@ public class MysqlService implements IDataBaseService {
     return dataSourceType;
   }
 
-  private Connection getConnection(Datastore config)
+  protected Connection getConnection(Datastore config)
       throws ClassNotFoundException, SQLException {
     Class.forName("com.mysql.jdbc.Driver");
     return DriverManager.getConnection(

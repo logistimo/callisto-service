@@ -187,6 +187,17 @@ public class CassandraPluginTest {
     verify(rs, times(9500)).one();
   }
 
+  @Test
+  public void cassandraMetadataTest() {
+    DataSourceType dataSourceType = cassandraService.getMetaFields();
+    assertEquals("cassandra", dataSourceType.name);
+    dataSourceType.metaFields.contains("port");
+    dataSourceType.metaFields.contains("host");
+    dataSourceType.metaFields.contains("username");
+    dataSourceType.metaFields.contains("password");
+    dataSourceType.metaFields.contains("keyspace");
+  }
+
   private class StatementQueryArgMatcher implements ArgumentMatcher<Statement> {
     private String query;
 

@@ -24,16 +24,24 @@
 package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.model.QueryRequestModel;
+import com.logistimo.callisto.service.IConstantService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MathFunctionTest {
@@ -123,5 +131,32 @@ public class MathFunctionTest {
         MathFunction.calculateExpression(
             null, expr, Arrays.asList(headings), Arrays.asList(row), null, null);
     assertEquals(22607.08, Double.valueOf(str), 0.01);
+  }
+
+  @Test
+  public void getExpressionValueNumberFormatTest() throws CallistoException {
+    String expr = "2 + 4 - a/4";
+    Double d = MathFunction.getExpressionValue(expr);
+    assert d == null;
+  }
+
+  @Test
+  public void replaceLinksTest() {
+    QueryRequestModel model = new QueryRequestModel();
+    final List<String> headings = Arrays.asList("abc", "def", "ghi");
+    final List<String> row = Arrays.asList("100", "34", "anthony");
+    String val = "$$math(5+(3*link($ghi)))$$";
+    ICallistoFunction linkFunction = mock(ICallistoFunction.class);
+    when(linkFunction.getResult(argThat(new ArgumentMatcher<FunctionParam>() {
+      @Override
+      public boolean matches(FunctionParam argument) {
+        return Objects.equals(argument.function, "$$link(anthony)$$")
+            && argument.getResultHeadings() == headings
+            && argument.getResultRow() == row;
+      }
+    }))).thenReturn("4934");
+    String result = MathFunction.calculateExpression(model, val, headings, row,
+        mock(IConstantService.class), linkFunction);
+    assertEquals("14807", result);
   }
 }
