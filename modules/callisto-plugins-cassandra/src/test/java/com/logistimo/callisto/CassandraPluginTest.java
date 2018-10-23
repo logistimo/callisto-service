@@ -96,7 +96,7 @@ public class CassandraPluginTest {
     when(cluster.getMetadata()).thenReturn(mock(Metadata.class));
     rs = mock(ResultSet.class);
     statement = mock(SimpleStatement.class);
-    when(rs.isFullyFetched()).thenReturn(true);
+    when(rs.iterator()).thenReturn(null);
     when(rs.getColumnDefinitions()).thenReturn(mock(ColumnDefinitions.class));
     when(session.execute(any(Statement.class))).thenReturn(rs);
     when(cluster.connect("some-schema")).thenReturn(session);

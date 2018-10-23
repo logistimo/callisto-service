@@ -116,7 +116,7 @@ public class CassandraService implements IDataBaseService {
       ColumnDefinitions columnDefinitions = rs.getColumnDefinitions();
       results = setResultMetaData(results, columnDefinitions);
       List<String> headers = results.getHeadings();
-      if (!rs.isFullyFetched()) {
+      if(rs.iterator() != null) {
         for (Row row : rs) {
           List<String> rowVal = new ArrayList<>(headers.size());
           for (int i = 0; i < headers.size(); i++) {
