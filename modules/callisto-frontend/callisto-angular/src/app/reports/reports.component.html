@@ -1,7 +1,7 @@
-<div class="container-fluid callisto-container p4" style="margin-top: 20px">
+<div class="container-fluid callisto-container p4">
   <div class="row">
     <div class="col-sm-3 mb-4">
-      <b>Reports</b>
+      <div class="h3">Reports</div>
     </div>
     <div class="col-sm-9">
       <button mat-stroked-button class="float-right" (click)="navigateToNewReport()" color="primary">
@@ -10,24 +10,16 @@
     </div>
   </div>
   <div>
-    <mat-grid-list cols="3" rowHeight="2:1">
-      <mat-grid-tile>
-        <mat-card>
-          <mat-card-title>
-            {{reports[0].type}}
-          </mat-card-title>
-          <mat-card-content>
-            <p>
-              The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan.
-              A small, agile dog that copes very well with mountainous terrain, the Shiba Inu was originally
-              bred for hunting.
-            </p>
-          </mat-card-content>
-        </mat-card>
-      </mat-grid-tile>
-      <mat-grid-tile>2</mat-grid-tile>
-      <mat-grid-tile>3</mat-grid-tile>
-      <mat-grid-tile>4</mat-grid-tile>
-    </mat-grid-list>
+    <table class="table table-striped">
+      <tbody *ngFor="let report of reports">
+      <mat-card>
+        <mat-card-title (click)="openReport(report)" class="clickable">
+          {{report.name}}
+        </mat-card-title>
+        <mat-card-content>
+          Description of the report!
+        </mat-card-content>
+      </mat-card>
+    </table>
   </div>
 </div>

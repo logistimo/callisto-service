@@ -35,7 +35,7 @@ import java.util.Optional;
 @Repository
 public interface ReportConfigRepository extends MongoRepository<ReportConfig, String> {
 
-  @Query(value = "{'userId': ?0}", fields = "{'type': 1, 'subType': 1}")
+  @Query(value = "{'userId': ?0}", fields = "{'type': 1, 'subType': 1, 'name': 1}")
   List<ReportConfig> readAllReportTypes(String userId);
 
   Optional<ReportConfig> findOneByUserIdAndTypeAndSubType(String userId, String type, String

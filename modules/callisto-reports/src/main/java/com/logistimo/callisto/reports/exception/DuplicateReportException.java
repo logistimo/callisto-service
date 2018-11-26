@@ -21,20 +21,10 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.reports.model;
+package com.logistimo.callisto.reports.exception;
 
-import com.google.gson.annotations.SerializedName;
-
-import lombok.Data;
-
-@Data
-public class ReportModel {
-  @SerializedName("type")
-  private String type;
-
-  @SerializedName("sub_type")
-  private String subType;
-
-  @SerializedName("name")
-  private String name;
+public class DuplicateReportException extends RuntimeException {
+  public DuplicateReportException(String s) {
+    super(s);
+  }
 }

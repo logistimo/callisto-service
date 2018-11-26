@@ -24,10 +24,12 @@
 package com.logistimo.callisto.reports.rest;
 
 import com.logistimo.callisto.model.Filter;
+import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.ReportRequestModel;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
+import com.logistimo.callisto.reports.model.SuccessResponseDetails;
 import com.logistimo.callisto.reports.service.IReportService;
 import com.logistimo.callisto.service.IFilterService;
 
@@ -62,11 +64,35 @@ public class ReportsController {
     this.filterService = filterService;
   }
 
+  @RequestMapping(value = "/add", method = RequestMethod.POST)
+  public ResponseEntity saveReport(@RequestHeader(value = "User-Id", defaultValue = "logistimo") String userId,
+                                   @RequestBody ReportConfig reportConfig) {
+    reportConfig.setUserId(userId);
+    reportService.saveReportConfig(reportConfig);
+    SuccessResponseDetails success = new SuccessResponseDetails("Report saved successfully");
+    return new ResponseEntity<>(success, HttpStatus.OK);
+  }
+
   @RequestMapping(value = "", method = RequestMethod.GET)
   public ResponseEntity getAllReportTypes(@RequestHeader(value = "User-Id", defaultValue =
       "logistimo") String userId) {
     List<ReportModel> list = reportService.getAllReports(userId);
     return new ResponseEntity<>(list, HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/{type}", method = RequestMethod.GET)
+  public ResponseEntity getReportModel(@RequestHeader(value = "User-Id", defaultValue =
+      "logistimo") String userId, @PathVariable String type) {
+    return getReportModel(userId, type, null);
+  }
+
+  @RequestMapping(value = "/{type}/{subtype}", method = RequestMethod.GET)
+  public ResponseEntity getReportModel(@RequestHeader(value = "User-Id", defaultValue =
+      "logistimo") String userId, @PathVariable String type, @PathVariable String subtype) {
+    Optional<ReportModel> reportModel = reportService.getReportModel(userId, type, subtype);
+    return reportModel.isPresent() ?
+        new ResponseEntity<>(reportModel.get(), HttpStatus.OK)
+        : new ResponseEntity<>(HttpStatus.NOT_FOUND);
   }
 
   @RequestMapping(value = "/{type}", method = RequestMethod.POST)

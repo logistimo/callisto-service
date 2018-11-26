@@ -3,6 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { QueryText } from '../model/querytext'
 import { Datastore } from '../model/datastore'
+import { ReportConfig } from '../model/reportconfig'
 import { Utils } from '../util/utils'
 import 'rxjs/add/operator/map'
 
@@ -27,6 +28,16 @@ export class DataService {
     reqOptions.headers['X-app-version'] = 'v2';
     reqOptions.headers['User-Id'] = this.defaultUserName;
     reqOptions.params['userId'] = this.defaultUserName;
+    return reqOptions
+  }
+
+  private getNewRequestOptions() {
+    var reqOptions = {
+      params: {},
+      headers: {}
+    };
+    reqOptions.headers['X-app-version'] = 'v2';
+    reqOptions.headers['User-Id'] = this.defaultUserName;
     return reqOptions
   }
 
@@ -130,5 +141,21 @@ export class DataService {
     const reqOptions = this.getDefaultRequestOptions();
     return this.http.get('reports', reqOptions)
         .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
+  }
+
+  getReportModel(type: string, subtype: string):any {
+    const reqOptions = this.getDefaultRequestOptions();
+    var url = 'reports/' + type;
+    if(Utils.checkNotNullEmpty(subtype)) {
+      url += '/' + subtype;
+    }
+    return this.http.get(url, reqOptions)
+        .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
+  }
+
+  saveReport(reportConfig: ReportConfig) {
+    const reqOptions = this.getNewRequestOptions();
+    return this.http.post('reports/add', reportConfig, reqOptions)
+      .map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null});
   }
 }

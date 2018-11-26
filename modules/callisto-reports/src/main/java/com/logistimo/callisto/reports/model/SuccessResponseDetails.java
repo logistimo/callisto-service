@@ -23,18 +23,18 @@
 
 package com.logistimo.callisto.reports.model;
 
-import com.google.gson.annotations.SerializedName;
+public class SuccessResponseDetails {
+  private String msg;
 
-import lombok.Data;
+  public SuccessResponseDetails(String msg) {
+    this.msg = msg;
+  }
 
-@Data
-public class ReportModel {
-  @SerializedName("type")
-  private String type;
+  public String getMsg() {
+    return msg;
+  }
 
-  @SerializedName("sub_type")
-  private String subType;
-
-  @SerializedName("name")
-  private String name;
+  public void setMsg(String msg) {
+    this.msg = msg;
+  }
 }

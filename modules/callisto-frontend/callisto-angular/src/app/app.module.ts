@@ -47,6 +47,8 @@ import { QueriesComponent } from './queries/queries.component';
 import { NewQueryComponent } from './new-query/new-query.component';
 import { NewDatastoreComponent } from './new-datastore/new-datastore.component';
 import { ReportsComponent } from './reports/reports.component';
+import { ReportDetailComponent } from './report-detail/report-detail.component';
+import { NewReportComponent } from './new-report/new-report.component';
 
 const appRoutes: Routes = [
   { path: '',
@@ -60,7 +62,19 @@ const appRoutes: Routes = [
   },
   {
     path: 'reports',
-    component: ReportsComponent,
+    component: ReportsComponent
+  },
+  {
+    path: 'new-report',
+    component: NewReportComponent
+  },
+  {
+    path: 'report/:type',
+    component: ReportDetailComponent
+  },
+  {
+    path: 'report/:type/:subtype',
+    component: ReportDetailComponent
   },
   {
     path: 'datastores/new',
@@ -104,7 +118,9 @@ const appRoutes: Routes = [
     DomainFilterFilterPipe,
     NewQueryComponent,
     NewDatastoreComponent,
-    ReportsComponent
+    ReportsComponent,
+    ReportDetailComponent,
+    NewReportComponent
   ],
   imports: [
     BrowserModule,

@@ -30,7 +30,7 @@ export class QueriesComponent implements OnInit {
 
   updatePathDisplay(subpath) {
     const delimiter = Utils.checkNotNullEmpty(subpath) ? " / " : ''
-    this.path = delimiter + subpath;
+    this.path = subpath;
   }
 
   componentAdded(event) {

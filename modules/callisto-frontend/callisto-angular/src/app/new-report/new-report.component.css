@@ -21,20 +21,10 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.reports.model;
+.p40-width {
+    width: 40%
+}
 
-import com.google.gson.annotations.SerializedName;
-
-import lombok.Data;
-
-@Data
-public class ReportModel {
-  @SerializedName("type")
-  private String type;
-
-  @SerializedName("sub_type")
-  private String subType;
-
-  @SerializedName("name")
-  private String name;
+.p80-width {
+    width: 80%
 }

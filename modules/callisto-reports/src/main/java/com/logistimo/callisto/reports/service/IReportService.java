@@ -23,14 +23,20 @@
 
 package com.logistimo.callisto.reports.service;
 
+import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.ReportRequestModel;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IReportService {
   List<ReportModel> getAllReports(String userId);
 
+  Optional<ReportModel> getReportModel(String userId, String type, String subType);
+
   ReportResult getReportData(ReportRequestModel reportRequestModel);
+
+  void saveReportConfig(ReportConfig reportConfig);
 }

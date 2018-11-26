@@ -24,6 +24,7 @@
 package com.logistimo.callisto.exception;
 
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
+import com.logistimo.callisto.reports.exception.DuplicateReportException;
 import com.logistimo.callisto.reports.exception.ReportNotFoundException;
 
 import org.slf4j.Logger;
@@ -83,6 +84,14 @@ public class CustomizedResponseExcpetionHandler {
     ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
         request.getDescription(false));
     return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(DuplicateReportException.class)
+  public final ResponseEntity<ErrorDetails> handleDuplicationReportException
+      (DuplicateReportException ex, WebRequest request) {
+    ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
+        request.getDescription(false));
+    return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(Exception.class)

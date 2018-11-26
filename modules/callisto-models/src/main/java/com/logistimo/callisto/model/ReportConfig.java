@@ -50,6 +50,9 @@ public class ReportConfig {
   @SerializedName("sub_type")
   private String subType;
 
+  @SerializedName("name")
+  private String name;
+
   @SerializedName("metrics")
   private Map<String, String> metrics;
 

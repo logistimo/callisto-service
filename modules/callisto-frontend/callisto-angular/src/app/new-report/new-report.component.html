@@ -1,0 +1,96 @@
+<!--
+  ~ Copyright © 2018 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="container-fluid callisto-container p4">
+  <div class="row">
+    <div class="col-sm-6 mb-4">
+      <div class="h4">Add report</div>
+    </div>
+  </div>
+  <div class="main-form-container">
+    <mat-card>
+      <mat-card-subtitle>
+        Report details
+      </mat-card-subtitle>
+      <mat-card-content>
+
+        <mat-form-field appearance="outline" class="p80-width">
+          <mat-label>Report name</mat-label>
+          <input spellcheck="false" matInput [(ngModel)]="reportConfig.name">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="p40-width">
+          <mat-label>Report type</mat-label>
+          <input spellcheck="false" matInput [(ngModel)]="reportConfig.type">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="p40-width pl-5">
+          <mat-label>Report sub-type</mat-label>
+          <input spellcheck="false" matInput [(ngModel)]="reportConfig.sub_type">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="p40-width">
+          <mat-label>Columns filter Id</mat-label>
+          <input spellcheck="false" matInput [(ngModel)]="reportConfig.column_filter_id">
+        </mat-form-field>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <hr />
+
+  <mat-card>
+    <mat-card-subtitle>
+      Metrics
+    </mat-card-subtitle>
+    <mat-card-content>
+      <mat-list role="list" class="pt-2">
+        <mat-list-item *ngFor="let metric of metrics; let i = index" role="listitem" class="mt-2">
+          <div class="row">
+            <mat-form-field class="col-sm-3">
+              <mat-label>key</mat-label>
+              <input spellcheck="false" matInput [(ngModel)]="metric.key">
+            </mat-form-field>
+            <mat-form-field class="col-sm-8">
+              <mat-label>value</mat-label>
+              <input spellcheck="false" matInput [(ngModel)]="metric.value">
+            </mat-form-field>
+            <button mat-icon-button class="mt-2 col-sm-1" (click)="deleteMetric($event, i)">
+              <mat-icon aria-label="Remove">delete</mat-icon>
+            </button>
+          </div>
+        </mat-list-item>
+      </mat-list>
+      <button mat-icon-button (click)="addEmptyMetric($event)">
+        <mat-icon aria-label="Add metric">add</mat-icon>
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="mt-2">
+    <button mat-raised-button class="btn float-right" color="primary"
+            (click)="saveReport($event)">Save
+    </button>
+  </div>
+</div>

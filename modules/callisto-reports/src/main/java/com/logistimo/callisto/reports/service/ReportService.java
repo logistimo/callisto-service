@@ -31,6 +31,7 @@ import com.logistimo.callisto.reports.ReportRequestModel;
 import com.logistimo.callisto.reports.core.IReportDataFormatter;
 import com.logistimo.callisto.reports.core.ReportRequestHelper;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
+import com.logistimo.callisto.reports.exception.DuplicateReportException;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 import com.logistimo.callisto.repository.ReportConfigRepository;
@@ -97,6 +98,14 @@ public class ReportService implements IReportService {
   }
 
   @Override
+  public Optional<ReportModel> getReportModel(String userId, String type, String subType) {
+    Optional<ReportConfig> reportConfig = getReportConfig(userId, type, subType);
+    return reportConfig.isPresent() ?
+        Optional.of(modelMapper.map(reportConfig.get(), ReportModel.class))
+        : Optional.empty();
+  }
+
+  @Override
   public ReportResult getReportData(ReportRequestModel reportRequestModel) {
     Optional<ReportConfig> config = getReportConfig
         (reportRequestModel.getUserId(),
@@ -122,6 +131,22 @@ public class ReportService implements IReportService {
         reportDataFormatter.getFormattedResult(reportRequestModel.getUserId(), reportConfig
             .getMetrics().keySet(), derivedResults));
     return reportResult;
+  }
+
+  @Override
+  public void saveReportConfig(ReportConfig reportConfig) {
+    if(StringUtils.isEmpty(reportConfig.getSubType())) {
+      List<ReportConfig> reportConfigs = reportConfigRepository
+          .findByUserIdAndType(reportConfig.getUserId(), reportConfig.getType());
+      if(reportConfigs != null
+         && reportConfigs.stream().filter(s -> StringUtils.isEmpty(s.getSubType())).count() > 0) {
+        throw new DuplicateReportException("Report with same type and subtype exists!");
+      }
+    } else if(reportConfigRepository.findOneByUserIdAndTypeAndSubType(reportConfig.getUserId(),
+        reportConfig.getType(), reportConfig.getSubType()).isPresent()){
+      throw new DuplicateReportException("Report with same type and subtype exists!");
+    }
+    this.reportConfigRepository.save(reportConfig);
   }
 
   private Optional<ReportConfig> getReportConfig(@NonNull String userId, String type, String
