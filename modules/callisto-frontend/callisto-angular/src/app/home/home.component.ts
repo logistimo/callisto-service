@@ -18,6 +18,8 @@ import '../../../node_modules/pivottable/dist/pivot.min.css';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
+import {ApiResponse} from "../model/apiresponse";
+import {GraphResult} from "../model/graph-result";
 
 
 @Component({
@@ -35,7 +37,7 @@ export class HomeComponent implements OnInit {
     private el:ElementRef;
 
     constructor(private dataService:DataService,
-                private queryService:QueryService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog) {
+                private queryService:QueryService, @Inject(ElementRef)el:ElementRef, public dialog: MatDialog, private resultsService: ResultsService) {
         this.el = el;
     }
 
@@ -44,8 +46,8 @@ export class HomeComponent implements OnInit {
             .subscribe(response => {
                 var _dbs = this.datastores;
                 var _dbsModel = this.queryTextModel;
-                let datastores = response as Array<Datastore>;
-                datastores.forEach(function (datastore:Datastore) {
+                let apiResponse = response as ApiResponse<Array<Datastore>>;
+                apiResponse.payload.forEach(function (datastore:Datastore) {
                     _dbs.push(datastore);
                     if (Utils.checkNullEmpty(_dbsModel.datastore_id)) {
                         _dbsModel.datastore_id = datastore.id;
@@ -66,7 +68,10 @@ export class HomeComponent implements OnInit {
         request.columnText = {TOKEN_COLUMNS: mQueryText.columns}
 
         this.dataService.runQuery(request).subscribe(data => {
-            //this.resultsService.changeState(JSON.parse(data))
+          const result = new GraphResult();
+          result.query_id = mQueryText.query_id;
+          result.result = data;
+          this.resultsService.changeState(result);
         });
     }
 

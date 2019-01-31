@@ -94,7 +94,7 @@ export class DataService {
   }
 
   runQuery(body) {
-    return this.http.post('query/run', body, this.requestOption);
+    return this.http.post('query/run', body, this.requestOption).map(res => { return Utils.checkNotNullEmpty(res) ? res as any : null} );
   }
 
   saveQuery(body : QueryText) {

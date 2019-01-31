@@ -8,6 +8,7 @@ import { Utils } from '../util/utils'
 import { ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
 import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
 import { QuerySharingService } from '../service/query-sharing.service';
+import {ApiResponse} from "../model/apiresponse";
 
 @Component({
   selector: 'app-query-listing',
@@ -43,8 +44,8 @@ export class QueryListingComponent implements OnInit {
     this.dataService.getDatastores()
         .subscribe(response => {
           var _dbs = this.datastores;
-          let datastores = response as Array<Datastore>;
-          datastores.forEach(function (datastore:Datastore) {
+          let apiResponse = response as ApiResponse<Array<Datastore>>;
+          apiResponse.payload.forEach(function (datastore:Datastore) {
             _dbs.push(datastore);
           });
         });

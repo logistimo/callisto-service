@@ -1,0 +1,15 @@
+<table class="table table-striped">
+  <tbody>
+  <tr>
+    <th *ngFor="let header of data.result.headings">{{header}}</th>
+  </tr>
+
+  </tbody>
+  <tbody>
+  <tr *ngFor="let row of data.result.rows">
+    <td *ngFor="let column of row">
+      {{column}}
+    </td>
+  </tr>
+  </tbody>
+</table>

@@ -12,6 +12,7 @@ import { DomainFilterFilterPipe } from './query/filter.pipe'
 import { ErrorHandler } from './error/error-handler'
 import { RequestInterceptor } from './error/http-interceptor'
 
+
 import {
   MatCheckboxModule,
   MatFormFieldModule,
@@ -28,8 +29,7 @@ import {
   MatCardModule,
   MatGridListModule,
   MatDividerModule,
-  MatAutocompleteModule, MatSidenavModule, MatListModule, MatPaginatorModule
-} from '@angular/material';
+  MatAutocompleteModule, MatSidenavModule, MatListModule, MatPaginatorModule, MatTableModule} from '@angular/material';
 
 import {MatExpansionModule} from '@angular/material/expansion';
 
@@ -49,6 +49,7 @@ import { NewDatastoreComponent } from './new-datastore/new-datastore.component';
 import { ReportsComponent } from './reports/reports.component';
 import { ReportDetailComponent } from './report-detail/report-detail.component';
 import { NewReportComponent } from './new-report/new-report.component';
+import { DataExplorerComponent } from './data-explorer/data-explorer.component';
 
 const appRoutes: Routes = [
   { path: '',
@@ -120,7 +121,8 @@ const appRoutes: Routes = [
     NewDatastoreComponent,
     ReportsComponent,
     ReportDetailComponent,
-    NewReportComponent
+    NewReportComponent,
+    DataExplorerComponent
   ],
   imports: [
     BrowserModule,
@@ -129,7 +131,7 @@ const appRoutes: Routes = [
     FormsModule,
     HttpClientModule,
     HttpModule,
-
+    MatTableModule,
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
