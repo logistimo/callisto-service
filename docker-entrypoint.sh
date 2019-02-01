@@ -7,7 +7,7 @@ spring.data.mongodb.database=$CALLISTO_DATABASE"
 
 
 cd $CALLISTO_HOME
-exec java -cp $CALLISTO_HOME/*.jar \
+exec java $JAVA_OPTS -cp $CALLISTO_HOME/*.jar \
 	-Dloader.path=$CALLISTO_HOME/lib/* \
 	-Dserver.port=$SERVER_PORT \
 	-Dspring.data.mongodb.host=$MONGODB_HOST \
