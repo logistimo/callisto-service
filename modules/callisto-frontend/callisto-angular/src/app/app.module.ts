@@ -30,7 +30,7 @@ import {
   MatGridListModule,
   MatDividerModule,
   MatAutocompleteModule, MatSidenavModule, MatListModule, MatPaginatorModule, MatTableModule} from '@angular/material';
-
+import { CdkTableModule } from '@angular/cdk/table';
 import {MatExpansionModule} from '@angular/material/expansion';
 
 import { AppComponent } from './app.component';
@@ -153,6 +153,7 @@ const appRoutes: Routes = [
     MatPaginatorModule,
     MatExpansionModule,
     MatDividerModule,
+    CdkTableModule,
     RouterModule.forRoot(
       appRoutes,
       {
