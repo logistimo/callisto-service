@@ -86,7 +86,7 @@ public class CassandraService implements IDataBaseService {
   @Override
   public QueryResults fetchRows(
       Datastore config,
-      String query,
+      String finalQuery,
       Map<String, String> filters,
       Optional<Integer> size,
       Optional<Integer> offset) {
@@ -97,7 +97,6 @@ public class CassandraService implements IDataBaseService {
         logger.warn("Cassandra session is null");
         return null;
       }
-      String finalQuery = constructQuery(query, filters);
       logger.info("Fetching cassandra results: " + finalQuery);
       logger.info("Cassandra query filters: " + filters);
       Statement statement = getStatement(finalQuery);
@@ -273,15 +272,5 @@ public class CassandraService implements IDataBaseService {
 
   protected Statement getStatement(String query) {
     return new SimpleStatement(query);
-  }
-
-  private String constructQuery(String query, Map<String, String> filters) {
-    if (filters != null && filters.size() > 0) {
-      for (Map.Entry<String, String> entry : filters.entrySet()) {
-        String placeholder = "{{" + entry.getKey() + "}}";
-        query = query.replace(placeholder, entry.getValue());
-      }
-    }
-    return query;
   }
 }

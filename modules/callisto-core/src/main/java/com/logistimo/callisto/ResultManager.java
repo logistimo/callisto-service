@@ -41,7 +41,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -127,7 +126,7 @@ public class ResultManager {
     for (String functionsVar : functionsVars) {
       if ((index = variableIndex(functionsVar, headings)) > -1) {
         if (index > row.size() - 1) {
-          return CharacterConstants.EMPTY;
+          return AppConstants.EMPTY;
         }
         str = StringUtils.replaceOnce(str, functionsVar, row.get(index));
       } else if (FunctionUtil.isFunction(functionsVar, false)) {
@@ -158,8 +157,8 @@ public class ResultManager {
    */
   public static int variableIndex(String val, List<String> headings) {
     if (headings != null
-        && val.startsWith(String.valueOf(CharacterConstants.DOLLAR))
-        && !val.contains(CharacterConstants.FN_ENCLOSE)) {
+        && val.startsWith(String.valueOf(AppConstants.DOLLAR))
+        && !val.contains(AppConstants.FN_ENCLOSE)) {
       for (int i = 0; i < headings.size(); i++) {
         String column = headings.get(i);
         if (column.equalsIgnoreCase(val.substring(1))) {
@@ -190,7 +189,7 @@ public class ResultManager {
   }
 
   private Map<String, String> getRawColumnsAsDerivedColumns(Set<String> columns) {
-    return columns.stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
+    return columns.stream().map(s -> Pair.of(s, AppConstants.DOLLAR + s))
         .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
             linkedHashMapMerger, LinkedHashMap::new));
   }

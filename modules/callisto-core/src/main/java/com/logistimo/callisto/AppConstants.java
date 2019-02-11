@@ -26,7 +26,7 @@ package com.logistimo.callisto;
 /**
  * @author Mohan Raja
  */
-public class CharacterConstants {
+public class AppConstants {
   public static final String SINGLE_QUOTE = "'";
   public static final String DOUBLE_QUOTE = "\"";
   public static final char DOLLAR = '$';
@@ -47,8 +47,10 @@ public class CharacterConstants {
   public static final String DOT = ".";
   public static final String SPACE = " ";
   public static final String AS = " as ";
+  public static final String FILTER_PREFIX = "{{";
+  public static final String FILTER_SUFFIX = "}}";
 
-  private CharacterConstants() {
+  private AppConstants() {
     // Constants collection class
   }
 

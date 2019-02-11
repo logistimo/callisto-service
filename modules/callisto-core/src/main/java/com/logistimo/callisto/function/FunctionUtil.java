@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.function;
 
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
 
@@ -51,10 +51,10 @@ public class FunctionUtil {
   private static final Logger logger = LoggerFactory.getLogger(FunctionUtil.class);
   private static final String[]
       delimiters =
-      {CharacterConstants.ADD, CharacterConstants.COMMA, CharacterConstants.CLOSE_BRACKET,
-          CharacterConstants.DIVIDE, CharacterConstants.MULTIPLY, CharacterConstants.SPACE,
-          CharacterConstants.PIPE, CharacterConstants.SUBTRACT, CharacterConstants.CLOSE_CURLY_BRACKET,
-          String.valueOf(CharacterConstants.DOLLAR)};
+      {AppConstants.ADD, AppConstants.COMMA, AppConstants.CLOSE_BRACKET,
+          AppConstants.DIVIDE, AppConstants.MULTIPLY, AppConstants.SPACE,
+          AppConstants.PIPE, AppConstants.SUBTRACT, AppConstants.CLOSE_CURLY_BRACKET,
+          String.valueOf(AppConstants.DOLLAR)};
 
   private FunctionUtil() {
     // Util class
@@ -63,8 +63,8 @@ public class FunctionUtil {
   public static boolean isFunction(String value, boolean skipEnclose) {
     String val = StringUtils.trim(value);
     if (skipEnclose || FunctionUtil.validateSyntax(val)) {
-      int fnStart = StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET);
-      int fnEnd = StringUtils.indexOf(val, CharacterConstants.CLOSE_BRACKET);
+      int fnStart = StringUtils.indexOf(val, AppConstants.OPEN_BRACKET);
+      int fnEnd = StringUtils.indexOf(val, AppConstants.CLOSE_BRACKET);
       if (fnStart != -1
           && fnEnd != -1
           && fnEnd > fnStart
@@ -72,9 +72,9 @@ public class FunctionUtil {
           && StringUtils.isNotEmpty(
           StringUtils.substring(
               val,
-              StringUtils.indexOf(val, CharacterConstants.FN_ENCLOSE)
-                  + CharacterConstants.FN_ENCLOSE.length(),
-              StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET)).trim())) {
+              StringUtils.indexOf(val, AppConstants.FN_ENCLOSE)
+                  + AppConstants.FN_ENCLOSE.length(),
+              StringUtils.indexOf(val, AppConstants.OPEN_BRACKET)).trim())) {
         return true;
       } else {
         logger.warn("Invalid function: " + val);
@@ -88,9 +88,9 @@ public class FunctionUtil {
     try {
       return
           StringUtils.substring(
-              val, StringUtils.indexOf(val, CharacterConstants.FN_ENCLOSE)
-                  + StringUtils.length(CharacterConstants.FN_ENCLOSE),
-              StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET)).trim();
+              val, StringUtils.indexOf(val, AppConstants.FN_ENCLOSE)
+                  + StringUtils.length(AppConstants.FN_ENCLOSE),
+              StringUtils.indexOf(val, AppConstants.OPEN_BRACKET)).trim();
     } catch (IllegalArgumentException e) {
       logger.error("Exception while getting function type: " + val, e);
     }
@@ -98,8 +98,8 @@ public class FunctionUtil {
   }
 
   public static boolean validateSyntax(String val) {
-    return (StringUtils.startsWith(val, CharacterConstants.FN_ENCLOSE)
-        && StringUtils.endsWith(val, CharacterConstants.FN_ENCLOSE));
+    return (StringUtils.startsWith(val, AppConstants.FN_ENCLOSE)
+        && StringUtils.endsWith(val, AppConstants.FN_ENCLOSE));
   }
 
   public static List<String> getAllFunctions(String text) {
@@ -108,14 +108,14 @@ public class FunctionUtil {
 
   private static List<String> getAllFunctions(String text, int start) {
     List<String> matches = new ArrayList<>();
-    if (text.contains(CharacterConstants.FN_ENCLOSE)) {
-      int ss = text.indexOf(CharacterConstants.FN_ENCLOSE, start);
+    if (text.contains(AppConstants.FN_ENCLOSE)) {
+      int ss = text.indexOf(AppConstants.FN_ENCLOSE, start);
       int se =
-          text.indexOf(CharacterConstants.FN_ENCLOSE, ss + 1)
-              + CharacterConstants.FN_ENCLOSE.length();
+          text.indexOf(AppConstants.FN_ENCLOSE, ss + 1)
+              + AppConstants.FN_ENCLOSE.length();
       String subStr = text.substring(ss, se);
       matches.add(subStr);
-      if (text.indexOf(CharacterConstants.FN_ENCLOSE, se + 1) >= 0) {
+      if (text.indexOf(AppConstants.FN_ENCLOSE, se + 1) >= 0) {
         matches.addAll(getAllFunctions(text, se + 1));
       }
     }
@@ -145,9 +145,9 @@ public class FunctionUtil {
    */
   public static List<String> getAllFunctionsAndVariables(String text) {
     List<String> matches = new ArrayList<>();
-    int sIndex = StringUtils.indexOf(text, CharacterConstants.DOLLAR);
+    int sIndex = StringUtils.indexOf(text, AppConstants.DOLLAR);
     if (sIndex > -1 && StringUtils.isNotEmpty(text)) {
-      int dIndex = text.indexOf(CharacterConstants.FN_ENCLOSE);
+      int dIndex = text.indexOf(AppConstants.FN_ENCLOSE);
       if (dIndex == -1 || dIndex > sIndex) {
         // Variable first
         String var = getVariable(text, sIndex);
@@ -156,12 +156,12 @@ public class FunctionUtil {
             .addAll(getAllFunctionsAndVariables(StringUtils.substring(text, sIndex + var.length())));
       } else if (dIndex > -1) {
         // sIndex = dIndex i.e. Function first
-        int index = StringUtils.indexOf(text, CharacterConstants.FN_ENCLOSE, dIndex + 1);
+        int index = StringUtils.indexOf(text, AppConstants.FN_ENCLOSE, dIndex + 1);
         if (index > -1) {
           matches.add(
-              StringUtils.substring(text, dIndex, index + CharacterConstants.FN_ENCLOSE.length()));
+              StringUtils.substring(text, dIndex, index + AppConstants.FN_ENCLOSE.length()));
           matches.addAll(getAllFunctionsAndVariables(
-              StringUtils.substring(text, index + CharacterConstants.FN_ENCLOSE.length())));
+              StringUtils.substring(text, index + AppConstants.FN_ENCLOSE.length())));
         } else {
           logger.warn("Error in getAllFunctionsVariable: " + text);
         }
@@ -211,7 +211,7 @@ public class FunctionUtil {
    */
   public static String replaceVariables(String val, List<String> headings, List<String> row)
       throws CallistoException {
-    List<String> variables = getAllVariables(val, CharacterConstants.DOLLAR);
+    List<String> variables = getAllVariables(val, AppConstants.DOLLAR);
     for (String variable : variables) {
       int index = ResultManager.variableIndex(variable, headings);
       if (index != -1) {
@@ -220,14 +220,14 @@ public class FunctionUtil {
         }else{
           logger.error("Variable "+ variable +" not found in results. So replacing "
                        + "with empty character in expression: " + val);
-          val = StringUtils.replace(val, variable, CharacterConstants.EMPTY);
+          val = StringUtils.replace(val, variable, AppConstants.EMPTY);
         }
       } else {
         if (row.size() == headings.size()) {
           logger.warn("Unknown variable found in Math function: " + val);
           throw new CallistoException("Q102", variable, headings.toString());
         }
-        val = StringUtils.replace(val, variable, CharacterConstants.EMPTY);
+        val = StringUtils.replace(val, variable, AppConstants.EMPTY);
       }
     }
     return val;
@@ -245,28 +245,28 @@ public class FunctionUtil {
       if(StringUtils.isEmpty(str)) {
         return new LinkedHashMap<>();
       }
-      String[] splitArr = StringUtils.split(str, CharacterConstants.COMMA);
+      String[] splitArr = StringUtils.split(str, AppConstants.COMMA);
       for (int i = 0; i < splitArr.length; i++) {
         if (i != splitArr.length - 1
-            && StringUtils.countMatches(splitArr[i], CharacterConstants.FN_ENCLOSE) % 2 != 0) {
-          splitArr[i + 1] = splitArr[i].concat(CharacterConstants.COMMA).concat(splitArr[i + 1]);
-          splitArr[i] = CharacterConstants.EMPTY;
+            && StringUtils.countMatches(splitArr[i], AppConstants.FN_ENCLOSE) % 2 != 0) {
+          splitArr[i + 1] = splitArr[i].concat(AppConstants.COMMA).concat(splitArr[i + 1]);
+          splitArr[i] = AppConstants.EMPTY;
         }
       }
       List<String> columns =
           Arrays.asList(splitArr).stream().filter(StringUtils::isNotEmpty).collect(
               Collectors.toList());
       return columns.stream().collect(Collectors.toMap(s -> {
-        String[] split = s.split(CharacterConstants.AS);
+        String[] split = s.split(AppConstants.AS);
         return split.length >= 2 ? split[split.length - 1].trim() : s.trim();
       }, s -> {
-        String[] split = s.split(CharacterConstants.AS);
-        String var = StringUtils.contains(s, CharacterConstants.DOLLAR) ? s.trim()
-            : CharacterConstants.DOLLAR + s.trim();
+        String[] split = s.split(AppConstants.AS);
+        String var = StringUtils.contains(s, AppConstants.DOLLAR) ? s.trim()
+            : AppConstants.DOLLAR + s.trim();
         return split.length >= 2 ? StringUtils.join(
             IntStream.range(0, split.length).filter(i -> i < split.length - 1)
                 .mapToObj(i -> split[i])
-                .collect(Collectors.toList()), CharacterConstants.EMPTY).trim() : var;
+                .collect(Collectors.toList()), AppConstants.EMPTY).trim() : var;
       }, ResultManager.linkedHashMapMerger, LinkedHashMap::new));
     } catch (Exception e) {
       logger.error("Exception while parsing column text", e);
@@ -279,13 +279,13 @@ public class FunctionUtil {
    * @return a CSV String of all the variables/columns used in the map values.
    */
   public static String extractColumnsCsv(Map<String, String> columnData) {
-    return StringUtils.join(extractColumnSet(columnData), CharacterConstants.COMMA);
+    return StringUtils.join(extractColumnSet(columnData), AppConstants.COMMA);
   }
 
   public static Set<String> extractColumnSet(Map<String, String> columnData) {
     return columnData.entrySet().stream()
-        .flatMap(e -> e.getValue().contains(CharacterConstants.FN_ENCLOSE) ? FunctionUtil
-            .getAllVariables(e.getValue(), CharacterConstants.DOLLAR).stream()
+        .flatMap(e -> e.getValue().contains(AppConstants.FN_ENCLOSE) ? FunctionUtil
+            .getAllVariables(e.getValue(), AppConstants.DOLLAR).stream()
             .map(s -> s.substring(1))
             : new ArrayList<>(Collections.singletonList(e.getValue().substring(1))).stream())
         .collect(Collectors.toSet());

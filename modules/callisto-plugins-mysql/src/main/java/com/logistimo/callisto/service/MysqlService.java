@@ -76,9 +76,8 @@ public class MysqlService implements IDataBaseService {
       if (size.isPresent()) {
         query = query.concat(" LIMIT " + offset.orElse(0) + "," + size.get());
       }
-      String finalQuery = constructQuery(query, filters);
-      logger.info("Fetching mysql results: " + finalQuery);
-      rs = stmt.executeQuery(finalQuery);
+      logger.info("Fetching mysql results: " + query);
+      rs = stmt.executeQuery(query);
       ResultSetMetaData metaData = rs.getMetaData();
       int columnCount = metaData.getColumnCount();
       List<String> headings = new ArrayList<>(columnCount);
@@ -132,15 +131,5 @@ public class MysqlService implements IDataBaseService {
         "jdbc:mysql://" + config.getHosts().get(0) + "/" + config.getSchema(),
         config.getUsername(),
         config.getPassword());
-  }
-
-  private String constructQuery(String query, Map<String, String> filters) {
-    if (filters != null && filters.size() > 0) {
-      for (Map.Entry<String, String> entry : filters.entrySet()) {
-        String placeholder = "{{" + entry.getKey() + "}}";
-        query = query.replace(placeholder, entry.getValue());
-      }
-    }
-    return query;
   }
 }

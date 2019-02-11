@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.function;
 
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.ConstantText;
@@ -77,10 +77,10 @@ public class ConstantFunction implements ICallistoFunction {
 
   public static String getParameter(String value) {
     String val = value.trim();
-    int fnStart = val.indexOf(CharacterConstants.OPEN_BRACKET);
-    int fnEnd = val.indexOf(CharacterConstants.CLOSE_BRACKET);
+    int fnStart = val.indexOf(AppConstants.OPEN_BRACKET);
+    int fnEnd = val.indexOf(AppConstants.CLOSE_BRACKET);
     return StringUtils.split(
-            StringUtils.substring(val, fnStart + 1, fnEnd), CharacterConstants.COMMA)[
+            StringUtils.substring(val, fnStart + 1, fnEnd), AppConstants.COMMA)[
         0];
   }
 

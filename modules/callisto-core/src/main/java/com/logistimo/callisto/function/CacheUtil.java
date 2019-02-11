@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.function;
 
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.service.IQueryService;
@@ -56,7 +56,7 @@ public class CacheUtil {
     }
     logger.warn("Expected result size from Link function " + functionParam.function
                 + " is 1. Actual result: " + rs.toString());
-    return CharacterConstants.EMPTY;
+    return AppConstants.EMPTY;
   }
 
 }
