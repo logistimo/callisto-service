@@ -105,7 +105,7 @@ public class MysqlServiceTest {
     when(statement.executeQuery(anyString())).thenReturn(rs);
     QueryResults queryResults = mysqlService
         .fetchRows(null,
-            "select some-data from some-table where sc = {{TOKEN_F1}} and scc = {{TOKEN_F2}}",
+            "select some-data from some-table where sc = v1 and scc = v2",
             filters, Optional.empty(), Optional.empty());
     verify(connection, times(1)).createStatement();
     verify(statement, times(1)).executeQuery(eq("select some-data from some-table where sc = v1 and"

@@ -176,11 +176,9 @@ public class CassandraPluginTest {
     datastore.setHosts(Collections.singletonList("localhost"));
     datastore.setPort(27017);
     datastore.setSchema("some-schema");
-    String query = "select this, that from some-table where other in ({{I_DONT_KNOW}}) and "
-                   + "some-other in {{I_KNOW}}";
+    String query = "select this, that from some-table where other in (439843) and "
+                   + "some-other in 'some-value'";
     Map<String, String> filters = new HashMap<>();
-    filters.put("I_DONT_KNOW", "439843");
-    filters.put("I_KNOW", "'some-value'");
     cassandraService.fetchRows(datastore, query, filters, Optional.empty(), Optional.of(9500));
     assertEquals("select this, that from some-table where other in (439843) and some-other in "
                  + "'some-value'", this.query);
