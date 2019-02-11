@@ -35,9 +35,9 @@ public class QueryRequestModel {
   public String userId = "logistimo";
   public String queryId;
   public QueryText query; // used only if queryId is not present
-  public Map<String, String> filters;
+  public HashMap<String, String> filters;
   public String derivedResultsId; //constant ID for the derived result i.e. LinkedHashMap
-  public Map<String, String> columnText;
+  public HashMap<String, String> columnText;
   public Integer size;
   public List<String> rowHeadings;
   public Integer offset;
@@ -50,9 +50,12 @@ public class QueryRequestModel {
     this.userId = String.valueOf(queryRequestModel.userId);
     this.queryId = queryRequestModel.queryId;
     this.query = queryRequestModel.query;
-    this.filters = queryRequestModel.filters == null ? null : (Map) ((HashMap) queryRequestModel.filters).clone();
+    this.filters =
+        queryRequestModel.filters == null ? null : (HashMap) queryRequestModel.filters
+            .clone();
     this.columnText =
-        queryRequestModel.columnText == null ? null : (Map) ((HashMap) queryRequestModel.columnText).clone();
+        queryRequestModel.columnText == null ? null : (HashMap) queryRequestModel.columnText
+            .clone();
     this.rowHeadings =
         queryRequestModel.rowHeadings == null ? null : (List) ((ArrayList) queryRequestModel.rowHeadings).clone();
     this.derivedResultsId = queryRequestModel.derivedResultsId;

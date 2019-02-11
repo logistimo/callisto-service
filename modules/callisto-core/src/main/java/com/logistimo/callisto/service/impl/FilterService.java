@@ -77,7 +77,7 @@ public class FilterService implements IFilterService {
     if(StringUtils.isNotEmpty(filter.getAutoCompletePlaceholder())) {
       filters.put(filter.getAutoCompletePlaceholder(), search);
     }
-    queryRequestModel.filters = filters;
+    queryRequestModel.filters = new HashMap<>(filters);
     return queryRequestModel;
   }
 

@@ -69,8 +69,8 @@ public class ReportRequestHelper {
     this.reportConfig = reportConfig;
     QueryRequestModel queryRequestModel = new QueryRequestModel();
     queryRequestModel.userId = reportRequestModel.getUserId();
-    queryRequestModel.filters = generateQueryFilters(reportRequestModel.getUserId(),
-        reportRequestModel.getFilters());
+    queryRequestModel.filters = new HashMap<>(generateQueryFilters(reportRequestModel.getUserId(),
+        reportRequestModel.getFilters()));
       queryRequestModel.queryId = deriveQueryIdFromFilters(reportRequestModel.getUserId(),
           reportRequestModel.getFilters().keySet());
     return queryRequestModel;

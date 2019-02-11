@@ -80,7 +80,7 @@ public abstract class ReportDataFormatter implements IReportDataFormatter {
           filters.put(filter.get().getPlaceholder(), value);
           QueryRequestModel queryRequestModel = new QueryRequestModel();
           queryRequestModel.userId = userId;
-          queryRequestModel.filters = filters;
+          queryRequestModel.filters = new HashMap<>(filters);
           functionParam.setQueryRequestModel(queryRequestModel);
           functionParam.function = LinkFunction.getFunctionSyntax(renameQueryId);
           return linkFunction.getResult(functionParam);
