@@ -186,7 +186,7 @@ public class QueryService implements IQueryService {
     List<String> rowHeadings = new ArrayList<>();
     if (queryText == null) {
       logger.warn("Query " + request.queryId + " not found for user " + request.userId);
-      return null;
+      return new QueryResults();
     }
     Datastore
         datastore =

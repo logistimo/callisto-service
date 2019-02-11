@@ -40,6 +40,7 @@ public class QueryResults {
 
   public QueryResults() {
     this.rows = new ArrayList<>();
+    this.headings = new ArrayList<>();
   }
 
   public List<String> getHeadings() {

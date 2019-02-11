@@ -5,6 +5,7 @@ import { Datastore } from '../model/datastore';
 import { DataService } from '../service/data.service';
 import {Utils} from '../util/utils'
 import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
+import {ApiResponse} from "../model/apiresponse";
 
 @Component({
     selector: 'app-new-query',
@@ -41,8 +42,8 @@ export class NewQueryComponent implements OnInit {
             .subscribe(response => {
                 var _dbs = this.datastores;
                 var _dbsModel = this.queryTextModel;
-                let datastores = response as Array<Datastore>;
-                datastores.forEach(function (datastore:Datastore) {
+                let apiResponse = response as ApiResponse<Array<Datastore>>;
+                apiResponse.payload.forEach(function (datastore:Datastore) {
                     _dbs.push(datastore);
                     if (Utils.checkNullEmpty(_dbsModel.datastore_id)) {
                         _dbsModel.datastore_id = datastore.id;

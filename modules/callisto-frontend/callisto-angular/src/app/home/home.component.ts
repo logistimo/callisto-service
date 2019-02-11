@@ -18,6 +18,7 @@ import '../../../node_modules/pivottable/dist/pivot.min.css';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
+import {ApiResponse} from "../model/apiresponse";
 
 
 @Component({
@@ -44,8 +45,8 @@ export class HomeComponent implements OnInit {
             .subscribe(response => {
                 var _dbs = this.datastores;
                 var _dbsModel = this.queryTextModel;
-                let datastores = response as Array<Datastore>;
-                datastores.forEach(function (datastore:Datastore) {
+                let apiResponse = response as ApiResponse<Array<Datastore>>;
+                apiResponse.payload.forEach(function (datastore:Datastore) {
                     _dbs.push(datastore);
                     if (Utils.checkNullEmpty(_dbsModel.datastore_id)) {
                         _dbsModel.datastore_id = datastore.id;
