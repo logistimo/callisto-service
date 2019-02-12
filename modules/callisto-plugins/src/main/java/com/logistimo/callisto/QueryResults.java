@@ -24,14 +24,24 @@
 package com.logistimo.callisto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-/** @author Mohan Raja */
+/**
+ * @author Mohan Raja
+ */
 public class QueryResults {
   private List<String> headings;
   private List<CallistoDataType> dataTypes;
   private List<List<String>> rows;
   private List<String> rowHeadings;
+
+  public QueryResults() {
+    this.rows = new ArrayList<>();
+    this.headings = new ArrayList<>();
+  }
 
   public List<String> getHeadings() {
     return headings;
@@ -65,8 +75,31 @@ public class QueryResults {
   }
 
   public void setRowHeadings(List<String> rowHeadings) {
-    if(rowHeadings != null && !rowHeadings.isEmpty()){
+    if (rowHeadings != null && !rowHeadings.isEmpty()) {
       this.rowHeadings = rowHeadings;
+    }
+  }
+
+  /**
+   * @param index index of rowHeading element
+   * @return QueryResults after filling dummy rows for the all absent rowHeading elements
+   */
+  public void fillResults(List<String> rowHeadings, Integer index) {
+    if (rowHeadings != null && !rowHeadings.isEmpty()) {
+      Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
+      if (getRows() != null) {
+        for (List row : getRows()) {
+          rowHeadingsSet.remove(row.get(index));
+        }
+      }
+      rowHeadings.stream()
+          .filter(rowHeadingsSet::contains)
+          .forEach(heading -> {
+            String[] nRow = new String[headings.size()];
+            Arrays.fill(nRow, "");
+            nRow[index] = heading;
+            addRow(Arrays.asList(nRow));
+          });
     }
   }
 }

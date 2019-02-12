@@ -23,26 +23,46 @@
 
 package com.logistimo.callisto.service;
 
+import com.logistimo.callisto.DataBaseCollection;
+import com.logistimo.callisto.FunctionManager;
 import com.logistimo.callisto.QueryResults;
+import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
+import com.logistimo.callisto.model.PagedResults;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.QueryText;
+
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 /** @author Chandrakant */
 public interface IQueryService {
 
-  String saveQuery(QueryText q);
+  void saveQuery(QueryText q);
 
-  String updateQuery(QueryText q);
+  void setFunctionManager(FunctionManager functionManager);
+
+  void setDatabaseCollection(DataBaseCollection databaseCollection);
+
+  void updateQuery(QueryText q);
 
   QueryText readQuery(String userId, String queryId);
 
-  List<String> readQueryIds(String userId);
+  List<String> readQueryIds(String userId, String like, Pageable pageable);
 
   QueryResults readData(QueryRequestModel requestModel)
       throws CallistoException;
 
-  String deleteQuery(String userId, String queryId);
+  QueryResults readAndModifyData(QueryRequestModel requestModel, ResultManager resultManager);
+
+  void deleteQuery(String userId, String queryId);
+
+  List<String> getAllQueryIds(String userId);
+
+  List<QueryText> readQueries(String userId, Pageable pageable);
+
+  Long getTotalNumberOfQueries(String userId);
+
+  PagedResults<QueryText> searchQueriesLike(String userId, String like, Pageable pageable);
 }

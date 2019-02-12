@@ -35,7 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 /** Created by chandrakant on 26/05/17. */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ResultManagerTest {
 
   @Mock
@@ -90,7 +90,7 @@ public class ResultManagerTest {
     desiredResultFormat.put("Modified 2nd column", "$$math($pqr/$def)$$");
     desiredResultFormat.put("Modified bottom map", "$$bottomx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
     desiredResultFormat.put("Modified top map", "$$topx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
-    QueryResults newResult = resultManager.getDesiredResult(request, results, desiredResultFormat);
+    QueryResults newResult = resultManager.getDerivedResults(request, results, desiredResultFormat);
     assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
     assertEquals("2", newResult.getRows().get(0).get(1));
     assertEquals("{\"key7\":14,\"key8\":17,\"key9\":20,\"key1\":23,\"key5\":25}", newResult.getRows().get(0).get(2));

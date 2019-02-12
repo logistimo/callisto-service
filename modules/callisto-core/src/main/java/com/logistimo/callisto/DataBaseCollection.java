@@ -25,7 +25,6 @@ package com.logistimo.callisto;
 
 import com.logistimo.callisto.service.IDataBaseService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -36,8 +35,11 @@ import java.util.Map;
 @Component
 public class DataBaseCollection {
 
-  @Autowired
   private Map<String, IDataBaseService> databaseServices;
+
+  DataBaseCollection(Map<String, IDataBaseService> databaseServices) {
+    this.databaseServices = databaseServices;
+  }
 
   public IDataBaseService getDataBaseService(String serviceName) {
     if (databaseServices.containsKey(serviceName)) {

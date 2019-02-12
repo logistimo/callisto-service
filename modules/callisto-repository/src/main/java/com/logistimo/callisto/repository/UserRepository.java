@@ -31,6 +31,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by chandrakant on 08/03/17.
@@ -41,5 +42,5 @@ public interface UserRepository extends MongoRepository<User, String> {
   @Query(value = "{ 'userId': ?0 }", fields = "{ 'serverConfigs':{ $elemMatch: { 'id': ?1 }}}")
   List<User> readServerConfig(String userId, String serverId, Pageable pageable);
 
-  List<User> findByUserId(String userId);
+  Optional<User> findOneByUserId(String userId);
 }

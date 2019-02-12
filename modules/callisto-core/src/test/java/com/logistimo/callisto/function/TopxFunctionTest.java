@@ -30,7 +30,7 @@ import com.logistimo.callisto.model.QueryRequestModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by chandrakant on 02/08/17.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class TopxFunctionTest {
 
   private ICallistoFunction topx;

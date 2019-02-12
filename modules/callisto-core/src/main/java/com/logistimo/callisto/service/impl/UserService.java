@@ -24,7 +24,6 @@
 package com.logistimo.callisto.service.impl;
 
 import com.logistimo.callisto.exception.CallistoException;
-import com.logistimo.callisto.model.ServerConfig;
 import com.logistimo.callisto.model.User;
 import com.logistimo.callisto.repository.UserRepository;
 import com.logistimo.callisto.service.IUserService;
@@ -33,10 +32,10 @@ import com.mongodb.DuplicateKeyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Chandrakant
@@ -47,42 +46,33 @@ public class UserService implements IUserService {
 
   private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-  @Autowired
   private UserRepository repository;
 
-  public User readUser(String userId) {
-    User user = null;
-    try {
-      List<User> userList = repository.findByUserId(userId);
-      if (userList != null && userList.size() == 1) {
-        user = userList.get(0);
-      }
-    } catch (Exception e) {
-      logger.error("Error while reading user " + userId, e);
-    }
-    return user;
+  @Autowired
+  public void setUserRepository(UserRepository repository) {
+    this.repository = repository;
   }
 
-  public String saveUser(User user) {
-    String res = CallistoException.RESULT_FAILURE;
+  public Optional<User> readUser(String userId) {
+    return repository.findOneByUserId(userId);
+  }
+
+  public void saveUser(User user) {
     try {
       repository.insert(user);
-      res = "success";
     } catch (DuplicateKeyException e) {
       logger.warn("Duplicate userId", e);
-      return "Duplicate userId";
     } catch (Exception e) {
       logger.error("Error while creating user", e);
     }
-    return res;
   }
 
   public String updateUser(User user) {
     String res = CallistoException.RESULT_FAILURE;
     try {
-      List<User> userList = repository.findByUserId(user.getUserId());
-      if (userList != null && userList.size() == 1) {
-        user.setId(userList.get(0).getId());
+      Optional<User> userDb = repository.findOneByUserId(user.getUserId());
+      if (userDb.isPresent()) {
+        user.setId(userDb.get().getId());
         repository.save(user);
         res = "User successfully updated";
       }
@@ -92,31 +82,12 @@ public class UserService implements IUserService {
     return res;
   }
 
-  public ServerConfig readServerConfig(String userId, String serverId) {
-    ServerConfig serverConfig = null;
-    try {
-      List<User> users = repository.readServerConfig(userId, serverId, PageRequest.of(0, 1));
-      if (users != null && users.size() == 1) {
-        List<ServerConfig> serverConfigs = users.get(0).getServerConfigs();
-        if (serverConfigs != null) {
-          serverConfig = serverConfigs.get(0);
-        }
-      } else {
-        logger.warn("User " + userId + " not found");
-      }
-    } catch (Exception e) {
-      logger.error(
-          "Error while reading server config for userId "+ userId +" and serverId " + serverId, e);
-    }
-    return serverConfig;
-  }
-
   public String deleteUser(String userId) {
     String res = CallistoException.RESULT_FAILURE;
     try {
-      List<User> userList = repository.findByUserId(userId);
-      if (userList != null && userList.size() == 1) {
-        repository.delete(userList.get(0));
+      Optional<User> userDb = repository.findOneByUserId(userId);
+      if (userDb.isPresent()) {
+        repository.delete(userDb.get());
         res = "success";
       }
     } catch (Exception e) {

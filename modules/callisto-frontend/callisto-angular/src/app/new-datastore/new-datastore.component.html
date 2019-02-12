@@ -1,0 +1,85 @@
+<!--
+  ~ Copyright © 2018 Logistimo.
+  ~
+  ~ This file is part of Logistimo.
+  ~
+  ~ Logistimo software is a mobile & web platform for supply chain management and remote temperature monitoring in
+  ~ low-resource settings, made available under the terms of the GNU Affero General Public License (AGPL).
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  ~ Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+  ~ later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  ~ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License along with this program.  If not, see
+  ~ <http://www.gnu.org/licenses/>.
+  ~
+  ~ You can be released from the requirements of the license by purchasing a commercial license. To know more about
+  ~ the commercial license, please contact us at opensource@logistimo.com
+  -->
+
+<div class="container-fluid main-form-container callisto-container p-4">
+
+    <h4 class="mb-4">Update Datastores</h4>
+
+    <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Datastore Id</mat-label>
+        <input spellcheck="false" matInput [formControl]="datastoreIdField"
+               [(ngModel)]="datastoreModel.id">
+        <mat-icon matSuffix color="{{datastoreIdUnavailable && 'warn' || 'primary'}}"
+                  matTooltip="{{datastoreIdUnavailable && 'Unavailable' || 'Available'}}"
+                  matTooltipPosition="above">
+            {{datastoreIdUnavailable ? 'error' : 'check_circle'}}
+        </mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.name">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Hosts (csv)</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="_hostsCsv">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Port</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.port">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Username</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.username">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.password">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Schema name</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.schema">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.type">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Escaping term</mat-label>
+        <input spellcheck="false" matInput [(ngModel)]="datastoreModel.escaping">
+    </mat-form-field>
+
+
+    <div class="mt-2">
+        <button mat-raised-button color="primary" class="btn float-right" color="primary"
+                (click)="saveDatastore($event, datastoreModel)">Save
+        </button>
+    </div>
+</div>

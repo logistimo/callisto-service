@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
 /**
  * @author Mohan Raja
  */
-public class CallistoException extends Exception {
+public class CallistoException extends RuntimeException {
 
   public static final String RESULT_FAILURE = "failure";
 

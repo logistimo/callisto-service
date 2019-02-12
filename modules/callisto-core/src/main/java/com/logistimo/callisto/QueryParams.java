@@ -66,7 +66,7 @@ public class QueryParams {
   public static QueryParams getQueryParams(String functionText, Map<String, String> filters)
       throws CallistoException {
     QueryParams queryParams = new QueryParams();
-    int index = functionText.indexOf(CharacterConstants.OPEN_BRACKET);
+    int index = functionText.indexOf(AppConstants.OPEN_BRACKET);
     if (index == -1) {
       logger.warn("Invalid queryParams found. " + queryParams);
       throw new CallistoException("Q001", functionText);
@@ -74,12 +74,12 @@ public class QueryParams {
     String[] functionParams;
     queryParams.type =
         FunctionType.getFunctionType(
-            functionText.substring(CharacterConstants.FN_ENCLOSE.length(), index).trim());
+            functionText.substring(AppConstants.FN_ENCLOSE.length(), index).trim());
     functionParams =
         functionText
-            .substring(index + 1, functionText.indexOf(CharacterConstants.CLOSE_BRACKET))
+            .substring(index + 1, functionText.indexOf(AppConstants.CLOSE_BRACKET))
             .trim()
-            .split(CharacterConstants.COMMA);
+            .split(AppConstants.COMMA);
     if (functionParams.length >= 1) {
       String qId = functionParams[0].trim();
       if (filters.containsKey(qId)) {

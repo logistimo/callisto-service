@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.function;
 
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 
@@ -82,8 +82,8 @@ public class DateTimeFunction implements ICallistoFunction {
 
 
   public static List<String> getParameters(String fn) throws CallistoException {
-    String str = StringUtils.substring(fn, fn.indexOf(CharacterConstants.OPEN_BRACKET) + 1,
-        fn.lastIndexOf(CharacterConstants.CLOSE_BRACKET));
+    String str = StringUtils.substring(fn, fn.indexOf(AppConstants.OPEN_BRACKET) + 1,
+        fn.lastIndexOf(AppConstants.CLOSE_BRACKET));
     List<String> params = new ArrayList<>();
     String quote;
     int boundary = 0;
@@ -93,17 +93,17 @@ public class DateTimeFunction implements ICallistoFunction {
           boundary++;
         }
         quote =
-            Objects.equals(String.valueOf(str.charAt(boundary)), CharacterConstants.SINGLE_QUOTE)
-                ? CharacterConstants.SINGLE_QUOTE : null;
+            Objects.equals(String.valueOf(str.charAt(boundary)), AppConstants.SINGLE_QUOTE)
+                ? AppConstants.SINGLE_QUOTE : null;
         if (StringUtils.isNotEmpty(quote)) {
           int quoteEnd = str.indexOf(quote, boundary + 1);
           if (quoteEnd == -1) {
             throw new CallistoException("Q103", fn);
           }
           params.add(StringUtils.substring(str, boundary + 1, quoteEnd));
-          boundary = str.indexOf(CharacterConstants.COMMA, quoteEnd) + 1;
+          boundary = str.indexOf(AppConstants.COMMA, quoteEnd) + 1;
         } else {
-          int nextComma = str.indexOf(CharacterConstants.COMMA, boundary);
+          int nextComma = str.indexOf(AppConstants.COMMA, boundary);
           if (nextComma == -1) {
             nextComma = str.length();
           }

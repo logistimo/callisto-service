@@ -24,7 +24,7 @@
 package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.CallistoDataType;
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.QueryParams;
 import com.logistimo.callisto.QueryResults;
@@ -92,19 +92,19 @@ public class CsvFunction implements ICallistoFunction {
       if (!forceEnclose
           && results.getDataTypes() != null
           && CallistoDataType.NUMBER.equals(results.getDataTypes().get(0))) {
-        csv.append(strings.get(0)).append(CharacterConstants.COMMA);
+        csv.append(strings.get(0)).append(AppConstants.COMMA);
       } else {
         String enclosing;
-        if (strings.get(0).contains(CharacterConstants.SINGLE_QUOTE)
+        if (strings.get(0).contains(AppConstants.SINGLE_QUOTE)
             && StringUtils.isNotEmpty(param.getEscaping())) {
           enclosing = param.getEscaping();
         } else {
-          enclosing = CharacterConstants.SINGLE_QUOTE;
+          enclosing = AppConstants.SINGLE_QUOTE;
         }
         csv.append(enclosing)
             .append(strings.get(0))
             .append(enclosing)
-            .append(CharacterConstants.COMMA);
+            .append(AppConstants.COMMA);
       }
     }
     if (csv.length() > 0) {

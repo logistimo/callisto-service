@@ -28,7 +28,7 @@ import com.logistimo.callisto.function.FunctionUtil;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /** Created by chandrakant on 26/05/17. */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class FunctionUtilTest {
 
   @Test
@@ -120,7 +120,7 @@ public class FunctionUtilTest {
     Map<String, String> map = new HashMap<>();
     map.put("some_column", "$$somefunction($abc,user,$pwd,'')$$");
     map.put("abc", "$$math($v1/$v5-$somevar*$othervar)$$");
-    String[] result = FunctionUtil.extractColumnsCsv(map).split(CharacterConstants.COMMA);
+    String[] result = FunctionUtil.extractColumnsCsv(map).split(AppConstants.COMMA);
     Arrays.sort(result);
     assertArrayEquals(new String[]{"abc", "othervar", "pwd", "somevar", "v1", "v5"}, result);
 
@@ -129,7 +129,7 @@ public class FunctionUtilTest {
     map.put("abc", "$$math($outvar/$$math($inside_var,$cagedvar)$$-$somevar*$othervar)$$ "
                    + "$$funfun($funvar, $boringvar)$$");
     map.put("non-abc", "$$nofun($kool)$$ | $notkool");
-    result = FunctionUtil.extractColumnsCsv(map).split(CharacterConstants.COMMA);
+    result = FunctionUtil.extractColumnsCsv(map).split(AppConstants.COMMA);
     Arrays.sort(result);
     assertArrayEquals(new String[]{"abc", "alone_var", "boringvar", "cagedvar", "funvar",
         "inside_var", "kool", "much", "notkool", "othervar", "outvar", "pwd", "somevar"}, result);

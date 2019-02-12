@@ -35,12 +35,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,7 +58,6 @@ public class ResultManager {
 
   private static final Logger logger = LoggerFactory.getLogger(ResultManager.class);
 
-  @Autowired
   private FunctionManager functionManager;
 
   public static final BinaryOperator<String> linkedHashMapMerger = (u, v) -> {
@@ -70,7 +70,8 @@ public class ResultManager {
    * @param derivedColumnMap Map of derived column names and values
    * @return Derived QueryResults using original QueryResults and derivedColumnMap
    */
-  public QueryResults getDesiredResult(
+  @CacheEvict(allEntries = true,value = {"links"})
+  public QueryResults getDerivedResults(
       QueryRequestModel request,
       QueryResults rs,
       Map<String, String> derivedColumnMap)
@@ -79,23 +80,26 @@ public class ResultManager {
     if (derivedColumnMap == null || derivedColumnMap.isEmpty()) {
       return rs;
     }
-    Map<String, String> modifiedColumnMap = derivedColumnMap.entrySet().stream().collect(
-        Collectors.toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
-            linkedHashMapMerger, LinkedHashMap::new));
+    derivedColumnMap =
+        derivedColumnMap.entrySet().stream().collect(Collectors
+            .toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
+                linkedHashMapMerger, LinkedHashMap::new));
     //TODO: mechanism to identify which column is for rowHeadings,
-    QueryResults results = fillResult(rs, request.rowHeadings, 0);
+    rs.fillResults(request.rowHeadings, 0);
     QueryResults derivedResults = new QueryResults();
-    derivedResults.setHeadings(new ArrayList<>(modifiedColumnMap.keySet()));
-    derivedResults.setRowHeadings(results.getRowHeadings());
-    if (results.getHeadings() != null && results.getRows() != null) {
-      Map<String, List<String>> functionsVarsMap =
-          modifiedColumnMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-              e -> FunctionUtil.getAllFunctionsAndVariables(e.getValue())));
-      for (List<String> row : results.getRows()) {
+    derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
+    derivedResults.setRowHeadings(rs.getRowHeadings());
+    if (rs.getHeadings() != null && rs.getRows() != null) {
+      Map<String, List<String>>
+          functionsVarsMap =
+          derivedColumnMap.entrySet().stream()
+              .map(e -> Pair.of(e.getKey(), FunctionUtil.getAllFunctionsAndVariables(e.getValue())))
+              .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+      for (List row : rs.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
-        for (Map.Entry<String, String> entry : modifiedColumnMap.entrySet()) {
+        for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String r =
-              parseDesiredValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
+              parseDerivedValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
                   headings, row);
           dRow.add(r);
         }
@@ -103,30 +107,6 @@ public class ResultManager {
       }
     }
     return derivedResults;
-  }
-
-  /**
-   * @param results QueryResults to be filled
-   * @param index   index of rowHeading element
-   * @return QueryResults after filling dummy rows for the all absent rowHeading elements
-   */
-  private static QueryResults fillResult(QueryResults results, List<String> rowHeadings,
-                                         Integer index) {
-    if (rowHeadings != null && results != null) {
-      Set<String> rowHeadingsSet = new HashSet<>(rowHeadings);
-      if (results.getRows() != null) {
-        for (List<String> row : results.getRows()) {
-          rowHeadingsSet.remove(row.get(index));
-        }
-      }
-      for (String heading : rowHeadings) {
-        String[] nRow = new String[index + 1];
-        Arrays.fill(nRow, CharacterConstants.EMPTY);
-        nRow[index] = heading;
-        results.addRow(Arrays.asList(nRow));
-      }
-    }
-    return results;
   }
 
   /**
@@ -138,7 +118,7 @@ public class ResultManager {
    * @param row      result row, respective to column names
    * @return String after replacing all the CallistoFunctions and Variables
    */
-  public String parseDesiredValue(
+  public String parseDerivedValue(
       QueryRequestModel request, String str, List<String> functionsVars, List<String> headings,
       List<String> row)
       throws CallistoException {
@@ -146,7 +126,7 @@ public class ResultManager {
     for (String functionsVar : functionsVars) {
       if ((index = variableIndex(functionsVar, headings)) > -1) {
         if (index > row.size() - 1) {
-          return CharacterConstants.EMPTY;
+          return AppConstants.EMPTY;
         }
         str = StringUtils.replaceOnce(str, functionsVar, row.get(index));
       } else if (FunctionUtil.isFunction(functionsVar, false)) {
@@ -170,15 +150,15 @@ public class ResultManager {
   }
 
   /**
-   * @param val      desired value to be parsed
+   * @param val      derived value to be parsed
    * @param headings original result headings
    * @return checks if val is only a variable i.e. $xyz, and return index of variable in heading,
    * otherwise -1
    */
   public static int variableIndex(String val, List<String> headings) {
     if (headings != null
-        && val.startsWith(String.valueOf(CharacterConstants.DOLLAR))
-        && !val.contains(CharacterConstants.FN_ENCLOSE)) {
+        && val.startsWith(String.valueOf(AppConstants.DOLLAR))
+        && !val.contains(AppConstants.FN_ENCLOSE)) {
       for (int i = 0; i < headings.size(); i++) {
         String column = headings.get(i);
         if (column.equalsIgnoreCase(val.substring(1))) {
@@ -196,17 +176,45 @@ public class ResultManager {
    * @param results original QueryResults
    * @return parsed Map
    */
-  public Map<String, String> getResultFormatMap(String strToParse, QueryResults results) {
+  public Map<String, String> getDerivedColumnsMap(String strToParse, QueryResults results) {
     if (results == null || results.getHeadings() == null) {
       return null;
     }
     Type type = new TypeToken<LinkedHashMap<String, String>>() {
     }.getType();
-    Map<String, String> filterMap =
-        results.getHeadings().stream().map(s -> Pair.of(s, CharacterConstants.DOLLAR + s))
-            .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
-                linkedHashMapMerger, LinkedHashMap::new));
-    filterMap.putAll(new Gson().fromJson(strToParse, type));
-    return filterMap;
+    Map<String, String> derivedResults = getRawColumnsAsDerivedColumns(
+        new HashSet<>(results.getHeadings()));
+    derivedResults.putAll(new Gson().fromJson(strToParse, type));
+    return derivedResults;
+  }
+
+  private Map<String, String> getRawColumnsAsDerivedColumns(Set<String> columns) {
+    return columns.stream().map(s -> Pair.of(s, AppConstants.DOLLAR + s))
+        .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
+            linkedHashMapMerger, LinkedHashMap::new));
+  }
+
+  /**
+   *
+   * @param existingDerivedResults
+   * @param columns
+   * @param rawResultHeadings
+   * @return
+   */
+  public Map<String, String> getCompleteDerivedColumnsMap(
+      Map<String, String> existingDerivedResults,
+      Set<String> columns,
+      List<String> rawResultHeadings) {
+    Map<String, String> derivedResults = new HashMap<>();
+    derivedResults.putAll(existingDerivedResults);
+    Set<String> rawResultHeadingsSet = new HashSet<>(rawResultHeadings);
+    rawResultHeadingsSet.removeAll(columns);
+    derivedResults.putAll(getRawColumnsAsDerivedColumns(rawResultHeadingsSet));
+    return derivedResults;
+  }
+
+  @Autowired
+  public void setFunctionManager(FunctionManager functionManager) {
+    this.functionManager = functionManager;
   }
 }
