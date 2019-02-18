@@ -26,7 +26,7 @@ package com.logistimo.callisto.function;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 
@@ -52,10 +52,10 @@ public class BottomxFunction implements ICallistoFunction {
   private static final String NAME = "bottomx";
 
   private List<String> getParameters(String fn) {
-    String str = StringUtils.substring(fn, fn.indexOf(CharacterConstants.OPEN_BRACKET) + 1,
-        fn.lastIndexOf(CharacterConstants.CLOSE_BRACKET));
-    String[] arr = StringUtils.split(str, CharacterConstants.COMMA);
-    return Arrays.asList(StringUtils.join(arr, CharacterConstants.COMMA, 0, arr.length - 2),
+    String str = StringUtils.substring(fn, fn.indexOf(AppConstants.OPEN_BRACKET) + 1,
+        fn.lastIndexOf(AppConstants.CLOSE_BRACKET));
+    String[] arr = StringUtils.split(str, AppConstants.COMMA);
+    return Arrays.asList(StringUtils.join(arr, AppConstants.COMMA, 0, arr.length - 2),
         arr[arr.length - 2], arr[arr.length - 1]);
   }
 
@@ -88,7 +88,7 @@ public class BottomxFunction implements ICallistoFunction {
       offset =
           Integer.valueOf(functionParam.getQueryRequestModel().filters.get(params.get(2).trim()));
     } catch (NumberFormatException e) {
-      throw new CallistoException("Q105", params.get(1) + CharacterConstants.COMMA + params.get(2));
+      throw new CallistoException("Q105", params.get(1) + AppConstants.COMMA + params.get(2));
     }
     Map sortedMap = map.entrySet().stream()
         .sorted(this::compareEntry)

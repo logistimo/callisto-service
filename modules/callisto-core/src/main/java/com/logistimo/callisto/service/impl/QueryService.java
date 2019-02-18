@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto.service.impl;
 
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.DataBaseCollection;
 import com.logistimo.callisto.FunctionManager;
 import com.logistimo.callisto.ICallistoFunction;
@@ -186,7 +187,7 @@ public class QueryService implements IQueryService {
     List<String> rowHeadings = new ArrayList<>();
     if (queryText == null) {
       logger.warn("Query " + request.queryId + " not found for user " + request.userId);
-      return null;
+      return new QueryResults();
     }
     Datastore
         datastore =
@@ -201,14 +202,15 @@ public class QueryService implements IQueryService {
           FunctionParam
               functionParam =
               new FunctionParam(request, datastore.getEscaping(), rowHeadings);
-          functionParam.function = functionText;
+          functionParam.function = replaceFilters(functionText, request.filters);
           String data = qFunction.getResult(functionParam);
           queryText.setQuery(queryText.getQuery().replace(functionText, data));
         }
       }
     }
+    final String finalQuery = replaceFilters(queryText.getQuery(), request.filters);
     QueryResults queryResults =
-        executeQuery(datastore, queryText.getQuery(), request.filters, request.size,
+        executeQuery(datastore, finalQuery, request.filters, request.size,
             request.offset);
     queryResults.setRowHeadings(rowHeadings);
     return queryResults;
@@ -252,5 +254,15 @@ public class QueryService implements IQueryService {
         dataBaseCollection.getDataBaseService(datastore.getType());
     return dataBaseService.fetchRows(
         datastore, query, filters, Optional.ofNullable(size), Optional.ofNullable(offset));
+  }
+
+  private String replaceFilters(String query, Map<String, String> filters) {
+    if (filters != null && filters.size() > 0) {
+      for (Map.Entry<String, String> entry : filters.entrySet()) {
+        String placeholder = AppConstants.FILTER_PREFIX + entry.getKey() + AppConstants.FILTER_SUFFIX;
+        query = query.replace(placeholder, entry.getValue());
+      }
+    }
+    return query;
   }
 }

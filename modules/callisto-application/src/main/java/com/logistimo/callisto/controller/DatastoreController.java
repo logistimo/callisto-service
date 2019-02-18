@@ -57,13 +57,12 @@ public class DatastoreController {
       throws CallistoException {
     List<Datastore> datastores = datastoreService.getDatastoresByUser(userId);
     return new ResponseEntity<>(new ApiResponse<>(datastores),
-        datastores.isEmpty()?HttpStatus.NO_CONTENT:HttpStatus.OK);
+        datastores.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
   }
 
   @RequestMapping(value = "/{datastoreId}", method = RequestMethod.GET)
-  public ResponseEntity getDatastore(@PathVariable String datastoreId, @RequestParam String
-      userId)
-      throws CallistoException {
+  public ResponseEntity getDatastore(@PathVariable String datastoreId,
+                                     @RequestParam String userId) throws CallistoException {
     Datastore datastore = datastoreService.getDatastoreById(datastoreId);
     return new ResponseEntity<>(datastore, HttpStatus.OK);
   }

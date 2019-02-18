@@ -23,7 +23,7 @@
 
 package com.logistimo.callisto.function;
 
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
@@ -93,8 +93,8 @@ public class MathFunction implements ICallistoFunction {
 
   public static String getParameter(String value) {
     String val = value.trim();
-    int fnStart = StringUtils.indexOf(val, CharacterConstants.OPEN_BRACKET);
-    int fnEnd = StringUtils.lastIndexOf(val, CharacterConstants.CLOSE_BRACKET);
+    int fnStart = StringUtils.indexOf(val, AppConstants.OPEN_BRACKET);
+    int fnEnd = StringUtils.lastIndexOf(val, AppConstants.CLOSE_BRACKET);
     return StringUtils.substring(val, fnStart + 1, fnEnd);
   }
 
@@ -117,21 +117,21 @@ public class MathFunction implements ICallistoFunction {
   )
       throws CallistoException {
     val = val.replaceAll("\\s+", "");
-    if (StringUtils.countMatches(val, CharacterConstants.OPEN_BRACKET)
-        != StringUtils.countMatches(val, CharacterConstants.CLOSE_BRACKET)) {
+    if (StringUtils.countMatches(val, AppConstants.OPEN_BRACKET)
+        != StringUtils.countMatches(val, AppConstants.CLOSE_BRACKET)) {
       throw new CallistoException("Q101", val);
     }
     String expression = getParameter(val);
     expression = FunctionUtil.replaceVariables(expression, headings, row);
     if(StringUtils.isEmpty(expression)){
-      return CharacterConstants.EMPTY;
+      return AppConstants.EMPTY;
     }
     if (request != null) {
       expression = replaceConstants(request.userId, expression, constantService);
     }
     expression = replaceLinks(request, headings, row, expression, linkFunction);
     String result = new DecimalFormat("#.#####").format(getParenthesisValue(
-        CharacterConstants.OPEN_BRACKET + expression + CharacterConstants.CLOSE_BRACKET));
+        AppConstants.OPEN_BRACKET + expression + AppConstants.CLOSE_BRACKET));
     if (Objects.equals(result, "null")) {
       logger.warn("getParenthesisValue returned NULL for expression: " + expression);
       result = "0";
@@ -141,9 +141,9 @@ public class MathFunction implements ICallistoFunction {
   }
 
   public static String removeTrailingZeros(String num) {
-    return !num.contains(CharacterConstants.DOT) ? num
-        : num.replaceAll("0*$", CharacterConstants.EMPTY)
-            .replaceAll("\\.$", CharacterConstants.EMPTY);
+    return !num.contains(AppConstants.DOT) ? num
+        : num.replaceAll("0*$", AppConstants.EMPTY)
+            .replaceAll("\\.$", AppConstants.EMPTY);
   }
 
   private static String replaceLinks(
@@ -154,21 +154,21 @@ public class MathFunction implements ICallistoFunction {
     try {
       int linkCount =
           StringUtils.countMatches(
-              val, FunctionType.LINK.toString() + CharacterConstants.OPEN_BRACKET);
+              val, FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET);
       int after = 0;
       for (int i = 0; i < linkCount; i++) {
         int sIndex =
-            val.indexOf(FunctionType.LINK.toString() + CharacterConstants.OPEN_BRACKET, after);
-        if (sIndex != 0 && val.charAt(sIndex - 1) == CharacterConstants.DOLLAR) {
+            val.indexOf(FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET, after);
+        if (sIndex != 0 && val.charAt(sIndex - 1) == AppConstants.DOLLAR) {
           throw new CallistoException("Q001", val);
         }
         //TODO if Link function supports '(' inside parameters in future then eIndex needs to be changed
-        int eIndex = val.indexOf(CharacterConstants.CLOSE_BRACKET, after);
+        int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
         after = eIndex + 1;
         String functionText = val.substring(sIndex, eIndex + 1);
         FunctionParam param =
             new FunctionParam(request, headings, row,
-                CharacterConstants.FN_ENCLOSE + functionText + CharacterConstants.FN_ENCLOSE);
+                AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE);
         result =
             StringUtils.replace(
                 val,
@@ -186,15 +186,15 @@ public class MathFunction implements ICallistoFunction {
     try {
       int constantCount =
           StringUtils.countMatches(
-              val, FunctionType.CONSTANT.toString() + CharacterConstants.OPEN_BRACKET);
+              val, FunctionType.CONSTANT.toString() + AppConstants.OPEN_BRACKET);
       int after = 0;
       for (int i = 0; i < constantCount; i++) {
         int sIndex =
-            val.indexOf(FunctionType.CONSTANT.toString() + CharacterConstants.OPEN_BRACKET, after);
-        if (sIndex != 0 && val.charAt(sIndex - 1) == CharacterConstants.DOLLAR) {
+            val.indexOf(FunctionType.CONSTANT.toString() + AppConstants.OPEN_BRACKET, after);
+        if (sIndex != 0 && val.charAt(sIndex - 1) == AppConstants.DOLLAR) {
           throw new CallistoException("Q001", val);
         }
-        int eIndex = val.indexOf(CharacterConstants.CLOSE_BRACKET, after);
+        int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
         after = eIndex + 1;
         val =
             StringUtils.replace(
@@ -211,14 +211,14 @@ public class MathFunction implements ICallistoFunction {
   }
 
   public static Double getParenthesisValue(String expression) throws CallistoException {
-    assert (Objects.equals(String.valueOf(expression.charAt(0)), CharacterConstants.OPEN_BRACKET)
+    assert (Objects.equals(String.valueOf(expression.charAt(0)), AppConstants.OPEN_BRACKET)
         && Objects.equals(
         String.valueOf(expression.charAt(expression.length() - 1)),
-        CharacterConstants.CLOSE_BRACKET));
+        AppConstants.CLOSE_BRACKET));
     String substr = StringUtils.substring(expression, 1, expression.length() - 1);
     if (StringUtils.isNotEmpty(expression)) {
-      if (!StringUtils.contains(substr, CharacterConstants.OPEN_BRACKET)
-          && !StringUtils.contains(substr, CharacterConstants.CLOSE_BRACKET)) {
+      if (!StringUtils.contains(substr, AppConstants.OPEN_BRACKET)
+          && !StringUtils.contains(substr, AppConstants.CLOSE_BRACKET)) {
         return getExpressionValue(StringUtils.substring(expression, 1, expression.length() - 1));
       } else {
         StringBuilder result = new StringBuilder();
@@ -251,9 +251,9 @@ public class MathFunction implements ICallistoFunction {
     Deque<Integer> stack = new ArrayDeque<>();
     List<Pair> list = new ArrayList<>();
     for (int i = 0; i < val.length(); i++) {
-      if (Objects.equals(String.valueOf(val.charAt(i)), CharacterConstants.OPEN_BRACKET)) {
+      if (Objects.equals(String.valueOf(val.charAt(i)), AppConstants.OPEN_BRACKET)) {
         stack.push(i);
-      } else if (Objects.equals(String.valueOf(val.charAt(i)), CharacterConstants.CLOSE_BRACKET)) {
+      } else if (Objects.equals(String.valueOf(val.charAt(i)), AppConstants.CLOSE_BRACKET)) {
         int temp = stack.pop();
         if (stack.isEmpty()) {
           list.add(Pair.of(temp, i));
@@ -273,8 +273,8 @@ public class MathFunction implements ICallistoFunction {
    * @throws CallistoException in case Number parsing exceptions
    */
   public static Double getExpressionValue(String expr) throws CallistoException {
-    assert (!StringUtils.contains(expr, CharacterConstants.OPEN_BRACKET)
-        && !StringUtils.contains(expr, CharacterConstants.CLOSE_BRACKET)
+    assert (!StringUtils.contains(expr, AppConstants.OPEN_BRACKET)
+        && !StringUtils.contains(expr, AppConstants.CLOSE_BRACKET)
         && StringUtils.isNotEmpty(expr));
     try {
       String expression = StringUtils.replace(expr, "-", "+-");

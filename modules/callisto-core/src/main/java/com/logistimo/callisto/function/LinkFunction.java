@@ -26,7 +26,7 @@ package com.logistimo.callisto.function;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import com.logistimo.callisto.CharacterConstants;
+import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
@@ -60,10 +60,10 @@ public class LinkFunction implements ICallistoFunction {
 
   public static List<String> getParameter(String value) {
     String val = value.trim();
-    int fnStart = val.indexOf(CharacterConstants.OPEN_BRACKET);
-    int fnEnd = val.indexOf(CharacterConstants.CLOSE_BRACKET);
+    int fnStart = val.indexOf(AppConstants.OPEN_BRACKET);
+    int fnEnd = val.indexOf(AppConstants.CLOSE_BRACKET);
     val = StringUtils.substring(val, fnStart + 1, fnEnd);
-    String[] csv = StringUtils.split(val, CharacterConstants.COMMA);
+    String[] csv = StringUtils.split(val, AppConstants.COMMA);
     List<String> params = new ArrayList<>(2);
     params.add(csv[0]);
     if (csv.length > 1) {
@@ -122,7 +122,7 @@ public class LinkFunction implements ICallistoFunction {
     try {
       HashMap<String, String> filterMap = new Gson().fromJson(linkFilters, type);
       return filterMap.entrySet().stream().map(e -> {
-        if (StringUtils.contains(e.getValue(), CharacterConstants.DOLLAR)) {
+        if (StringUtils.contains(e.getValue(), AppConstants.DOLLAR)) {
           e = getModifiedEntry(e, functionParam);
         }
         return e;
@@ -159,7 +159,7 @@ public class LinkFunction implements ICallistoFunction {
   }
 
   public static String getFunctionSyntax(String renameQueryId) {
-    return CharacterConstants.FN_ENCLOSE + NAME + CharacterConstants.OPEN_BRACKET + renameQueryId
-           + CharacterConstants.CLOSE_BRACKET + CharacterConstants.FN_ENCLOSE;
+    return AppConstants.FN_ENCLOSE + NAME + AppConstants.OPEN_BRACKET + renameQueryId
+           + AppConstants.CLOSE_BRACKET + AppConstants.FN_ENCLOSE;
   }
 }

@@ -19,6 +19,7 @@ ENV SERVER_PORT=9080 \
         MONGODB_PORT=27017 \
         CALLISTO_DATABASE=callisto \
         SERVICE_NAME=logi-callisto \
+        JAVA_OPTS="" \
         APM_SERVER_URL=localhost:8200
 
 VOLUME $CALLISTO_HOME/logs

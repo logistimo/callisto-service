@@ -40,6 +40,32 @@ Modules
 4. Cassandra plugin
 5. REST API
 
+Build Instructions
+------------------
+
+To build the artifact and create a docker image of the callisto service, run the following commands.
+
+1. Set environment
+
+```
+export MAVEN_OPTS=-Xmx718m
+export MAVEN_HOME=/opt/apache-maven-3.5.3/
+export JAVA_HOME=/opt/java-home
+export PATH=$JAVA_HOME/bin:$PATH:$MAVEN_HOME/bin
+```
+
+2. Build the artifact
+
+```
+mvn clean compile package assembly:single -U
+````
+
+3. Build the docker image
+
+```
+docker build --rm=true --build-arg APP_NAME=callisto-application --build-arg APP_VERSION=<APP VERSION> -t callisto-service:latest .
+```
+
 Mailing Lists
 -------------
 

@@ -134,7 +134,7 @@ public class QueryController {
   }
 
   @RequestMapping(value = "/getdata", method = RequestMethod.POST)
-  public String getQueryData(@RequestBody QueryRequestModel model, HttpServletRequest request)
+  public QueryResults getQueryData(@RequestBody QueryRequestModel model, HttpServletRequest request)
       throws CallistoException {
     QueryResults results;
     if (StringUtils.isNotEmpty(model.derivedResultsId)) {
@@ -156,7 +156,7 @@ public class QueryController {
     if (results != null) {
       results.setDataTypes(null);
     }
-    return new Gson().toJson(results);
+    return results;
   }
 
 
