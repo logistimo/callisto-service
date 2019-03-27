@@ -28,7 +28,7 @@
 
     <groupId>com.logistimo</groupId>
     <artifactId>callisto-service</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.2.2</version>
     <packaging>pom</packaging>
 
     <name>Callisto service</name>
