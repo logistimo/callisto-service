@@ -32,7 +32,10 @@
     <packaging>pom</packaging>
 
     <name>Callisto service</name>
-
+    <scm>
+      <connection>scm:git:https://jenkins@github.com/logistimo/callisto-service.git</connection>
+      <developerConnection>scm:git:https://jenkins@github.com/logistimo/callisto-service.git</developerConnection>
+    </scm>
     <modules>
         <module>modules/callisto-application</module>
         <module>modules/callisto-frontend</module>
