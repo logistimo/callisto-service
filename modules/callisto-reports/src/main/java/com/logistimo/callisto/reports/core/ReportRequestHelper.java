@@ -50,7 +50,6 @@ public class ReportRequestHelper {
 
   private final static String QUERY_ID_DELIMITER = "_";
 
-  private ReportConfig reportConfig;
   private IFilterService filterService;
   private IQueryService queryService;
 
@@ -66,17 +65,17 @@ public class ReportRequestHelper {
 
   public QueryRequestModel getQueryRequestModel(ReportRequestModel reportRequestModel,
                                                 @NonNull ReportConfig reportConfig) {
-    this.reportConfig = reportConfig;
     QueryRequestModel queryRequestModel = new QueryRequestModel();
     queryRequestModel.userId = reportRequestModel.getUserId();
     queryRequestModel.filters = new HashMap<>(generateQueryFilters(reportRequestModel.getUserId(),
-        reportRequestModel.getFilters()));
+        reportRequestModel.getFilters(), reportConfig));
       queryRequestModel.queryId = deriveQueryIdFromFilters(reportRequestModel.getUserId(),
           reportRequestModel.getFilters().keySet());
     return queryRequestModel;
   }
 
-  private Map<String, String> generateQueryFilters(String userId, Map<String, String> reportFilters) {
+  private Map<String, String> generateQueryFilters(String userId, Map<String, String> reportFilters,
+                                                   ReportConfig reportConfig) {
     Map<String, String> callistoFilters = new HashMap<>();
     if(reportFilters != null) {
       for(Map.Entry<String, String> entry : reportFilters.entrySet()) {
@@ -86,8 +85,8 @@ public class ReportRequestHelper {
         }
       }
     }
-    Optional<Filter>
-        columnFilter = filterService.getFilter(userId, reportConfig.getColumnFilterId());
+    Optional<Filter> columnFilter =
+        filterService.getFilter(userId, reportConfig.getColumnFilterId());
     if(columnFilter.isPresent()) {
       Set<String> columns = getColumnsFromMetrics(reportConfig.getMetrics());
       callistoFilters.put(columnFilter.get().getPlaceholder(), StringUtils.join(columns, ","));

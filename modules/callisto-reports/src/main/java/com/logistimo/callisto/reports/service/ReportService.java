@@ -106,17 +106,13 @@ public class ReportService implements IReportService {
   }
 
   @Override
-  public ReportResult getReportData(ReportRequestModel reportRequestModel) {
-    Optional<ReportConfig> config = getReportConfig
-        (reportRequestModel.getUserId(),
-            reportRequestModel.getType(), reportRequestModel.getSubType());
-    if(!config.isPresent()) {
-      throw new BadReportRequestException(String.format("Report %s not configured for user %s!",
-          reportRequestModel.getType(), reportRequestModel.getUserId()));
-    }
-    final ReportConfig reportConfig = config.get();
+  public ReportResult getReportData(ReportRequestModel request) {
+    ReportConfig reportConfig =
+        getReportConfig(request.getUserId(), request.getType(), request.getSubType())
+        .orElseThrow(()->
+            new BadReportRequestException(String.format("Report %s not configured for user %s!", request.getType(), request.getUserId())));
     QueryRequestModel queryRequestModel = reportRequestHelper
-        .getQueryRequestModel(reportRequestModel, reportConfig);
+        .getQueryRequestModel(request, reportConfig);
     QueryResults rawResults = queryService.readData(queryRequestModel);
     Set<String> columns = reportRequestHelper.getColumnsFromMetrics(reportConfig.getMetrics());
     Map<String, String> derivedColumns = resultManager.getCompleteDerivedColumnsMap
@@ -124,11 +120,11 @@ public class ReportService implements IReportService {
     QueryResults derivedResults = resultManager.getDerivedResults(queryRequestModel, rawResults,
         derivedColumns);
     ReportResult reportResult = new ReportResult();
-    reportResult.setUserId(reportRequestModel.getUserId());
-    reportResult.setReportType(reportRequestModel.getType());
-    reportResult.setReportSubType(reportRequestModel.getSubType());
+    reportResult.setUserId(request.getUserId());
+    reportResult.setReportType(request.getType());
+    reportResult.setReportSubType(request.getSubType());
     reportResult.setResults(
-        reportDataFormatter.getFormattedResult(reportRequestModel.getUserId(), reportConfig
+        reportDataFormatter.getFormattedResult(request.getUserId(), reportConfig
             .getMetrics().keySet(), derivedResults));
     return reportResult;
   }

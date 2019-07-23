@@ -38,11 +38,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +65,7 @@ public class ResultManager {
   };
 
   /**
+   * This method maintains the order the columns in QueryResults as provided in the derivedColumnMap
    * @param request          QueryRequestModel by user
    * @param rs               QueryResults returned by running the query
    * @param derivedColumnMap Map of derived column names and values
@@ -77,7 +78,7 @@ public class ResultManager {
       Map<String, String> derivedColumnMap)
       throws CallistoException {
     List<String> headings = rs.getHeadings();
-    if (derivedColumnMap == null || derivedColumnMap.isEmpty()) {
+    if (CollectionUtils.isEmpty(derivedColumnMap)) {
       return rs;
     }
     derivedColumnMap =
@@ -90,12 +91,11 @@ public class ResultManager {
     derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
     derivedResults.setRowHeadings(rs.getRowHeadings());
     if (rs.getHeadings() != null && rs.getRows() != null) {
-      Map<String, List<String>>
-          functionsVarsMap =
+      Map<String, List<String>> functionsVarsMap =
           derivedColumnMap.entrySet().stream()
               .map(e -> Pair.of(e.getKey(), FunctionUtil.getAllFunctionsAndVariables(e.getValue())))
               .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-      for (List row : rs.getRows()) {
+      for (List<String> row : rs.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
         for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String r =
@@ -120,8 +120,7 @@ public class ResultManager {
    */
   public String parseDerivedValue(
       QueryRequestModel request, String str, List<String> functionsVars, List<String> headings,
-      List<String> row)
-      throws CallistoException {
+      List<String> row) throws CallistoException {
     int index;
     for (String functionsVar : functionsVars) {
       if ((index = variableIndex(functionsVar, headings)) > -1) {
@@ -136,11 +135,9 @@ public class ResultManager {
           if (function == null) {
             throw new CallistoException("Q001", functionsVar);
           }
-          FunctionParam
-              functionParam =
+          FunctionParam functionParam =
               new FunctionParam(request, headings, row, functionsVar);
-          str =
-              StringUtils.replaceOnce(str, functionsVar, function.getResult(functionParam));
+          str = StringUtils.replaceOnce(str, functionsVar, function.getResult(functionParam));
         } else {
           throw new CallistoException("Q001", functionsVar);
         }
@@ -172,24 +169,26 @@ public class ResultManager {
   }
 
   /**
-   * function to parse DerivedColumn map from a String and add the existing columns as they are
+   * function to parse DerivedColumn map from an expression and add the existing columns in the same
+   * order
    * @param results original QueryResults
    * @return parsed Map
    */
-  public Map<String, String> getDerivedColumnsMap(String strToParse, QueryResults results) {
-    if (results == null || results.getHeadings() == null) {
-      return null;
+  public LinkedHashMap<String, String> getDerivedColumnsMap(String expression, QueryResults
+      results) {
+    if (CollectionUtils.isEmpty(results.getHeadings())) {
+      return new LinkedHashMap<>(0);
     }
-    Type type = new TypeToken<LinkedHashMap<String, String>>() {
-    }.getType();
-    Map<String, String> derivedResults = getRawColumnsAsDerivedColumns(
-        new HashSet<>(results.getHeadings()));
-    derivedResults.putAll(new Gson().fromJson(strToParse, type));
+    LinkedHashMap<String, String> derivedResults = getRawColumnsAsDerivedColumns(results.getHeadings());
+    Type type = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
+    // putAll on LinkedHashMap will not change the insertion order
+    derivedResults.putAll(new Gson().fromJson(expression, type));
     return derivedResults;
   }
 
-  private Map<String, String> getRawColumnsAsDerivedColumns(Set<String> columns) {
-    return columns.stream().map(s -> Pair.of(s, AppConstants.DOLLAR + s))
+  private LinkedHashMap<String, String> getRawColumnsAsDerivedColumns(List<String> headings) {
+    return headings.stream()
+        .map(s -> Pair.of(s, AppConstants.DOLLAR + s))
         .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
             linkedHashMapMerger, LinkedHashMap::new));
   }
@@ -207,9 +206,8 @@ public class ResultManager {
       List<String> rawResultHeadings) {
     Map<String, String> derivedResults = new HashMap<>();
     derivedResults.putAll(existingDerivedResults);
-    Set<String> rawResultHeadingsSet = new HashSet<>(rawResultHeadings);
-    rawResultHeadingsSet.removeAll(columns);
-    derivedResults.putAll(getRawColumnsAsDerivedColumns(rawResultHeadingsSet));
+    rawResultHeadings.removeAll(columns);
+    derivedResults.putAll(getRawColumnsAsDerivedColumns(rawResultHeadings));
     return derivedResults;
   }
 
