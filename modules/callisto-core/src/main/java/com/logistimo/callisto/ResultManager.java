@@ -81,10 +81,8 @@ public class ResultManager {
     if (CollectionUtils.isEmpty(derivedColumnMap)) {
       return rs;
     }
-    derivedColumnMap =
-        derivedColumnMap.entrySet().stream().collect(Collectors
-            .toMap(Map.Entry::getKey, e -> e.getValue().replaceAll("\n", "").replaceAll("\t", ""),
-                linkedHashMapMerger, LinkedHashMap::new));
+    derivedColumnMap.entrySet()
+        .forEach(e -> e.setValue(e.getValue().replaceAll("\n", "").replaceAll("\t", "")));
     //TODO: mechanism to identify which column is for rowHeadings,
     rs.fillResults(request.rowHeadings, 0);
     QueryResults derivedResults = new QueryResults();
