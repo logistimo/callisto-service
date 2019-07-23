@@ -144,7 +144,7 @@ public class QueryController {
       }
       ConstantText constant = constantService.readConstant(model.userId, model.derivedResultsId);
       if (constant != null) {
-        Map<String, String> derivedColumns =
+        LinkedHashMap<String, String> derivedColumns =
             resultManager.getDerivedColumnsMap(constant.getConstant(), results);
         results = resultManager.getDerivedResults(model, results, derivedColumns);
       }
@@ -163,14 +163,13 @@ public class QueryController {
   @RequestMapping(value = "/run", method = RequestMethod.POST)
   public ResponseEntity runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)
       throws CallistoException {
-    QueryResults results = null;
+    QueryResults results = new QueryResults();
     if (model.columnText != null && !model.columnText.isEmpty()) {
       //expects only one element
       Map.Entry<String, String> entry = model.columnText.entrySet().iterator().next();
       Map<String, String> parsedColumnData = new LinkedHashMap<>();
       if (StringUtils.isNotEmpty(entry.getKey()) && StringUtils.isNotEmpty(entry.getValue())) {
-        parsedColumnData = FunctionUtil
-            .parseColumnText(entry.getValue());
+        parsedColumnData = FunctionUtil.parseColumnText(entry.getValue());
         if (model.filters == null) {
           model.filters = new HashMap<>();
         }

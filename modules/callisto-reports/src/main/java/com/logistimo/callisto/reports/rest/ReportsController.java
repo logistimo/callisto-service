@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -105,14 +106,13 @@ public class ReportsController {
     } else if(reportRequestModel.getFilters() == null) {
       throw new BadReportRequestException("Report filters not found");
     }
-    reportRequestModel.getFilters().entrySet().stream()
-        .forEach(filterEntry -> {
-          Optional<Filter> filter = filterService.getFilter(userId, filterEntry.getKey());
-          if (!filter.isPresent()) {
-            throw new BadReportRequestException(String.format("Report filter '%s' not registered!",
-                filterEntry.getKey()));
-          }
-        });
+    reportRequestModel.getFilters().entrySet().forEach(filterEntry -> {
+      Optional<Filter> filter = filterService.getFilter(userId, filterEntry.getKey());
+      if (!filter.isPresent()) {
+        throw new BadReportRequestException(String.format("Report filter '%s' not registered!",
+            filterEntry.getKey()));
+      }
+    });
     if (StringUtils.isNotEmpty(type)) {
       reportRequestModel.setType(type);
       reportRequestModel.setUserId(userId);
