@@ -334,6 +334,55 @@ public class QueryServiceTest {
         argThat(new MapArgMatcher(modifiedColumns)));
   }
 
+  @Test
+  public void readAndModifyDataParseColumnsTest() {
+    ResultManager resultManager = mock(ResultManager.class);
+    QueryRequestModel request = new QueryRequestModel();
+    request.userId = "logistimo";
+    request.queryId = "query3";
+    request.filters = new HashMap<>();
+    request.filters.put("f1", "v1");
+    request.filters.put("f2", "'v2'");
+    request.columnText = new HashMap<>();
+    request.columnText.put("TOKEN_COLUMNS", "$$math($a + $b)$$ as math-col, $$csv(some-query-id)$$ "
+                                            + "as csv-col");
+    QueryText queryText = new QueryText();
+    queryText.setUserId("logistimo");
+    queryText.setQueryId("query3");
+    queryText.setQuery("select {{TOKEN_COLUMNS}} from some_table where some-filter in "
+                       + "($$enclosecsv({{TOKEN_F1}})$$)");
+    queryText.setDatastoreId("ds1");
+    IDataBaseService dataBaseService = mock(IDataBaseService.class);
+    Datastore datastore = new Datastore();
+    datastore.setId("ds1");
+    datastore.setType("cassandra");
+    when(queryRepository.readQuery(eq("logistimo"), eq("query3"), any(PageRequest.class)))
+        .thenReturn(new PageImpl<>(Collections.singletonList(queryText)));
+    when(datastoreService.get(eq("logistimo"), eq("ds1"))).thenReturn(datastore);
+    when(dataBaseCollection.getDataBaseService(anyString())).thenReturn(dataBaseService);
+    when(dataBaseService.fetchRows(any(), anyString(), anyMap(), any(), any())).thenReturn(new
+        QueryResults());
+    ICallistoFunction function = mock(EncloseCsvFunction.class);
+    when(function.getResult(argThat(
+        new CsvFunctionParamArgMatcher("$$enclosecsv({{TOKEN_F1}})$$"))))
+        .thenReturn("'d1', 'd2', 'd3', 'd4'");
+    when(functionManager.getFunction(eq("enclosecsv"))).thenReturn(function);
+    queryService.readAndModifyData(request, resultManager);
+    verify(dataBaseService, times(1)).fetchRows(eq(datastore), eq(
+            "select a,b from some_table where some-filter in "
+            + "('d1', 'd2', 'd3', 'd4')"),
+        eq(request.filters),
+        eq(Optional.empty()), eq(Optional.empty()));
+    verify(queryRepository, times(1)).readQuery(eq("logistimo"), eq("query3"),
+        any(PageRequest.class));
+    verify(datastoreService, times(1)).get(eq("logistimo"), eq("ds1"));
+    Map<String, String> modifiedColumns = new HashMap<>();
+    modifiedColumns.put("math-col", "$$math($a + $b)$$");
+    modifiedColumns.put("csv-col", "$$csv(some-query-id)$$");
+    verify(resultManager, times(1)).getDerivedResults(eq(request), any(),
+        argThat(new MapArgMatcher(modifiedColumns)));
+  }
+
   private class CsvFunctionParamArgMatcher implements ArgumentMatcher<FunctionParam> {
     private String functionText;
 
