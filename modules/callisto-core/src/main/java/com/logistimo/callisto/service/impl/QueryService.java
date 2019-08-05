@@ -219,17 +219,20 @@ public class QueryService implements IQueryService {
   @Override
   public QueryResults readAndModifyData(QueryRequestModel requestModel,
                                         ResultManager resultManager) {
-    QueryResults results = readData(requestModel);
+    QueryResults results;
     if (requestModel.columnText != null && !requestModel.columnText.isEmpty()) {
       //expects only one element
       Map.Entry<String, String> entry = requestModel.columnText.entrySet().iterator().next();
       Map<String, String> parsedColumnData = FunctionUtil
           .parseColumnText(entry.getValue());
       requestModel.filters.put(entry.getKey(), FunctionUtil.extractColumnsCsv(parsedColumnData));
+      results = readData(requestModel);
       if (results.getRowHeadings() == null) {
         results.setRowHeadings(requestModel.rowHeadings);
       }
       results = resultManager.getDerivedResults(requestModel, results, parsedColumnData);
+    } else {
+      results = readData(requestModel);
     }
     return results;
   }
