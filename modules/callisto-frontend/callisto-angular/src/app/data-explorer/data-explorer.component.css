@@ -1,0 +1,21 @@
+.example-container {
+  height: 400px;
+  width : 100%;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+
+
+.mat-table-sticky:first-child {
+  border-right: 1px solid #e0e0e0;
+}
+
+th, td {
+  width: 200px;
+  padding: 5px;
+}

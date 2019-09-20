@@ -42,8 +42,8 @@ export class NewQueryComponent implements OnInit {
             .subscribe(response => {
                 var _dbs = this.datastores;
                 var _dbsModel = this.queryTextModel;
-                let apiResponse = response as ApiResponse<Array<Datastore>>;
-                apiResponse.payload.forEach(function (datastore:Datastore) {
+              let apiResponse = response as ApiResponse<Array<Datastore>>;
+              apiResponse.payload.forEach(function (datastore:Datastore) {
                     _dbs.push(datastore);
                     if (Utils.checkNullEmpty(_dbsModel.datastore_id)) {
                         _dbsModel.datastore_id = datastore.id;

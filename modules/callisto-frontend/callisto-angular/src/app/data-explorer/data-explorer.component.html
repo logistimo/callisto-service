@@ -1,0 +1,12 @@
+<div class="example-container mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource">
+    <!-- Generic column definition -->
+    <ng-container *ngFor="let column of data.result.headings; index as i" [cdkColumnDef]="column" [sticky]="i == 0 ? 'true': 'false'">
+      <th mat-header-cell *cdkHeaderCellDef>{{ column }}</th>
+      <td mat-cell *cdkCellDef="let row">{{ row[column] }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>
