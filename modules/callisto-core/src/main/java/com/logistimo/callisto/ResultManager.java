@@ -31,6 +31,7 @@ import com.logistimo.callisto.function.FunctionParam;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 
+import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,8 +205,9 @@ public class ResultManager {
       List<String> rawResultHeadings) {
     Map<String, String> derivedResults = new HashMap<>();
     derivedResults.putAll(existingDerivedResults);
-    rawResultHeadings.removeAll(columns);
-    derivedResults.putAll(getRawColumnsAsDerivedColumns(rawResultHeadings));
+    List<String> resultHeadingsCopy = new ArrayList<>(rawResultHeadings);
+    resultHeadingsCopy.removeAll(columns);
+    derivedResults.putAll(getRawColumnsAsDerivedColumns(resultHeadingsCopy));
     return derivedResults;
   }
 

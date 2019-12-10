@@ -27,26 +27,21 @@ import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.Filter;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.ReportConfig;
-import com.logistimo.callisto.reports.ReportRequestModel;
+import com.logistimo.callisto.reports.model.ReportRequestModel;
 import com.logistimo.callisto.service.IFilterService;
 import com.logistimo.callisto.service.IQueryService;
-
+import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import lombok.NonNull;
-
-@Component
-public class ReportRequestHelper {
+@Component("1.0.0")
+@Primary
+public class ReportQueryBuilder implements IReportQueryBuilder {
 
   private final static String QUERY_ID_DELIMITER = "_";
 
@@ -63,6 +58,7 @@ public class ReportRequestHelper {
     this.queryService = queryService;
   }
 
+  @Override
   public QueryRequestModel getQueryRequestModel(ReportRequestModel reportRequestModel,
                                                 @NonNull ReportConfig reportConfig) {
     QueryRequestModel queryRequestModel = new QueryRequestModel();
@@ -88,14 +84,10 @@ public class ReportRequestHelper {
     Optional<Filter> columnFilter =
         filterService.getFilter(userId, reportConfig.getColumnFilterId());
     if(columnFilter.isPresent()) {
-      Set<String> columns = getColumnsFromMetrics(reportConfig.getMetrics());
+      Set<String> columns = FunctionUtil.extractColumnSet(reportConfig.getMetrics());
       callistoFilters.put(columnFilter.get().getPlaceholder(), StringUtils.join(columns, ","));
     }
     return callistoFilters;
-  }
-
-  public Set<String> getColumnsFromMetrics(Map<String, String> metrics) {
-    return FunctionUtil.extractColumnSet(metrics);
   }
 
   /**

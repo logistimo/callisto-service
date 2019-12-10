@@ -32,6 +32,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Map;
 
 import lombok.Data;
+import org.springframework.data.util.Version;
 
 @Document(collection = "report_configs")
 @Data
@@ -52,6 +53,9 @@ public class ReportConfig {
 
   @SerializedName("name")
   private String name;
+
+  @SerializedName("version")
+  private Version version = new Version(1,0,0);
 
   @SerializedName("metrics")
   private Map<String, String> metrics;

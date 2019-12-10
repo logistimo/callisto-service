@@ -26,7 +26,8 @@ package com.logistimo.callisto.reports;
 import com.logistimo.callisto.model.Filter;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.ReportConfig;
-import com.logistimo.callisto.reports.core.ReportRequestHelper;
+import com.logistimo.callisto.reports.core.ReportQueryBuilder;
+import com.logistimo.callisto.reports.model.ReportRequestModel;
 import com.logistimo.callisto.service.IFilterService;
 import com.logistimo.callisto.service.IQueryService;
 
@@ -47,19 +48,19 @@ import java.util.Optional;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ReportRequestHelperTest {
+public class ReportQueryBuilderTest {
 
   private IQueryService queryService;
   private IFilterService filterService;
-  private ReportRequestHelper reportRequestHelper;
+  private ReportQueryBuilder reportQueryBuilder;
 
   @Before
   public void setUp() {
-    reportRequestHelper = new ReportRequestHelper();
+    reportQueryBuilder = new ReportQueryBuilder();
     queryService = Mockito.mock(IQueryService.class);
-    reportRequestHelper.setQueryService(queryService);
+    reportQueryBuilder.setQueryService(queryService);
     filterService = Mockito.mock(IFilterService.class);
-    reportRequestHelper.setFilterService(filterService);
+    reportQueryBuilder.setFilterService(filterService);
     when(queryService.getAllQueryIds("logistimo")).thenReturn(Arrays.asList("DID", "DID_KID",
         "DID_MID", "DID_KID_MID", "DID_KTAG_MID", "DID_KTAG_MID_CN", "DID_KTAG_MID_CN_ST",
         "DID_KTAG_MID_CN_ST_TALUK","HUB_DHUB_PRODUCT", "HUB_PRODUCT", "DHUB_PRODUCT"));
@@ -68,34 +69,34 @@ public class ReportRequestHelperTest {
 
   @Test
   public void deriveQueryIdFromFilters() {
-    String queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    String queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("did")));
     Assert.assertEquals("DID", queryId);
-    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("did","mid")));
     Assert.assertEquals("DID_MID", queryId);
 
-    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("mid","did")));
     Assert.assertEquals("DID_MID", queryId);
 
-    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("mid","page","did","ktag","cn","size")));
     Assert.assertEquals("DID_KTAG_MID_CN", queryId);
 
-    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("mid","page","did","ktag","cn","size","st")));
     Assert.assertEquals("DID_KTAG_MID_CN_ST", queryId);
 
-    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("hub", "product", "dhub")));
     Assert.assertEquals("HUB_DHUB_PRODUCT", queryId);
 
-    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("hub", "product")));
     Assert.assertEquals("HUB_PRODUCT", queryId);
 
-    queryId = reportRequestHelper.deriveQueryIdFromFilters("logistimo", new HashSet<>
+    queryId = reportQueryBuilder.deriveQueryIdFromFilters("logistimo", new HashSet<>
         (Arrays.asList("product", "dhub")));
     Assert.assertEquals("DHUB_PRODUCT", queryId);
   }
@@ -133,7 +134,7 @@ public class ReportRequestHelperTest {
     when(queryService.getAllQueryIds("logistimo")).thenReturn(Arrays.asList("dimension1_suffix",
         "dimension2_suffix","dimension1_dimension2_suffix"));
 
-    QueryRequestModel queryRequestModel = reportRequestHelper.getQueryRequestModel
+    QueryRequestModel queryRequestModel = reportQueryBuilder.getQueryRequestModel
         (reportRequestModel, reportConfig);
     Assert.assertEquals("dimension1_dimension2_suffix", queryRequestModel.queryId);
     Assert.assertEquals(3, queryRequestModel.filters.size());

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Logistimo.
+ * Copyright © 2019 Logistimo.
  *
  * This file is part of Logistimo.
  *
@@ -23,11 +23,12 @@
 
 package com.logistimo.callisto.reports.core;
 
-import com.logistimo.callisto.QueryResults;
+import com.logistimo.callisto.model.QueryRequestModel;
+import com.logistimo.callisto.model.ReportConfig;
+import com.logistimo.callisto.reports.model.ReportRequestModel;
+import lombok.NonNull;
 
-import com.logistimo.callisto.reports.model.ReportResult;
-import java.util.Set;
-
-public interface IReportDataFormatter {
-  Object getFormattedResult(String userId, Set<String> metricKeys, QueryResults queryResults);
+public interface IReportQueryBuilder {
+    QueryRequestModel getQueryRequestModel(ReportRequestModel reportRequestModel,
+                                           @NonNull ReportConfig reportConfig);
 }

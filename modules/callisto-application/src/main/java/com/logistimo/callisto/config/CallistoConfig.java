@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Logistimo.
+ * Copyright © 2019 Logistimo.
  *
  * This file is part of Logistimo.
  *
@@ -21,16 +21,21 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.reports;
+package com.logistimo.callisto.config;
 
-import java.util.Map;
+import com.logistimo.callisto.model.CallistoContext;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import lombok.Data;
+@Configuration
+public class CallistoConfig {
 
-@Data
-public class ReportRequestModel {
-  private String userId;
-  private String type;
-  private String subType;
-  private Map<String, String> filters;
+    @Value("${datax.datasource.id:datax}")
+    private String dataxDatasourceId;
+
+    @Bean
+    public CallistoContext applicationContext() {
+        return CallistoContext.builder().dataxDatasourceId(dataxDatasourceId).build();
+    }
 }

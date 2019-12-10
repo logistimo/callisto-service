@@ -25,12 +25,15 @@ package com.logistimo.callisto.reports;
 
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.ResultManager;
+import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.core.IReportDataFormatter;
-import com.logistimo.callisto.reports.core.ReportRequestHelper;
+import com.logistimo.callisto.reports.core.IReportQueryBuilder;
+import com.logistimo.callisto.reports.core.ReportQueryBuilder;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
 import com.logistimo.callisto.reports.model.ReportModel;
+import com.logistimo.callisto.reports.model.ReportRequestModel;
 import com.logistimo.callisto.reports.service.ReportService;
 import com.logistimo.callisto.repository.ReportConfigRepository;
 import com.logistimo.callisto.service.IQueryService;
@@ -67,7 +70,7 @@ public class ReportServiceTest {
   private ReportConfigRepository reportConfigRepository;
   private ResultManager resultManager;
   private IQueryService queryService;
-  private ReportRequestHelper reportRequestHelper;
+  private IReportQueryBuilder reportQueryBuilder;
   private IReportDataFormatter reportDataFormatter;
 
   @Before
@@ -79,8 +82,10 @@ public class ReportServiceTest {
     reportService.setResultManager(resultManager);
     queryService = mock(QueryService.class);
     reportService.setQueryService(queryService);
-    reportRequestHelper = mock(ReportRequestHelper.class);
-    reportService.setReportRequestHelper(reportRequestHelper);
+    reportQueryBuilder = mock(ReportQueryBuilder.class);
+    HashMap<String, IReportQueryBuilder> reportQueryBuilderHashMap = new HashMap<>();
+    reportQueryBuilderHashMap.put("1.0.0", reportQueryBuilder);
+    reportService.setReportQueryBuilders(reportQueryBuilderHashMap);
     reportDataFormatter = mock(IReportDataFormatter.class);
     reportService.setReportDataFormatter(reportDataFormatter);
   }
@@ -153,11 +158,11 @@ public class ReportServiceTest {
     QueryRequestModel queryRequestModel = new QueryRequestModel();
     queryRequestModel.userId = "logistimo";
     queryRequestModel.queryId = "select some-data from some-table";
-    when(reportRequestHelper.getQueryRequestModel(reportRequestModel, reportConfig))
+    when(reportQueryBuilder.getQueryRequestModel(reportRequestModel, reportConfig))
         .thenReturn(queryRequestModel);
     QueryResults rs = mock(QueryResults.class);
     when(queryService.readData(eq(queryRequestModel))).thenReturn(rs);
-    when(reportRequestHelper.getColumnsFromMetrics(reportConfig.getMetrics()))
+    when(FunctionUtil.extractColumnSet(reportConfig.getMetrics()))
         .thenReturn(new HashSet<>(Collections.singletonList("met")));
     Map<String, String> completeDerivedMap =
         (Map<String, String>) ((HashMap)reportConfig.getMetrics()).clone();

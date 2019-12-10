@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Logistimo.
+ * Copyright © 2019 Logistimo.
  *
  * This file is part of Logistimo.
  *
@@ -21,13 +21,24 @@
  * the commercial license, please contact us at opensource@logistimo.com
  */
 
-package com.logistimo.callisto.reports.core;
+package com.logistimo.callisto.reports.model;
 
-import com.logistimo.callisto.QueryResults;
+import com.logistimo.callisto.model.ReportConfig;
+import lombok.Data;
 
-import com.logistimo.callisto.reports.model.ReportResult;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
-public interface IReportDataFormatter {
-  Object getFormattedResult(String userId, Set<String> metricKeys, QueryResults queryResults);
+@Data
+public class ReportRequestModel {
+  private String userId;
+  private String type;
+  private String subType;
+  private ReportConfig reportConfig;
+  private Map<String, String> filters;
+  private String paginateBy;
+  private Periodicity periodicity;
+  private String from;
+  private String to;
+  private List<Dimension> page;
 }

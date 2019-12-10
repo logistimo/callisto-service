@@ -1,5 +1,5 @@
 /*
- * Copyright © 2018 Logistimo.
+ * Copyright © 2019 Logistimo.
  *
  * This file is part of Logistimo.
  *
@@ -23,11 +23,12 @@
 
 package com.logistimo.callisto.reports.core;
 
-import com.logistimo.callisto.QueryResults;
-
-import com.logistimo.callisto.reports.model.ReportResult;
-import java.util.Set;
-
-public interface IReportDataFormatter {
-  Object getFormattedResult(String userId, Set<String> metricKeys, QueryResults queryResults);
+public class DataXUtils {
+    public static final String DOMAIN_DIMENSION_KEY = "did";
+    public static final String DIM_KEY_COLUMN = "dim_key";
+    public static final String PERIODICITY_COLUMN = "p";
+    public static final String METRIC_COLUMN = "metrics";
+    public static final String TIME_COLUMN = "t";
+    public static final String VALUE_COLUMN = "value";
+    public static final String DIM_KEY_SEPARATOR = "_";
 }

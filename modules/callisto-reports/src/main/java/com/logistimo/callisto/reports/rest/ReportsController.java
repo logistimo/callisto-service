@@ -25,19 +25,17 @@ package com.logistimo.callisto.reports.rest;
 
 import com.logistimo.callisto.model.Filter;
 import com.logistimo.callisto.model.ReportConfig;
-import com.logistimo.callisto.reports.ReportRequestModel;
+import com.logistimo.callisto.reports.core.BuildReportRequestAction;
+import com.logistimo.callisto.reports.model.*;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
-import com.logistimo.callisto.reports.model.ReportModel;
-import com.logistimo.callisto.reports.model.ReportResult;
-import com.logistimo.callisto.reports.model.SuccessResponseDetails;
 import com.logistimo.callisto.reports.service.IReportService;
 import com.logistimo.callisto.service.IFilterService;
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -50,20 +48,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/reports")
+@AllArgsConstructor
 public class ReportsController {
 
-  private IReportService reportService;
-  private IFilterService filterService;
-
-  @Autowired
-  public void setReportService(IReportService reportService) {
-    this.reportService = reportService;
-  }
-
-  @Autowired
-  public void setFilterService(IFilterService filterService) {
-    this.filterService = filterService;
-  }
+  private final IReportService reportService;
+  private final IFilterService filterService;
 
   @RequestMapping(value = "/add", method = RequestMethod.POST)
   public ResponseEntity saveReport(@RequestHeader(value = "User-Id", defaultValue = "logistimo") String userId,
@@ -117,6 +106,18 @@ public class ReportsController {
       reportRequestModel.setType(type);
       reportRequestModel.setUserId(userId);
     }
+    ReportResult result = reportService.getReportData(reportRequestModel);
+    return new ResponseEntity<>(result, HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/datax", method = RequestMethod.POST)
+  public ResponseEntity getResults(
+      @RequestHeader(value = "User-Id", defaultValue = "logistimo") String userId,
+      @RequestBody DataXReportRequestModel reportRequestModel) {
+    if(reportRequestModel == null) {
+      throw new BadReportRequestException("Report request model not found");
+    }
+    reportRequestModel.setUserId(userId);
     ReportResult result = reportService.getReportData(reportRequestModel);
     return new ResponseEntity<>(result, HttpStatus.OK);
   }
