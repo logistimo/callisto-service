@@ -99,7 +99,7 @@ public class ResultManager {
         for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String r =
               parseDerivedValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
-                  headings, row);
+                  headings, row, rs);
           dRow.add(r);
         }
         derivedResults.addRow(dRow);
@@ -115,11 +115,12 @@ public class ResultManager {
    * @param str      expression to be parsed
    * @param headings result headings i.e. column names
    * @param row      result row, respective to column names
+   * @param resultSet
    * @return String after replacing all the CallistoFunctions and Variables
    */
   public String parseDerivedValue(
       QueryRequestModel request, String str, List<String> functionsVars, List<String> headings,
-      List<String> row) throws CallistoException {
+      List<String> row, QueryResults resultSet) throws CallistoException {
     int index;
     for (String functionsVar : functionsVars) {
       if ((index = variableIndex(functionsVar, headings)) > -1) {
@@ -135,7 +136,7 @@ public class ResultManager {
             throw new CallistoException("Q001", functionsVar);
           }
           FunctionParam functionParam =
-              new FunctionParam(request, headings, row, functionsVar);
+              new FunctionParam(request, headings, row, functionsVar, resultSet);
           str = StringUtils.replaceOnce(str, functionsVar, function.getResult(functionParam));
         } else {
           throw new CallistoException("Q001", functionsVar);
@@ -161,8 +162,8 @@ public class ResultManager {
           return i;
         }
       }
-      logger
-          .error("Variable " + val + " not found in heading of QueryResult " + headings.toString());
+      logger.error("Variable " + val + " not found in heading of QueryResult " +
+          headings.toString());
     }
     return -1;
   }

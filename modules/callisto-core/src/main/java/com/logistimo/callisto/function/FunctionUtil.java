@@ -212,6 +212,7 @@ public class FunctionUtil {
   public static String replaceVariables(String val, List<String> headings, List<String> row)
       throws CallistoException {
     List<String> variables = getAllVariables(val, AppConstants.DOLLAR);
+    variables.sort((v1, v2) -> Integer.compare(v2.length(), v1.length()));
     for (String variable : variables) {
       int index = ResultManager.variableIndex(variable, headings);
       if (index != -1) {

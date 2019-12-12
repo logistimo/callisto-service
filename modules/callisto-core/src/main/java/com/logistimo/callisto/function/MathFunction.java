@@ -29,6 +29,10 @@ import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IConstantService;
 
+import java.math.BigDecimal;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +50,7 @@ import java.util.Objects;
 
 import javax.annotation.Resource;
 
-/**
- * Created by chandrakant on 18/05/17.
- */
+/** Created by chandrakant on 18/05/17. */
 @Component(value = "math")
 public class MathFunction implements ICallistoFunction {
 
@@ -91,7 +93,7 @@ public class MathFunction implements ICallistoFunction {
     return -1;
   }
 
-  public static String getParameter(String value) {
+  private static String getParameter(String value) {
     String val = value.trim();
     int fnStart = StringUtils.indexOf(val, AppConstants.OPEN_BRACKET);
     int fnEnd = StringUtils.lastIndexOf(val, AppConstants.CLOSE_BRACKET);
@@ -99,12 +101,12 @@ public class MathFunction implements ICallistoFunction {
   }
 
   /**
-   * @param request         request model containing userId and filters
-   * @param val             expression to be parsed, all the variables in this expressions should be numeric
-   *                        otherwise returns null. Math function supports Link and ConstantText functions as variables in
-   *                        the parameter.
+   * @param request request model containing userId and filters
+   * @param val expression to be parsed, all the variables in this expressions should be numeric
+   *     otherwise returns null. Math function supports Link and ConstantText functions as variables
+   *     in the parameter.
    * @param constantService instance of IConstantService for constant function
-   * @param linkFunction    instance of ICallistoFunction for Link function
+   * @param linkFunction instance of ICallistoFunction for Link function
    * @return calculated value of the expression
    */
   public static String calculateExpression(
@@ -113,8 +115,7 @@ public class MathFunction implements ICallistoFunction {
       List<String> headings,
       List<String> row,
       IConstantService constantService,
-      ICallistoFunction linkFunction
-  )
+      ICallistoFunction linkFunction)
       throws CallistoException {
     val = val.replaceAll("\\s+", "");
     if (StringUtils.countMatches(val, AppConstants.OPEN_BRACKET)
@@ -123,57 +124,60 @@ public class MathFunction implements ICallistoFunction {
     }
     String expression = getParameter(val);
     expression = FunctionUtil.replaceVariables(expression, headings, row);
-    if(StringUtils.isEmpty(expression)){
+    if (StringUtils.isEmpty(expression)) {
       return AppConstants.EMPTY;
     }
     if (request != null) {
       expression = replaceConstants(request.userId, expression, constantService);
     }
     expression = replaceLinks(request, headings, row, expression, linkFunction);
-    String result = new DecimalFormat("#.#####").format(getParenthesisValue(
+    return String.valueOf(getExpressionValueByScriptEngine(expression));
+    /*String result = new DecimalFormat("#.#####").format(getParenthesisValue(
         AppConstants.OPEN_BRACKET + expression + AppConstants.CLOSE_BRACKET));
     if (Objects.equals(result, "null")) {
       logger.warn("getParenthesisValue returned NULL for expression: " + expression);
       result = "0";
     }
     result = removeTrailingZeros(result);
-    return result;
+    return result;*/
   }
 
   public static String removeTrailingZeros(String num) {
-    return !num.contains(AppConstants.DOT) ? num
-        : num.replaceAll("0*$", AppConstants.EMPTY)
-            .replaceAll("\\.$", AppConstants.EMPTY);
+    return !num.contains(AppConstants.DOT)
+        ? num
+        : num.replaceAll("0*$", AppConstants.EMPTY).replaceAll("\\.$", AppConstants.EMPTY);
   }
 
   private static String replaceLinks(
-      QueryRequestModel request, List<String> headings, List<String> row, final String val,
+      QueryRequestModel request,
+      List<String> headings,
+      List<String> row,
+      final String val,
       ICallistoFunction linkFunction)
       throws CallistoException {
     String result = val;
     try {
       int linkCount =
-          StringUtils.countMatches(
-              val, FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET);
+          StringUtils.countMatches(val, FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET);
       int after = 0;
       for (int i = 0; i < linkCount; i++) {
-        int sIndex =
-            val.indexOf(FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET, after);
+        int sIndex = val.indexOf(FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET, after);
         if (sIndex != 0 && val.charAt(sIndex - 1) == AppConstants.DOLLAR) {
           throw new CallistoException("Q001", val);
         }
-        //TODO if Link function supports '(' inside parameters in future then eIndex needs to be changed
+        // TODO if Link function supports '(' inside parameters in future then eIndex needs to be
+        // changed
         int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
         after = eIndex + 1;
         String functionText = val.substring(sIndex, eIndex + 1);
         FunctionParam param =
-            new FunctionParam(request, headings, row,
-                AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE);
-        result =
-            StringUtils.replace(
-                val,
-                functionText,
-                linkFunction.getResult(param));
+            new FunctionParam(
+                request,
+                headings,
+                row,
+                AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE,
+                null);
+        result = StringUtils.replace(val, functionText, linkFunction.getResult(param));
       }
     } catch (Exception e) {
       logger.warn("Error while replacing links in expression :" + val, e);
@@ -210,16 +214,17 @@ public class MathFunction implements ICallistoFunction {
     return val;
   }
 
-  public static Double getParenthesisValue(String expression) throws CallistoException {
+  public static BigDecimal getParenthesisValue(String expression) throws CallistoException {
     assert (Objects.equals(String.valueOf(expression.charAt(0)), AppConstants.OPEN_BRACKET)
         && Objects.equals(
-        String.valueOf(expression.charAt(expression.length() - 1)),
-        AppConstants.CLOSE_BRACKET));
+            String.valueOf(expression.charAt(expression.length() - 1)),
+            AppConstants.CLOSE_BRACKET));
     String substr = StringUtils.substring(expression, 1, expression.length() - 1);
     if (StringUtils.isNotEmpty(expression)) {
       if (!StringUtils.contains(substr, AppConstants.OPEN_BRACKET)
           && !StringUtils.contains(substr, AppConstants.CLOSE_BRACKET)) {
-        return getExpressionValue(StringUtils.substring(expression, 1, expression.length() - 1));
+        return getExpressionValueByScriptEngine(
+            StringUtils.substring(expression, 1, expression.length() - 1));
       } else {
         StringBuilder result = new StringBuilder();
         int after = 0;
@@ -236,7 +241,7 @@ public class MathFunction implements ICallistoFunction {
           }
         }
         result.append(StringUtils.substring(substr, after));
-        return getExpressionValue(result.toString());
+        return getExpressionValueByScriptEngine(result.toString());
       }
     }
     return null;
@@ -245,7 +250,7 @@ public class MathFunction implements ICallistoFunction {
   /**
    * @param val expression to be parsed for parenthesis
    * @return returns a List of Parenthesis as Pair of (startIndex, endIndex), outermost parenthesis
-   * only and not nested ones.
+   *     only and not nested ones.
    */
   public static List<Pair> getParenths(String val) {
     Deque<Integer> stack = new ArrayDeque<>();
@@ -267,12 +272,13 @@ public class MathFunction implements ICallistoFunction {
    * Stack based implementation for parsing a arithmetic expression. Alternatively {@link
    * javax.script.ScriptEngine} can also be used.
    *
-   * @param expr arithmetic expression to be parsed, should contain only numbers and
-   *             operations, no parenthesis or variables
+   * @param expr arithmetic expression to be parsed, should contain only numbers and operations, no
+   *     parenthesis or variables
    * @return calculated value of expression.
    * @throws CallistoException in case Number parsing exceptions
    */
   public static Double getExpressionValue(String expr) throws CallistoException {
+    ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
     assert (!StringUtils.contains(expr, AppConstants.OPEN_BRACKET)
         && !StringUtils.contains(expr, AppConstants.CLOSE_BRACKET)
         && StringUtils.isNotEmpty(expr));
@@ -288,6 +294,16 @@ public class MathFunction implements ICallistoFunction {
       logger.error("Exception in getExpressionValue()", e);
     }
     return null;
+  }
+
+  public static BigDecimal getExpressionValueByScriptEngine(String expression) {
+    ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+    try {
+      return new BigDecimal(engine.eval(expression).toString());
+    } catch (Exception e) {
+      logger.error("Exception while evaluating expression: " + expression);
+      throw new CallistoException("Invalid arithmetic expression: " + expression);
+    }
   }
 
   private static Double calculate(Deque<Double> values, Deque<Integer> operators) {

@@ -153,10 +153,7 @@ public class ReportService implements IReportService {
     List<String> flattenedColumnHeadings =
         new ArrayList<>(dataXReportRequestModel.getFilters().keySet());
     flattenedColumnHeadings.add("t");
-    flattenedColumnHeadings.addAll(
-        results.getRows().stream()
-            .map(row -> row.get(columnIndices.get("metrics")))
-            .collect(Collectors.toSet()));
+    flattenedColumnHeadings.addAll(FunctionUtil.extractColumnSet(dataXReportRequestModel.getDerivedMetrics()));
 
     Map<String, Integer> flattenedColumnIndices = new HashMap<>();
     for (int i = 0; i < flattenedColumnHeadings.size(); i++) {

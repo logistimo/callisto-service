@@ -23,13 +23,23 @@
 
 package com.logistimo.callisto.function;
 
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.QueryRequestModel;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Wrapper class for holding different parameters of Functions
- * Created by chandrakant on 25/05/17.
+ * Wrapper class for holding different parameters of Functions Created by chandrakant on 25/05/17.
  */
 public class FunctionParam {
   private QueryRequestModel request;
@@ -38,10 +48,10 @@ public class FunctionParam {
   private List<String> rowHeadings; // row headings of QueryResult
   public String function;
   private String escaping;
+  // Complete result set, don't operate on this object directly. For read-only purpose
+  private QueryResults resultSet;
 
-  public FunctionParam(){
-
-  }
+  public FunctionParam() {}
 
   public FunctionParam(QueryRequestModel request, String escaping, List<String> rowHeadings) {
     this.request = request;
@@ -50,11 +60,16 @@ public class FunctionParam {
   }
 
   public FunctionParam(
-      QueryRequestModel request, List<String> headings, List<String> row, String function) {
+      QueryRequestModel request,
+      List<String> headings,
+      List<String> row,
+      String function,
+      QueryResults results) {
     this.request = request;
     this.resultHeadings = headings;
     this.resultRow = row;
     this.function = function;
+    this.resultSet = results;
   }
 
   public QueryRequestModel getRequest() {
@@ -103,5 +118,57 @@ public class FunctionParam {
 
   public void setRowHeadings(List<String> rowHeadings) {
     this.rowHeadings = rowHeadings;
+  }
+
+  public List<String> getRowsCopySortedByColumn(String column, Set<String> columnsToAggregate) {
+    List<String> rowCopy = new ArrayList<>(resultRow);
+    if (this.resultSet != null
+        && CollectionUtils.isNotEmpty(this.resultSet.getRows())
+        && CollectionUtils.isNotEmpty(resultHeadings)) {
+      List<List<String>> copyOfRows = new ArrayList<>(resultSet.getRows());
+      int sortByColumnIndex = getColumnIndex(column);
+      if (sortByColumnIndex >= 0) {
+        final int finalColumnIndex = sortByColumnIndex;
+        copyOfRows.sort(
+            (row1, row2) ->
+                StringUtils.compare(row1.get(finalColumnIndex), row2.get(finalColumnIndex)));
+        Map<String, Integer> columnsIndices =
+            columnsToAggregate.stream().collect(Collectors.toMap(c -> c, this::getColumnIndex));
+        Map<String, BigDecimal> aggregatedColumnValues =
+            columnsToAggregate.stream().collect(Collectors.toMap(c -> c, c -> BigDecimal.ZERO));
+        for (List<String> row : copyOfRows) {
+          if (StringUtils.compare(row.get(sortByColumnIndex), resultRow.get(finalColumnIndex))
+              > 0) {
+            break;
+          }
+          aggregatedColumnValues
+              .entrySet()
+              .forEach(
+                  entry -> {
+                    String v = row.get(columnsIndices.get(entry.getKey()));
+                    BigDecimal value =
+                        StringUtils.isNotEmpty(v) ? new BigDecimal(v) : BigDecimal.ZERO;
+                    entry.setValue(entry.getValue().add(value));
+                  });
+        }
+        aggregatedColumnValues.forEach(
+            (key, value) -> rowCopy.set(columnsIndices.get(key), String.valueOf(value)));
+      }
+    }
+    return rowCopy;
+  }
+
+  private int getColumnIndex(String column) {
+    int columnIndex = -1;
+    for (int i = 0; i < resultHeadings.size(); i++) {
+      if (Objects.equals(resultHeadings.get(i), column)) {
+        columnIndex = i;
+      }
+    }
+    return columnIndex;
+  }
+
+  public QueryResults getResultSet() {
+    return resultSet;
   }
 }

@@ -29,6 +29,7 @@ import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IConstantService;
 
+import java.math.BigDecimal;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -84,7 +85,7 @@ public class MathFunctionTest {
   @Test
   public void getParenthesisValueTest() throws CallistoException {
     String expr = "(1+2)";
-    Double d = MathFunction.getParenthesisValue(expr);
+    BigDecimal d = MathFunction.getParenthesisValue(expr);
     assert d != null;
     assertEquals(3, d.doubleValue(), 0);
     expr = "(5*(2+3))";
