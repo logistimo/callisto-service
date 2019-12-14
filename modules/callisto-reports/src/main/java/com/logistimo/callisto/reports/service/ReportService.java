@@ -206,7 +206,7 @@ public class ReportService implements IReportService {
         .filter(e -> StringUtils.isNotEmpty(e.getKey()))
         .forEach(
             (entry) -> {
-              String dimKey = entry.getKey();
+              String dimKey = entry.getKey().toLowerCase();
               List<List<String>> dimKeyRows = entry.getValue();
               dimKeyRows.stream()
                   .collect(
@@ -219,9 +219,11 @@ public class ReportService implements IReportService {
                         String[] dimensionKeyValuePairs =
                             StringUtils.split(dimKey, DataXUtils.DIM_KEY_SEPARATOR);
                         for (int i = 0; i < dimensionKeyValuePairs.length; i = i + 2) {
-                          row.set(
-                              flattenedColumnIndices.get(dimensionKeyValuePairs[i]),
-                              dimensionKeyValuePairs[i + 1]);
+                          if (flattenedColumnIndices.containsKey(dimensionKeyValuePairs[i])) {
+                            row.set(
+                                flattenedColumnIndices.get(dimensionKeyValuePairs[i]),
+                                dimensionKeyValuePairs[i + 1]);
+                          }
                         }
                         row.set(flattenedColumnIndices.get(DataXUtils.TIME_COLUMN), time);
                         dimKeyTimeRows.forEach(
