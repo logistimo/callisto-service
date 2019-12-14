@@ -34,7 +34,9 @@ import com.logistimo.callisto.reports.model.ReportRequestModel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -58,6 +60,9 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
   }
 
   private QueryText buildQuery(Map<String, String> metrics, ReportRequestModel requestModel) {
+    requestModel.setFilters(
+        requestModel.getFilters().entrySet().stream()
+            .collect(Collectors.toMap(e -> StringUtils.upperCase(e.getKey()), Entry::getValue)));
     QueryText queryText = new QueryText();
     if (StringUtils.isNotBlank(requestModel.getPaginateBy())
         && !CollectionUtils.isEmpty(requestModel.getPage())) {
@@ -87,9 +92,10 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
                 element ->
                     StringUtils.replace(
                         dimKeys, PAGINATE_DIMENSION_PLACEHOLDER_VALUE, element.getValue()))
+            .map(element -> "DKEY_" + requestModel.getUserId() + "_" + element)
             .map(element -> "'" + element + "'")
             .reduce((s1, s2) -> s1+ "," + s2)
-            .orElse("'" + dimKeys + "'");
+            .orElse("'" + "DKEY_" + requestModel.getUserId() + "_" + dimKeys + "'");
 
     final String query =
         "select "
