@@ -40,9 +40,16 @@ import com.logistimo.callisto.reports.model.ReportRequestModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 import com.logistimo.callisto.repository.ReportConfigRepository;
 import com.logistimo.callisto.service.IQueryService;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.modelmapper.ModelMapper;
@@ -51,8 +58,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Version;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 @Service
 public class ReportService implements IReportService {
@@ -153,7 +158,8 @@ public class ReportService implements IReportService {
     List<String> flattenedColumnHeadings =
         new ArrayList<>(dataXReportRequestModel.getFilters().keySet());
     flattenedColumnHeadings.add("t");
-    flattenedColumnHeadings.addAll(FunctionUtil.extractColumnSet(dataXReportRequestModel.getDerivedMetrics()));
+    flattenedColumnHeadings.addAll(
+        FunctionUtil.extractColumnSet(dataXReportRequestModel.getDerivedMetrics()));
 
     Map<String, Integer> flattenedColumnIndices = new HashMap<>();
     for (int i = 0; i < flattenedColumnHeadings.size(); i++) {
@@ -193,30 +199,40 @@ public class ReportService implements IReportService {
       int numberOfColumns) {
     QueryResults flattenedResults = new QueryResults();
     results.getRows().stream()
-        .collect(Collectors.groupingBy(row -> row.get(columnIndices.get(DataXUtils.DIM_KEY_COLUMN))))
+        .collect(
+            Collectors.groupingBy(row -> row.get(columnIndices.get(DataXUtils.DIM_KEY_COLUMN))))
+        .entrySet()
+        .stream()
+        .filter(e -> StringUtils.isNotEmpty(e.getKey()))
         .forEach(
-            (dimKey, dimKeyRows) ->
-                dimKeyRows.stream()
-                    .collect(Collectors.groupingBy(row -> row.get(columnIndices.get(DataXUtils.TIME_COLUMN))))
-                    .forEach(
-                        (time, dimKeyTimeRows) -> {
-                          List<String> row =
-                              new ArrayList<>(Collections.nCopies(numberOfColumns, ""));
-                          String[] dimensionKeyValuePairs = StringUtils.split(dimKey, DataXUtils.DIM_KEY_SEPARATOR);
-                          for (int i = 0; i < dimensionKeyValuePairs.length; i = i + 2) {
-                            row.set(
-                                flattenedColumnIndices.get(dimensionKeyValuePairs[i]),
-                                dimensionKeyValuePairs[i + 1]);
-                          }
-                          row.set(flattenedColumnIndices.get(DataXUtils.TIME_COLUMN), time);
-                          dimKeyTimeRows.forEach(
-                              r ->
-                                  row.set(
-                                      flattenedColumnIndices.get(
-                                          r.get(columnIndices.get(DataXUtils.METRIC_COLUMN))),
-                                      r.get(columnIndices.get(DataXUtils.VALUE_COLUMN))));
-                          flattenedResults.addRow(row);
-                        }));
+            (entry) -> {
+              String dimKey = entry.getKey();
+              List<List<String>> dimKeyRows = entry.getValue();
+              dimKeyRows.stream()
+                  .collect(
+                      Collectors.groupingBy(
+                          row -> row.get(columnIndices.get(DataXUtils.TIME_COLUMN))))
+                  .forEach(
+                      (time, dimKeyTimeRows) -> {
+                        List<String> row =
+                            new ArrayList<>(Collections.nCopies(numberOfColumns, ""));
+                        String[] dimensionKeyValuePairs =
+                            StringUtils.split(dimKey, DataXUtils.DIM_KEY_SEPARATOR);
+                        for (int i = 0; i < dimensionKeyValuePairs.length; i = i + 2) {
+                          row.set(
+                              flattenedColumnIndices.get(dimensionKeyValuePairs[i]),
+                              dimensionKeyValuePairs[i + 1]);
+                        }
+                        row.set(flattenedColumnIndices.get(DataXUtils.TIME_COLUMN), time);
+                        dimKeyTimeRows.forEach(
+                            r ->
+                                row.set(
+                                    flattenedColumnIndices.get(
+                                        r.get(columnIndices.get(DataXUtils.METRIC_COLUMN))),
+                                    r.get(columnIndices.get(DataXUtils.VALUE_COLUMN))));
+                        flattenedResults.addRow(row);
+                      });
+            });
     return flattenedResults;
   }
 
