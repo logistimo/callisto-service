@@ -60,9 +60,6 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
   }
 
   private QueryText buildQuery(Map<String, String> metrics, ReportRequestModel requestModel) {
-    requestModel.setFilters(
-        requestModel.getFilters().entrySet().stream()
-            .collect(Collectors.toMap(e -> StringUtils.upperCase(e.getKey()), Entry::getValue)));
     QueryText queryText = new QueryText();
     if (StringUtils.isNotBlank(requestModel.getPaginateBy())
         && !CollectionUtils.isEmpty(requestModel.getPage())) {
@@ -92,10 +89,17 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
                 element ->
                     StringUtils.replace(
                         dimKeys, PAGINATE_DIMENSION_PLACEHOLDER_VALUE, element.getValue()))
-            .map(element -> "DKEY_" + requestModel.getUserId() + "_" + element)
+            .map(
+                element ->
+                    DataXUtils.DKEY_DIMENSION_KEY
+                        + DataXUtils.DIM_KEY_SEPARATOR
+                        + requestModel.getUserId()
+                        + DataXUtils.DIM_KEY_SEPARATOR
+                        + element)
             .map(element -> "'" + element + "'")
-            .reduce((s1, s2) -> s1+ "," + s2)
-            .orElse("'" + "DKEY_" + requestModel.getUserId() + "_" + dimKeys + "'");
+            .reduce((s1, s2) -> s1 + "," + s2)
+            .orElse("'" + DataXUtils.DKEY_DIMENSION_KEY + DataXUtils.DIM_KEY_SEPARATOR +
+                requestModel.getUserId() + DataXUtils.DIM_KEY_SEPARATOR + dimKeys + "'");
 
     final String query =
         "select "

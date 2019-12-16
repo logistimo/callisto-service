@@ -206,7 +206,7 @@ public class ReportService implements IReportService {
         .filter(e -> StringUtils.isNotEmpty(e.getKey()))
         .forEach(
             (entry) -> {
-              String dimKey = entry.getKey().toLowerCase();
+              String dimKey = entry.getKey();
               List<List<String>> dimKeyRows = entry.getValue();
               dimKeyRows.stream()
                   .collect(

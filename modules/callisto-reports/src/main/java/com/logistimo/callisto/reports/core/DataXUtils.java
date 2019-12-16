@@ -24,7 +24,8 @@
 package com.logistimo.callisto.reports.core;
 
 public class DataXUtils {
-    public static final String DOMAIN_DIMENSION_KEY = "DID";
+    public static final String DKEY_DIMENSION_KEY = "dkey";
+    public static final String DOMAIN_DIMENSION_KEY = "did";
     public static final String DIM_KEY_COLUMN = "dim_key";
     public static final String PERIODICITY_COLUMN = "p";
     public static final String METRIC_COLUMN = "metrics";
