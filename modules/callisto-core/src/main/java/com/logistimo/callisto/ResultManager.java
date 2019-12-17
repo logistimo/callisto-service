@@ -51,9 +51,7 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
-/**
- * Created by chandrakant on 19/05/17.
- */
+/** Created by chandrakant on 19/05/17. */
 @Component
 public class ResultManager {
 
@@ -61,30 +59,33 @@ public class ResultManager {
 
   private FunctionManager functionManager;
 
-  public static final BinaryOperator<String> linkedHashMapMerger = (u, v) -> {
-    throw new IllegalStateException(String.format("Duplicate key %s", u));
-  };
+  public static final BinaryOperator<String> linkedHashMapMerger =
+      (u, v) -> {
+        throw new IllegalStateException(String.format("Duplicate key %s", u));
+      };
 
   /**
    * This method maintains the order the columns in QueryResults as provided in the derivedColumnMap
-   * @param request          QueryRequestModel by user
-   * @param rs               QueryResults returned by running the query
+   *
+   * @param request QueryRequestModel by user
+   * @param rs QueryResults returned by running the query
    * @param derivedColumnMap Map of derived column names and values
    * @return Derived QueryResults using original QueryResults and derivedColumnMap
    */
-  @CacheEvict(allEntries = true,value = {"links"})
+  @CacheEvict(
+      allEntries = true,
+      value = {"links"})
   public QueryResults getDerivedResults(
-      QueryRequestModel request,
-      QueryResults rs,
-      Map<String, String> derivedColumnMap)
+      QueryRequestModel request, QueryResults rs, Map<String, String> derivedColumnMap)
       throws CallistoException {
     List<String> headings = rs.getHeadings();
     if (CollectionUtils.isEmpty(derivedColumnMap)) {
       return rs;
     }
-    derivedColumnMap.entrySet()
+    derivedColumnMap
+        .entrySet()
         .forEach(e -> e.setValue(e.getValue().replaceAll("\n", "").replaceAll("\t", "")));
-    //TODO: mechanism to identify which column is for rowHeadings,
+    // TODO: mechanism to identify which column is for rowHeadings,
     rs.fillResults(request.rowHeadings, 0);
     QueryResults derivedResults = new QueryResults();
     derivedResults.setHeadings(new ArrayList<>(derivedColumnMap.keySet()));
@@ -97,10 +98,20 @@ public class ResultManager {
       for (List<String> row : rs.getRows()) {
         List<String> dRow = new ArrayList<>(derivedResults.getHeadings().size());
         for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
-          String r =
-              parseDerivedValue(request, entry.getValue(), functionsVarsMap.get(entry.getKey()),
-                  headings, row, rs);
-          dRow.add(r);
+          String fieldValue = "";
+          try {
+            String r =
+                parseDerivedValue(
+                    request,
+                    entry.getValue(),
+                    functionsVarsMap.get(entry.getKey()),
+                    headings,
+                    row,
+                    rs);
+          } catch (Exception e) {
+            logger.error("Exception while computing derived value", e);
+          }
+          dRow.add(fieldValue);
         }
         derivedResults.addRow(dRow);
       }
@@ -111,16 +122,21 @@ public class ResultManager {
   /**
    * Function to parse a expression which can contain all CallistoFunctions and Variables
    *
-   * @param request  QueryRequestModel by the User
-   * @param str      expression to be parsed
+   * @param request QueryRequestModel by the User
+   * @param str expression to be parsed
    * @param headings result headings i.e. column names
-   * @param row      result row, respective to column names
+   * @param row result row, respective to column names
    * @param resultSet
    * @return String after replacing all the CallistoFunctions and Variables
    */
   public String parseDerivedValue(
-      QueryRequestModel request, String str, List<String> functionsVars, List<String> headings,
-      List<String> row, QueryResults resultSet) throws CallistoException {
+      QueryRequestModel request,
+      String str,
+      List<String> functionsVars,
+      List<String> headings,
+      List<String> row,
+      QueryResults resultSet)
+      throws CallistoException {
     int index;
     for (String functionsVar : functionsVars) {
       if ((index = variableIndex(functionsVar, headings)) > -1) {
@@ -148,10 +164,10 @@ public class ResultManager {
   }
 
   /**
-   * @param val      derived value to be parsed
+   * @param val derived value to be parsed
    * @param headings original result headings
    * @return checks if val is only a variable i.e. $xyz, and return index of variable in heading,
-   * otherwise -1
+   *     otherwise -1
    */
   public static int variableIndex(String val, List<String> headings) {
     if (headings != null
@@ -163,8 +179,8 @@ public class ResultManager {
           return i;
         }
       }
-      logger.error("Variable " + val + " not found in heading of QueryResult " +
-          headings.toString());
+      logger.error(
+          "Variable " + val + " not found in heading of QueryResult " + headings.toString());
     }
     return -1;
   }
@@ -172,15 +188,17 @@ public class ResultManager {
   /**
    * function to parse DerivedColumn map from an expression and add the existing columns in the same
    * order
+   *
    * @param results original QueryResults
    * @return parsed Map
    */
-  public LinkedHashMap<String, String> getDerivedColumnsMap(String expression, QueryResults
-      results) {
+  public LinkedHashMap<String, String> getDerivedColumnsMap(
+      String expression, QueryResults results) {
     if (CollectionUtils.isEmpty(results.getHeadings())) {
       return new LinkedHashMap<>(0);
     }
-    LinkedHashMap<String, String> derivedResults = getRawColumnsAsDerivedColumns(results.getHeadings());
+    LinkedHashMap<String, String> derivedResults =
+        getRawColumnsAsDerivedColumns(results.getHeadings());
     Type type = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
     // putAll on LinkedHashMap will not change the insertion order
     derivedResults.putAll(new Gson().fromJson(expression, type));
@@ -190,12 +208,12 @@ public class ResultManager {
   private LinkedHashMap<String, String> getRawColumnsAsDerivedColumns(List<String> headings) {
     return headings.stream()
         .map(s -> Pair.of(s, AppConstants.DOLLAR + s))
-        .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond,
-            linkedHashMapMerger, LinkedHashMap::new));
+        .collect(
+            Collectors.toMap(
+                Pair::getFirst, Pair::getSecond, linkedHashMapMerger, LinkedHashMap::new));
   }
 
   /**
-   *
    * @param existingDerivedResults
    * @param columns
    * @param rawResultHeadings
