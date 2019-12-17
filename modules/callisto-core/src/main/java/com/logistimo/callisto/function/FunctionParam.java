@@ -108,7 +108,7 @@ public class FunctionParam {
     this.request = request;
   }
 
-  public String getEscaping() {
+  String getEscaping() {
     return escaping;
   }
 
@@ -116,7 +116,7 @@ public class FunctionParam {
     this.escaping = escaping;
   }
 
-  public List<String> getRowHeadings() {
+  List<String> getRowHeadings() {
     return rowHeadings;
   }
 
@@ -124,7 +124,8 @@ public class FunctionParam {
     this.rowHeadings = rowHeadings;
   }
 
-  public List<String> getRowsCopySortedByColumn(String column, Set<String> columnsToAggregate, Set<String> dimensionKeys) {
+  List<String> getRowsCopySortedByColumn(String column, Set<String> columnsToAggregate,
+      Set<String> dimensionKeys) {
     List<String> rowCopy = new ArrayList<>(resultRow);
     if (this.resultSet != null
         && CollectionUtils.isNotEmpty(this.resultSet.getRows())
@@ -147,9 +148,9 @@ public class FunctionParam {
             break;
           }
           if(dimensionKeys.stream().anyMatch(dimensionKey ->
-              StringUtils.isNotEmpty(resultRow.get(columnsIndices.get(dimensionKey)))
-              && StringUtils.isNotEmpty(row.get(columnsIndices.get(dimensionKey)))
-              && !Objects.equals(resultRow.get(columnsIndices.get(dimensionKey)), row.get(columnsIndices.get(dimensionKey))))) {
+              StringUtils.isEmpty(resultRow.get(columnsIndices.get(dimensionKey)))
+              || StringUtils.isEmpty(row.get(columnsIndices.get(dimensionKey)))
+              || !Objects.equals(resultRow.get(columnsIndices.get(dimensionKey)), row.get(columnsIndices.get(dimensionKey))))) {
               continue;
           }
           aggregatedColumnValues
