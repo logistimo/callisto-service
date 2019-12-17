@@ -28,6 +28,7 @@ import com.logistimo.callisto.model.QueryRequestModel;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -50,6 +52,8 @@ public class FunctionParam {
   private String escaping;
   // Complete result set, don't operate on this object directly. For read-only purpose
   private QueryResults resultSet;
+  // dimension set
+  private Set<String> dimensions;
 
   public FunctionParam() {}
 
@@ -120,7 +124,7 @@ public class FunctionParam {
     this.rowHeadings = rowHeadings;
   }
 
-  public List<String> getRowsCopySortedByColumn(String column, Set<String> columnsToAggregate) {
+  public List<String> getRowsCopySortedByColumn(String column, Set<String> columnsToAggregate, Set<String> dimensionKeys) {
     List<String> rowCopy = new ArrayList<>(resultRow);
     if (this.resultSet != null
         && CollectionUtils.isNotEmpty(this.resultSet.getRows())
@@ -132,14 +136,21 @@ public class FunctionParam {
         copyOfRows.sort(
             (row1, row2) ->
                 StringUtils.compare(row1.get(finalColumnIndex), row2.get(finalColumnIndex)));
+        Set<String> columns = new HashSet<>(columnsToAggregate);
+        columns.addAll(dimensionKeys);
         Map<String, Integer> columnsIndices =
-            columnsToAggregate.stream().collect(Collectors.toMap(c -> c, this::getColumnIndex));
+            columns.stream().collect(Collectors.toMap(c -> c, this::getColumnIndex));
         Map<String, BigDecimal> aggregatedColumnValues =
             columnsToAggregate.stream().collect(Collectors.toMap(c -> c, c -> BigDecimal.ZERO));
         for (List<String> row : copyOfRows) {
-          if (StringUtils.compare(row.get(sortByColumnIndex), resultRow.get(finalColumnIndex))
-              > 0) {
+          if (StringUtils.compare(row.get(finalColumnIndex), resultRow.get(finalColumnIndex)) > 0) {
             break;
+          }
+          if(dimensionKeys.stream().anyMatch(dimensionKey ->
+              StringUtils.isNotEmpty(resultRow.get(columnsIndices.get(dimensionKey)))
+              && StringUtils.isNotEmpty(row.get(columnsIndices.get(dimensionKey)))
+              && !Objects.equals(resultRow.get(columnsIndices.get(dimensionKey)), row.get(columnsIndices.get(dimensionKey))))) {
+              continue;
           }
           aggregatedColumnValues
               .entrySet()
@@ -171,4 +182,12 @@ public class FunctionParam {
   public QueryResults getResultSet() {
     return resultSet;
   }
+
+    public Set<String> getDimensions() {
+        return dimensions;
+    }
+
+    public void setDimensions(Set<String> dimensions) {
+        this.dimensions = dimensions;
+    }
 }

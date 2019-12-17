@@ -137,6 +137,7 @@ public class ResultManager {
           }
           FunctionParam functionParam =
               new FunctionParam(request, headings, row, functionsVar, resultSet);
+          functionParam.setDimensions(request.dimensions);
           str = StringUtils.replaceOnce(str, functionsVar, function.getResult(functionParam));
         } else {
           throw new CallistoException("Q001", functionsVar);

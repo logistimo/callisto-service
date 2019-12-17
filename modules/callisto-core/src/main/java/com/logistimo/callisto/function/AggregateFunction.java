@@ -28,9 +28,7 @@ import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,7 +57,7 @@ public class AggregateFunction implements ICallistoFunction {
             .collect(Collectors.toList());
     List<String> rowsCopySortedByColumn =
         functionParam.getRowsCopySortedByColumn(
-            sortByColumn, new HashSet<>(columnsInArithmeticExpression));
+            sortByColumn, new HashSet<>(columnsInArithmeticExpression), functionParam.getDimensions());
     FunctionParam mathFunctionParam =
         new FunctionParam(
             functionParam.getRequest(),

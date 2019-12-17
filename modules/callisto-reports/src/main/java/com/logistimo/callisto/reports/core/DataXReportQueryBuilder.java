@@ -33,9 +33,11 @@ import com.logistimo.callisto.reports.model.Periodicity;
 import com.logistimo.callisto.reports.model.ReportRequestModel;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,12 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
     queryRequest.userId = reportRequestModel.getUserId();
     queryRequest.filters = new HashMap<>(reportRequestModel.getFilters());
     queryRequest.query = buildQuery(reportConfig.getMetrics(), reportRequestModel);
+    Set<String> dimensions = new HashSet<>();
+    dimensions.addAll(reportRequestModel.getFilters().keySet());
+    if(StringUtils.isNotEmpty(reportRequestModel.getPaginateBy())) {
+        dimensions.add(reportRequestModel.getPaginateBy());
+    }
+    queryRequest.dimensions = dimensions;
     return queryRequest;
   }
 
