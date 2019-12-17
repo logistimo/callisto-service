@@ -100,7 +100,7 @@ public class ResultManager {
         for (Map.Entry<String, String> entry : derivedColumnMap.entrySet()) {
           String fieldValue = "";
           try {
-            String r =
+            fieldValue =
                 parseDerivedValue(
                     request,
                     entry.getValue(),
