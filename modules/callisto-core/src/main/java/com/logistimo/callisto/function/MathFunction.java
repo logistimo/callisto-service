@@ -56,7 +56,9 @@ public class MathFunction implements ICallistoFunction {
 
   private static final Logger logger = LoggerFactory.getLogger(MathFunction.class);
   private static final String NAME = "math";
-  @Resource IConstantService constantService;
+  private static final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+
+    @Resource IConstantService constantService;
 
   @Autowired
   @Qualifier("link")
@@ -296,8 +298,7 @@ public class MathFunction implements ICallistoFunction {
     return null;
   }
 
-  public static BigDecimal getExpressionValueByScriptEngine(String expression) {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+  private static BigDecimal getExpressionValueByScriptEngine(String expression) {
     try {
       return new BigDecimal(engine.eval(expression).toString());
     } catch (Exception e) {
