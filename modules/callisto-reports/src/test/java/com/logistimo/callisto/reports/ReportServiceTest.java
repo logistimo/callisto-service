@@ -162,8 +162,6 @@ public class ReportServiceTest {
         .thenReturn(queryRequestModel);
     QueryResults rs = mock(QueryResults.class);
     when(queryService.readData(eq(queryRequestModel))).thenReturn(rs);
-    when(FunctionUtil.extractColumnSet(reportConfig.getMetrics()))
-        .thenReturn(new HashSet<>(Collections.singletonList("met")));
     Map<String, String> completeDerivedMap =
         (Map<String, String>) ((HashMap)reportConfig.getMetrics()).clone();
     completeDerivedMap.put("met", "$met");

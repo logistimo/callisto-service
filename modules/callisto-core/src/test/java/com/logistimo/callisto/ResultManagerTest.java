@@ -91,7 +91,7 @@ public class ResultManagerTest {
     desiredResultFormat.put("Modified bottom map", "$$bottomx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
     desiredResultFormat.put("Modified top map", "$$topx($mapc,TOKEN_SIZE,TOKEN_OFFSET)$$");
     QueryResults newResult = resultManager.getDerivedResults(request, results, desiredResultFormat);
-    assertEquals("result of abc 125 20", newResult.getRows().get(0).get(0));
+    assertEquals("result of abc 125 20.0", newResult.getRows().get(0).get(0));
     assertEquals("2", newResult.getRows().get(0).get(1));
     assertEquals("{\"key7\":14,\"key8\":17,\"key9\":20,\"key1\":23,\"key5\":25}", newResult.getRows().get(0).get(2));
     assertEquals("{\"key7\":14,\"key6\":12,\"key2\":10,\"key3\":8,\"key4\":2}", newResult.getRows().get(0).get(3));
