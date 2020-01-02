@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto.reports.core;
 
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.CallistoContext;
 import com.logistimo.callisto.model.QueryRequestModel;
@@ -31,11 +32,12 @@ import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
 import com.logistimo.callisto.reports.model.Periodicity;
 import com.logistimo.callisto.reports.model.ReportRequestModel;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,10 +60,9 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
     queryRequest.userId = reportRequestModel.getUserId();
     queryRequest.filters = new HashMap<>(reportRequestModel.getFilters());
     queryRequest.query = buildQuery(reportConfig.getMetrics(), reportRequestModel);
-    Set<String> dimensions = new HashSet<>();
-    dimensions.addAll(reportRequestModel.getFilters().keySet());
-    if(StringUtils.isNotEmpty(reportRequestModel.getPaginateBy())) {
-        dimensions.add(reportRequestModel.getPaginateBy());
+    Set<String> dimensions = new HashSet<>(reportRequestModel.getFilters().keySet());
+    if (StringUtils.isNotEmpty(reportRequestModel.getPaginateBy())) {
+      dimensions.add(reportRequestModel.getPaginateBy());
     }
     queryRequest.dimensions = dimensions;
     return queryRequest;
@@ -78,18 +79,9 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
       requestModel.setPaginateBy(null);
       requestModel.setPage(Collections.emptyList());
     }
-    String dimKeys =
-        StringUtils.join(
-            DataXUtils.DOMAIN_DIMENSION_KEY
-                + DataXUtils.DIM_KEY_SEPARATOR
-                + requestModel.getFilters().get(DataXUtils.DOMAIN_DIMENSION_KEY),
-            requestModel.getFilters().entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .filter(entry -> !entry.getKey().equals(DataXUtils.DOMAIN_DIMENSION_KEY))
-                .map(entry -> entry.getKey() + DataXUtils.DIM_KEY_SEPARATOR + entry.getValue())
-                .reduce((s1, s2) -> s1 + DataXUtils.DIM_KEY_SEPARATOR + s2)
-                .map(d -> DataXUtils.DIM_KEY_SEPARATOR + d)
-                .orElse(""));
+    requestModel.getFilters().put(DataXUtils.DKEY_DIMENSION_KEY, requestModel.getUserId());
+
+    String dimKeys = getDimKeyBaseValue(requestModel.getFilters());
 
     String dimensions =
         Optional.ofNullable(requestModel.getPage()).orElse(Collections.emptyList()).stream()
@@ -97,17 +89,9 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
                 element ->
                     StringUtils.replace(
                         dimKeys, PAGINATE_DIMENSION_PLACEHOLDER_VALUE, element.getValue()))
-            .map(
-                element ->
-                    DataXUtils.DKEY_DIMENSION_KEY
-                        + DataXUtils.DIM_KEY_SEPARATOR
-                        + requestModel.getUserId()
-                        + DataXUtils.DIM_KEY_SEPARATOR
-                        + element)
             .map(element -> "'" + element + "'")
             .reduce((s1, s2) -> s1 + "," + s2)
-            .orElse("'" + DataXUtils.DKEY_DIMENSION_KEY + DataXUtils.DIM_KEY_SEPARATOR +
-                requestModel.getUserId() + DataXUtils.DIM_KEY_SEPARATOR + dimKeys + "'");
+            .orElse("'" + dimKeys + "'");
 
     final String query =
         "select "
@@ -136,6 +120,27 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
     return queryText;
   }
 
+  private String getDimKeyBaseValue(Map<String, String> reportRequestFilters) {
+    return StringUtils.join(
+        DataXUtils.DKEY_DIMENSION_KEY
+            + DataXUtils.DIM_KEY_SEPARATOR
+            + reportRequestFilters.get(DataXUtils.DKEY_DIMENSION_KEY),
+        DataXUtils.DIM_KEY_SEPARATOR,
+        DataXUtils.DOMAIN_DIMENSION_KEY
+            + DataXUtils.DIM_KEY_SEPARATOR
+            + reportRequestFilters.get(DataXUtils.DOMAIN_DIMENSION_KEY),
+        reportRequestFilters.entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .filter(
+                entry ->
+                    !entry.getKey().equals(DataXUtils.DOMAIN_DIMENSION_KEY)
+                        && !entry.getKey().equals(DataXUtils.DKEY_DIMENSION_KEY))
+            .map(entry -> entry.getKey() + DataXUtils.DIM_KEY_SEPARATOR + entry.getValue())
+            .reduce((s1, s2) -> s1 + DataXUtils.DIM_KEY_SEPARATOR + s2)
+            .map(d -> DataXUtils.DIM_KEY_SEPARATOR + d)
+            .orElse(""));
+  }
+
   private String getTimeQuerySpecification(Periodicity periodicity, String from, String to) {
     final String timeQuery =
         DataXUtils.PERIODICITY_COLUMN + " = '%s' and t >= '" + from + "' and t <= '" + to + "'";
@@ -157,5 +162,83 @@ public class DataXReportQueryBuilder implements IReportQueryBuilder {
       default:
         throw new BadReportRequestException("Unknown periodicity type: " + periodicity);
     }
+  }
+
+  @Override
+  public QueryResults postProcessQueryResults(
+      QueryResults results, ReportRequestModel reportRequestModel) {
+    Map<String, Integer> columnIndices = new HashMap<>();
+    for (int i = 0; i < results.getHeadings().size(); i++) {
+      columnIndices.put(results.getHeadings().get(i), i);
+    }
+
+    List<String> flattenedColumnHeadings =
+        new ArrayList<>(reportRequestModel.getFilters().keySet());
+    flattenedColumnHeadings.add("t");
+    flattenedColumnHeadings.addAll(
+        FunctionUtil.extractColumnSet(reportRequestModel.getReportConfig().getMetrics()));
+
+    Map<String, Integer> flattenedColumnIndices = new HashMap<>();
+    for (int i = 0; i < flattenedColumnHeadings.size(); i++) {
+      flattenedColumnIndices.put(flattenedColumnHeadings.get(i), i);
+    }
+
+    QueryResults flattenedQueryResults =
+        flattenDataxQueryResults(
+            reportRequestModel,
+            results,
+            columnIndices,
+            flattenedColumnIndices,
+            flattenedColumnHeadings.size());
+    flattenedQueryResults.setHeadings(flattenedColumnHeadings);
+    return flattenedQueryResults;
+  }
+
+  private QueryResults flattenDataxQueryResults(
+      ReportRequestModel reportRequestModel,
+      QueryResults results,
+      Map<String, Integer> columnIndices,
+      Map<String, Integer> flattenedColumnIndices,
+      int numberOfColumns) {
+    QueryResults flattenedResults = new QueryResults();
+    results.getRows().stream()
+        .collect(
+            Collectors.groupingBy(row -> row.get(columnIndices.get(DataXUtils.DIM_KEY_COLUMN))))
+        .entrySet()
+        .stream()
+        .filter(e -> StringUtils.isNotEmpty(e.getKey()))
+        .forEach(
+            (entry) -> {
+              String dimKey = entry.getKey();
+              List<List<String>> dimKeyRows = entry.getValue();
+              dimKeyRows.stream()
+                  .collect(
+                      Collectors.groupingBy(
+                          row -> row.get(columnIndices.get(DataXUtils.TIME_COLUMN))))
+                  .forEach(
+                      (time, dimKeyTimeRows) -> {
+                        List<String> row =
+                            new ArrayList<>(Collections.nCopies(numberOfColumns, ""));
+                        String[] dimensionKeyValuePairs =
+                            StringUtils.split(dimKey, DataXUtils.DIM_KEY_SEPARATOR);
+                        for (int i = 0; i < dimensionKeyValuePairs.length; i += 2) {
+
+                          if (flattenedColumnIndices.containsKey(dimensionKeyValuePairs[i])) {
+                            row.set(
+                                flattenedColumnIndices.get(dimensionKeyValuePairs[i]),
+                                dimensionKeyValuePairs[i + 1]);
+                          }
+                        }
+                        row.set(flattenedColumnIndices.get(DataXUtils.TIME_COLUMN), time);
+                        dimKeyTimeRows.forEach(
+                            r ->
+                                row.set(
+                                    flattenedColumnIndices.get(
+                                        r.get(columnIndices.get(DataXUtils.METRIC_COLUMN))),
+                                    r.get(columnIndices.get(DataXUtils.VALUE_COLUMN))));
+                        flattenedResults.addRow(row);
+                      });
+            });
+    return flattenedResults;
   }
 }

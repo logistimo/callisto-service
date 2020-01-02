@@ -31,5 +31,5 @@ public class DataXUtils {
     public static final String METRIC_COLUMN = "metrics";
     public static final String TIME_COLUMN = "t";
     public static final String VALUE_COLUMN = "value";
-    public static final String DIM_KEY_SEPARATOR = "_";
+    public static final String DIM_KEY_SEPARATOR = "||";
 }

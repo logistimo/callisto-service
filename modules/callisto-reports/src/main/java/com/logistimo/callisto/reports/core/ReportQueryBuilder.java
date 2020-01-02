@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto.reports.core;
 
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.function.FunctionUtil;
 import com.logistimo.callisto.model.Filter;
 import com.logistimo.callisto.model.QueryRequestModel;
@@ -70,7 +71,14 @@ public class ReportQueryBuilder implements IReportQueryBuilder {
     return queryRequestModel;
   }
 
-  private Map<String, String> generateQueryFilters(String userId, Map<String, String> reportFilters,
+    @Override
+    public QueryResults postProcessQueryResults(
+        QueryResults results,
+        ReportRequestModel reportRequestModel) {
+        return results;
+    }
+
+    private Map<String, String> generateQueryFilters(String userId, Map<String, String> reportFilters,
                                                    ReportConfig reportConfig) {
     Map<String, String> callistoFilters = new HashMap<>();
     if(reportFilters != null) {

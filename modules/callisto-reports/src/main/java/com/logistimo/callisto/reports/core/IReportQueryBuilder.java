@@ -23,6 +23,7 @@
 
 package com.logistimo.callisto.reports.core;
 
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.model.ReportConfig;
 import com.logistimo.callisto.reports.model.ReportRequestModel;
@@ -31,4 +32,5 @@ import lombok.NonNull;
 public interface IReportQueryBuilder {
     QueryRequestModel getQueryRequestModel(ReportRequestModel reportRequestModel,
                                            @NonNull ReportConfig reportConfig);
+    QueryResults postProcessQueryResults(QueryResults results, ReportRequestModel reportRequestModel);
 }

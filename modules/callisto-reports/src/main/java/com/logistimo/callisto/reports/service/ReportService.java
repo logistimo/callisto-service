@@ -32,6 +32,7 @@ import com.logistimo.callisto.reports.core.BuildReportRequestAction;
 import com.logistimo.callisto.reports.core.DataXUtils;
 import com.logistimo.callisto.reports.core.IReportDataFormatter;
 import com.logistimo.callisto.reports.core.IReportQueryBuilder;
+import com.logistimo.callisto.reports.core.ReportQueryBuilder;
 import com.logistimo.callisto.reports.exception.BadReportRequestException;
 import com.logistimo.callisto.reports.exception.DuplicateReportException;
 import com.logistimo.callisto.reports.model.DataXReportRequestModel;
@@ -150,26 +151,9 @@ public class ReportService implements IReportService {
     Pair<QueryRequestModel, QueryResults> reportQueryResult =
         getReportQueryResult(reportRequestModel);
     final QueryResults results = reportQueryResult.getValue();
-    Map<String, Integer> columnIndices = new HashMap<>();
-    for (int i = 0; i < results.getHeadings().size(); i++) {
-      columnIndices.put(results.getHeadings().get(i), i);
-    }
 
-    List<String> flattenedColumnHeadings =
-        new ArrayList<>(dataXReportRequestModel.getFilters().keySet());
-    flattenedColumnHeadings.add("t");
-    flattenedColumnHeadings.addAll(
-        FunctionUtil.extractColumnSet(dataXReportRequestModel.getDerivedMetrics()));
-
-    Map<String, Integer> flattenedColumnIndices = new HashMap<>();
-    for (int i = 0; i < flattenedColumnHeadings.size(); i++) {
-      flattenedColumnIndices.put(flattenedColumnHeadings.get(i), i);
-    }
-
-    QueryResults flattenedQueryResults =
-        flattenDataxQueryResults(
-            results, columnIndices, flattenedColumnIndices, flattenedColumnHeadings.size());
-    flattenedQueryResults.setHeadings(flattenedColumnHeadings);
+    QueryResults flattenedQueryResults = getReportQueryBuilder(reportRequestModel)
+        .postProcessQueryResults(results, reportRequestModel);
     ReportResult reportResult = new ReportResult();
     QueryResults derivedResults =
         getDerivedResults(reportRequestModel, reportQueryResult.getKey(), flattenedQueryResults);
@@ -181,6 +165,15 @@ public class ReportService implements IReportService {
     return reportResult;
   }
 
+  private IReportQueryBuilder getReportQueryBuilder(ReportRequestModel request) {
+      String reportVersion =
+          matchVersionOfReport(
+              request.getReportConfig().getVersion(),
+              Lists.from(reportQueryBuilders.keySet().iterator()));
+      final IReportQueryBuilder reportQueryBuilder = reportQueryBuilders.get(reportVersion);
+      return reportQueryBuilder;
+  }
+
   private Pair<QueryRequestModel, QueryResults> getReportQueryResult(ReportRequestModel request) {
     String reportVersion =
         matchVersionOfReport(
@@ -190,52 +183,6 @@ public class ReportService implements IReportService {
     QueryRequestModel queryRequestModel =
         reportQueryBuilder.getQueryRequestModel(request, request.getReportConfig());
     return Pair.of(queryRequestModel, queryService.readData(queryRequestModel));
-  }
-
-  private QueryResults flattenDataxQueryResults(
-      QueryResults results,
-      Map<String, Integer> columnIndices,
-      Map<String, Integer> flattenedColumnIndices,
-      int numberOfColumns) {
-    QueryResults flattenedResults = new QueryResults();
-    results.getRows().stream()
-        .collect(
-            Collectors.groupingBy(row -> row.get(columnIndices.get(DataXUtils.DIM_KEY_COLUMN))))
-        .entrySet()
-        .stream()
-        .filter(e -> StringUtils.isNotEmpty(e.getKey()))
-        .forEach(
-            (entry) -> {
-              String dimKey = entry.getKey();
-              List<List<String>> dimKeyRows = entry.getValue();
-              dimKeyRows.stream()
-                  .collect(
-                      Collectors.groupingBy(
-                          row -> row.get(columnIndices.get(DataXUtils.TIME_COLUMN))))
-                  .forEach(
-                      (time, dimKeyTimeRows) -> {
-                        List<String> row =
-                            new ArrayList<>(Collections.nCopies(numberOfColumns, ""));
-                        String[] dimensionKeyValuePairs =
-                            StringUtils.split(dimKey, DataXUtils.DIM_KEY_SEPARATOR);
-                        for (int i = 0; i < dimensionKeyValuePairs.length; i = i + 2) {
-                          if (flattenedColumnIndices.containsKey(dimensionKeyValuePairs[i])) {
-                            row.set(
-                                flattenedColumnIndices.get(dimensionKeyValuePairs[i]),
-                                dimensionKeyValuePairs[i + 1]);
-                          }
-                        }
-                        row.set(flattenedColumnIndices.get(DataXUtils.TIME_COLUMN), time);
-                        dimKeyTimeRows.forEach(
-                            r ->
-                                row.set(
-                                    flattenedColumnIndices.get(
-                                        r.get(columnIndices.get(DataXUtils.METRIC_COLUMN))),
-                                    r.get(columnIndices.get(DataXUtils.VALUE_COLUMN))));
-                        flattenedResults.addRow(row);
-                      });
-            });
-    return flattenedResults;
   }
 
   private QueryResults getDerivedResults(
