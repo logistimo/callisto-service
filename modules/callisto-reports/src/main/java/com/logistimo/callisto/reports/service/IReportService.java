@@ -24,7 +24,8 @@
 package com.logistimo.callisto.reports.service;
 
 import com.logistimo.callisto.model.ReportConfig;
-import com.logistimo.callisto.reports.ReportRequestModel;
+import com.logistimo.callisto.reports.model.DataXReportRequestModel;
+import com.logistimo.callisto.reports.model.ReportRequestModel;
 import com.logistimo.callisto.reports.model.ReportModel;
 import com.logistimo.callisto.reports.model.ReportResult;
 
@@ -38,5 +39,7 @@ public interface IReportService {
 
   ReportResult getReportData(ReportRequestModel reportRequestModel);
 
-  void saveReportConfig(ReportConfig reportConfig);
+    ReportResult getReportData(DataXReportRequestModel reportRequestModel);
+
+    void saveReportConfig(ReportConfig reportConfig);
 }

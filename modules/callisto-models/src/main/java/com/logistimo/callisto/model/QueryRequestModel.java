@@ -26,7 +26,7 @@ package com.logistimo.callisto.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mohan Raja
@@ -41,6 +41,7 @@ public class QueryRequestModel {
   public Integer size;
   public List<String> rowHeadings;
   public Integer offset;
+  public Set<String> dimensions;
 
   public QueryRequestModel() {
 
