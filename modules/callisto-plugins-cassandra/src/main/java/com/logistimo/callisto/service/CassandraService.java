@@ -23,8 +23,6 @@
 
 package com.logistimo.callisto.service;
 
-import com.google.gson.Gson;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.ConsistencyLevel;
@@ -39,35 +37,33 @@ import com.datastax.driver.core.exceptions.DriverException;
 import com.datastax.driver.core.exceptions.InvalidQueryException;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.SyntaxError;
+import com.google.gson.Gson;
 import com.logistimo.callisto.CallistoDataType;
+import com.logistimo.callisto.CassandraConnection;
 import com.logistimo.callisto.DataSourceType;
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoSyntaxErrorException;
 import com.logistimo.callisto.model.Datastore;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
 /**
- * @author Chandrakant
+ *  @author Chandrakant
  */
 @Service(value = "cassandra")
 public class CassandraService implements IDataBaseService {
 
-  private static final int DEFAULT_PAGE_SIZE = 5000;
+  private Map<String, CassandraConnection> dataStoreConnections = new HashMap<>();
 
-  private Cluster cluster;
-  private Session session;
-  private Integer serverConfigHash;
   private static final List<DataType.Name> numericDataTypes =
       new ArrayList<>(
           Arrays.asList(
@@ -101,24 +97,17 @@ public class CassandraService implements IDataBaseService {
       logger.info("Cassandra query filters: " + filters);
       Statement statement = getStatement(finalQuery);
       statement.setConsistencyLevel(ConsistencyLevel.LOCAL_QUORUM);
-      offset = Optional.of(offset.orElse(0));
-      if (size.isPresent()) {
-        statement.setFetchSize(getSize(size, offset));
-      }
       logger.info("Query Execution started");
       ResultSet rs = iSession.execute(statement);
-      if (offset.isPresent() && offset.get() > 0) {
-        skipRows(rs, statement, size, offset.get());
-      }
       ColumnDefinitions columnDefinitions = rs.getColumnDefinitions();
       results = setResultMetaData(results, columnDefinitions);
       List<String> headers = results.getHeadings();
-      if(rs.iterator() != null) {
+      if (rs.iterator() != null) {
         for (Row row : rs) {
           List<String> rowVal = new ArrayList<>(headers.size());
           for (int i = 0; i < headers.size(); i++) {
             Optional<String> rowElem = getRowElement(columnDefinitions, row, i);
-            if(rowElem.isPresent()) {
+            if (rowElem.isPresent()) {
               rowVal.add(rowElem.get());
             } else {
               rowVal.add("");
@@ -174,33 +163,6 @@ public class CassandraService implements IDataBaseService {
     return results;
   }
 
-  private int getSize(Optional<Integer> size, Optional<Integer> offset) {
-    if (offset.isPresent()) {
-      if (offset.get() > DEFAULT_PAGE_SIZE) {
-        return DEFAULT_PAGE_SIZE;
-      } else if (offset.get() > 0) {
-        return offset.get();
-      }
-    } else if (size.isPresent()) {
-      return size.get();
-    }
-    return DEFAULT_PAGE_SIZE;
-  }
-
-  private ResultSet skipRows(ResultSet rs, Statement st, Optional<Integer> size, int skip) {
-    while (skip-- > 0) {
-      if (rs.getAvailableWithoutFetching() == 1 && size.isPresent()) {
-        if (skip + size.get() < DEFAULT_PAGE_SIZE) {
-          st.setFetchSize(skip + size.get());
-        } else {
-          st.setFetchSize(DEFAULT_PAGE_SIZE);
-        }
-      }
-      rs.one();
-    }
-    return rs;
-  }
-
   @Override
   public DataSourceType getMetaFields() {
     DataSourceType dataSourceType = new DataSourceType();
@@ -213,49 +175,64 @@ public class CassandraService implements IDataBaseService {
     return dataSourceType;
   }
 
-  private Session getSession(Datastore datastore) {
-    Integer sHash = new Gson().toJson(datastore).hashCode();
-    if (!Objects.equals(serverConfigHash, sHash)) {
-      connect(datastore, true);
-    } else if (session == null || session.isClosed()) {
-      connect(datastore, false);
-    }
-    return session;
+  private int getHashCode(Datastore datastore) {
+    return new Gson().toJson(datastore).hashCode();
   }
 
-  private void connect(Datastore config, boolean reconnect) {
+  private Session getSession(Datastore datastore) {
+    if (dataStoreConnections.containsKey(datastore.getId())
+        && !Objects.equals(
+            dataStoreConnections.get(datastore.getId()).getServerConfigHash(),
+            getHashCode(datastore))) {
+      connect(datastore, true);
+    } else if (!dataStoreConnections.containsKey(datastore.getId())
+        || dataStoreConnections.get(datastore.getId()).getSession() == null
+        || dataStoreConnections.get(datastore.getId()).getSession().isClosed()) {
+      connect(datastore, false);
+    }
+    return dataStoreConnections.get(datastore.getId()).getSession();
+  }
+
+  private void connect(Datastore datastore, boolean reconnect) {
+    CassandraConnection conn =
+        dataStoreConnections.containsKey(datastore.getId())
+            ? dataStoreConnections.get(datastore.getId())
+            : new CassandraConnection();
+    dataStoreConnections.put(datastore.getId(), conn);
     try {
-      if (cluster == null || cluster.isClosed() || reconnect) {
-        String username = config.getUsername();
-        String password = config.getPassword();
-        if (StringUtils.isNotEmpty(username)
-            && StringUtils.isNotEmpty(password)) {
-          String[] hostArray = new String[config.getHosts().size()];
-          cluster =
-              buildCluster(config, username, password, hostArray);
+      if (reconnect
+          || dataStoreConnections.get(datastore.getId()).getCluster() == null
+          || dataStoreConnections.get(datastore.getId()).getCluster().isClosed()) {
+        String username = datastore.getUsername();
+        String password = datastore.getPassword();
+        Cluster cluster;
+        if (StringUtils.isNotEmpty(username) && StringUtils.isNotEmpty(password)) {
+          String[] hostArray = new String[datastore.getHosts().size()];
+          cluster = buildCluster(datastore, username, password, hostArray);
         } else {
-          String[] hostArray = new String[config.getHosts().size()];
-          cluster = buildCluster(config, hostArray);
+          String[] hostArray = new String[datastore.getHosts().size()];
+          cluster = buildCluster(datastore, hostArray);
         }
+        conn.setCluster(cluster);
       }
-      session = cluster.connect(config.getSchema());
-      serverConfigHash = new Gson().toJson(config).hashCode();
-      Metadata metadata = cluster.getMetadata();
+      conn.setSession(conn.getCluster().connect(datastore.getSchema()));
+      conn.setServerConfigHash(getHashCode(datastore));
+      Metadata metadata = dataStoreConnections.get(datastore.getId()).getCluster().getMetadata();
       logger.info(
           "Connected to cluster: "
-          + metadata.getClusterName()
-          + " with partitioner: "
-          + metadata.getPartitioner());
+              + metadata.getClusterName()
+              + " with partitioner: "
+              + metadata.getPartitioner());
     } catch (NoHostAvailableException e) {
       throw new DriverException("No host available exception", e);
     } catch (Exception e) {
-      serverConfigHash = null;
+      conn.setServerConfigHash(null);
       logger.error("Exception in cassandra Connection", e);
     }
   }
 
-  protected Cluster buildCluster(Datastore config, String username, String password,
-                               String[] hostArray) {
+  protected Cluster buildCluster(
+      Datastore config, String username, String password, String[] hostArray) {
     return Cluster.builder()
         .addContactPoints(config.getHosts().toArray(hostArray))
         .withPort(config.getPort())
