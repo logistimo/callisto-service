@@ -33,7 +33,7 @@ ADD custom-functions/* $CALLISTO_HOME/lib/
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN wget -P $CALLISTO_HOME/jmx/ http://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/0.6.0/elastic-apm-agent-0.6.0.jar \
+RUN wget -P $CALLISTO_HOME/jmx/ https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/0.6.0/elastic-apm-agent-0.6.0.jar \
         && chmod +x /docker-entrypoint.sh
 
 CMD ["/docker-entrypoint.sh"]
