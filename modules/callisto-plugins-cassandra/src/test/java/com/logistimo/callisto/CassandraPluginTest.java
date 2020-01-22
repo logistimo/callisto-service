@@ -128,46 +128,6 @@ public class CassandraPluginTest {
   }
 
   @Test
-  public void resultOffset1Test() {
-    Datastore datastore = new Datastore();
-    datastore.setId("id1");
-    datastore.setName("some-cassandra");
-    datastore.setType("cassandra");
-    datastore.setHosts(Collections.singletonList("localhost"));
-    datastore.setPort(27017);
-    datastore.setSchema("some-schema");
-    cassandraService.fetchRows(datastore, null, null, Optional.empty(), Optional.of(15));
-    verify(rs, times(15)).one();
-  }
-
-  @Test
-  public void resultOffset2Test() {
-    Datastore datastore = new Datastore();
-    datastore.setId("id1");
-    datastore.setName("some-cassandra");
-    datastore.setType("cassandra");
-    datastore.setHosts(Collections.singletonList("localhost"));
-    datastore.setPort(27017);
-    datastore.setSchema(DEFAULT_SCHEMA);
-    cassandraService.fetchRows(datastore, null, null, Optional.of(50), Optional.of(4000));
-    verify(rs, times(4000)).one();
-    verify(statement, times(1)).setFetchSize(4000);
-  }
-
-  @Test
-  public void resultOffset3Test() {
-    Datastore datastore = new Datastore();
-    datastore.setId("id1");
-    datastore.setName("some-cassandra");
-    datastore.setType("cassandra");
-    datastore.setHosts(Collections.singletonList("localhost"));
-    datastore.setPort(27017);
-    datastore.setSchema("some-schema");
-    cassandraService.fetchRows(datastore, null, null, Optional.empty(), Optional.of(9500));
-    verify(rs, times(9500)).one();
-  }
-
-  @Test
   public void constructQueryTest() throws Exception {
     Datastore datastore = new Datastore();
     datastore.setId("id1");
@@ -179,10 +139,9 @@ public class CassandraPluginTest {
     String query = "select this, that from some-table where other in (439843) and "
                    + "some-other in 'some-value'";
     Map<String, String> filters = new HashMap<>();
-    cassandraService.fetchRows(datastore, query, filters, Optional.empty(), Optional.of(9500));
+    cassandraService.fetchRows(datastore, query, filters, Optional.empty(), Optional.empty());
     assertEquals("select this, that from some-table where other in (439843) and some-other in "
                  + "'some-value'", this.query);
-    verify(rs, times(9500)).one();
   }
 
   @Test
