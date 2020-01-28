@@ -43,7 +43,6 @@ public class AppConstants {
   public static final String ADD = "+";
   public static final String SUBTRACT = "-";
   public static final String INVERT = "!";
-  public static final String EQUALS = "=";
   public static final String ZERO = "0";
   public static final String EMPTY = "";
   public static final String DOT = ".";
