@@ -26,14 +26,10 @@ package com.logistimo.callisto.function;
 import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ResultManager;
 import com.logistimo.callisto.exception.CallistoException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +37,9 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by chandrakant on 22/05/17.
@@ -49,12 +47,11 @@ import java.util.stream.Stream;
 public class FunctionUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(FunctionUtil.class);
-  private static final String[]
-      delimiters =
-      {AppConstants.ADD, AppConstants.COMMA, AppConstants.CLOSE_BRACKET,
+  private static final Set<String> delimiters =
+      new HashSet<>(Arrays.asList(AppConstants.ADD, AppConstants.COMMA, AppConstants.CLOSE_BRACKET,
           AppConstants.DIVIDE, AppConstants.MULTIPLY, AppConstants.SPACE,
           AppConstants.PIPE, AppConstants.SUBTRACT, AppConstants.CLOSE_CURLY_BRACKET,
-          String.valueOf(AppConstants.DOLLAR)};
+          AppConstants.INVERT, String.valueOf(AppConstants.DOLLAR)));
 
   private FunctionUtil() {
     // Util class
@@ -122,15 +119,16 @@ public class FunctionUtil {
     return matches;
   }
 
-  public static boolean isDelimiter(char c) {
-    String s = String.valueOf(c);
-    return Stream.of(delimiters).anyMatch(s::equals);
+  private static boolean isDelimiter(char c) {
+    return delimiters.contains(String.valueOf(c));
   }
 
   private static String getVariable(String text, int startIndex) {
     OptionalInt index =
-        Stream.of(delimiters).mapToInt(s -> StringUtils.indexOf(text, s, startIndex + 1))
-            .map(i -> i == -1 ? Integer.MAX_VALUE : i).min();
+        delimiters.stream()
+            .mapToInt(delimiter -> StringUtils.indexOf(text, delimiter, startIndex + 1))
+            .map(i -> i == -1 ? Integer.MAX_VALUE : i)
+            .min();
     if (index.isPresent() && index.getAsInt() != Integer.MAX_VALUE) {
       return StringUtils.substring(text, startIndex, index.getAsInt());
     } else {
