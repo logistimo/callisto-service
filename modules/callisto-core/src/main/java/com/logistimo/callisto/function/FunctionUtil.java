@@ -207,9 +207,11 @@ public class FunctionUtil {
    * @param val      String for parsing and modification
    * @param headings List of column names
    * @param row      List of column results, which is a result row in general
+   * @param defaultReplacement      Default replacement value to use if variable is not found
    * @return String after all the variables are replaced with respective results
    */
-  public static String replaceVariables(String val, List<String> headings, List<String> row)
+  public static String replaceVariables(String val, List<String> headings, List<String> row,
+      String defaultReplacement)
       throws CallistoException {
     List<String> variables = getAllVariables(val, AppConstants.DOLLAR);
     variables.sort((v1, v2) -> Integer.compare(v2.length(), v1.length()));
@@ -218,20 +220,23 @@ public class FunctionUtil {
       if (index != -1) {
         if(StringUtils.isNotEmpty(row.get(index))){
           val = StringUtils.replace(val, variable, row.get(index));
-        }else{
-          logger.error("Variable "+ variable +" not found in results. So replacing "
-                       + "with empty character in expression: " + val);
-          val = StringUtils.replace(val, variable, AppConstants.EMPTY);
+        } else {
+          val = StringUtils.replace(val, variable, defaultReplacement);
         }
       } else {
         if (row.size() == headings.size()) {
           logger.warn("Unknown variable found in Math function: " + val);
           throw new CallistoException("Q102", variable, headings.toString());
         }
-        val = StringUtils.replace(val, variable, AppConstants.EMPTY);
+        val = StringUtils.replace(val, variable, defaultReplacement);
       }
     }
     return val;
+  }
+
+  public static String replaceVariables(String val, List<String> headings, List<String> row)
+      throws CallistoException {
+    return replaceVariables(val, headings, row, AppConstants.EMPTY);
   }
 
   /**

@@ -125,7 +125,7 @@ public class MathFunction implements ICallistoFunction {
       throw new CallistoException("Q101", val);
     }
     String expression = getParameter(val);
-    expression = FunctionUtil.replaceVariables(expression, headings, row);
+    expression = FunctionUtil.replaceVariables(expression, headings, row, "null");
     if (StringUtils.isEmpty(expression)) {
       return AppConstants.EMPTY;
     }
