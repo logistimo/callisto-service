@@ -119,7 +119,6 @@ public class MathFunction implements ICallistoFunction {
       IConstantService constantService,
       ICallistoFunction linkFunction)
       throws CallistoException {
-    val = val.replaceAll("\\s+", "");
     if (StringUtils.countMatches(val, AppConstants.OPEN_BRACKET)
         != StringUtils.countMatches(val, AppConstants.CLOSE_BRACKET)) {
       throw new CallistoException("Q101", val);
