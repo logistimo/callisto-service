@@ -38,11 +38,11 @@ public class QueryText {
 
   @Id private String id;
 
-  @SerializedName("user_id")
+  @SerializedName(value = "user_id", alternate = "userId")
   private String userId = "logistimo";
 
   @Indexed
-  @SerializedName("query_id")
+  @SerializedName(value = "query_id", alternate = "queryId")
   private String queryId;
 
   @SerializedName("query")
@@ -51,7 +51,7 @@ public class QueryText {
   @SerializedName("columns")
   private String columns;
 
-  @SerializedName("datastore_id")
+  @SerializedName(value = "datastore_id",alternate = "datastoreId")
   private String datastoreId;
 
   public String getId() {
