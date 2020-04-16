@@ -161,7 +161,7 @@ public class QueryController {
 
 
   @RequestMapping(value = "/run", method = RequestMethod.POST)
-  public ResponseEntity runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)
+  public ResponseEntity<QueryResults> runQuery(@RequestBody QueryRequestModel model, HttpServletRequest request)
       throws CallistoException {
     QueryResults results = new QueryResults();
     if (model.columnText != null && !model.columnText.isEmpty()) {
