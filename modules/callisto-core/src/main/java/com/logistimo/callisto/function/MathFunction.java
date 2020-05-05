@@ -50,7 +50,9 @@ import java.util.Objects;
 
 import javax.annotation.Resource;
 
-/** Created by chandrakant on 18/05/17. */
+/**
+ * Created by chandrakant on 18/05/17.
+ */
 @Component(value = "math")
 public class MathFunction implements ICallistoFunction {
 
@@ -58,11 +60,18 @@ public class MathFunction implements ICallistoFunction {
   private static final String NAME = "math";
   private static final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 
-    @Resource IConstantService constantService;
+  @Resource
+  IConstantService constantService;
 
   @Autowired
   @Qualifier("link")
   ICallistoFunction linkFunction;
+
+  @Autowired
+  @Qualifier("prev")
+  ICallistoFunction prevFunction;
+
+  private FunctionParam functionParam;
 
   @Override
   public String getName() {
@@ -71,13 +80,12 @@ public class MathFunction implements ICallistoFunction {
 
   @Override
   public String getResult(FunctionParam functionParam) throws CallistoException {
+    this.functionParam = functionParam;
     return calculateExpression(
         functionParam.getRequest(),
         functionParam.function,
         functionParam.getResultHeadings(),
-        functionParam.getResultRow(),
-        constantService,
-        linkFunction);
+        functionParam.getResultRow());
   }
 
   @Override
@@ -104,57 +112,45 @@ public class MathFunction implements ICallistoFunction {
 
   /**
    * @param request request model containing userId and filters
-   * @param val expression to be parsed, all the variables in this expressions should be numeric
-   *     otherwise returns null. Math function supports Link and ConstantText functions as variables
-   *     in the parameter.
-   * @param constantService instance of IConstantService for constant function
-   * @param linkFunction instance of ICallistoFunction for Link function
+   * @param val     expression to be parsed, all the variables in this expressions should be numeric
+   *                otherwise returns null. Math function supports Link and ConstantText functions
+   *                as variables in the parameter.
    * @return calculated value of the expression
    */
-  public static String calculateExpression(
+  String calculateExpression(
       QueryRequestModel request,
       String val,
       List<String> headings,
-      List<String> row,
-      IConstantService constantService,
-      ICallistoFunction linkFunction)
+      List<String> row)
       throws CallistoException {
     if (StringUtils.countMatches(val, AppConstants.OPEN_BRACKET)
         != StringUtils.countMatches(val, AppConstants.CLOSE_BRACKET)) {
       throw new CallistoException("Q101", val);
     }
     String expression = getParameter(val);
+    expression = replacePrevFunction(request, headings, row, expression);
     expression = FunctionUtil.replaceVariables(expression, headings, row, "null");
     if (StringUtils.isEmpty(expression)) {
       return AppConstants.EMPTY;
     }
     if (request != null) {
-      expression = replaceConstants(request.userId, expression, constantService);
+      expression = replaceConstants(request.userId, expression);
     }
-    expression = replaceLinks(request, headings, row, expression, linkFunction);
+    expression = replaceLinks(request, headings, row, expression);
     return String.valueOf(getExpressionValueByScriptEngine(expression));
-    /*String result = new DecimalFormat("#.#####").format(getParenthesisValue(
-        AppConstants.OPEN_BRACKET + expression + AppConstants.CLOSE_BRACKET));
-    if (Objects.equals(result, "null")) {
-      logger.warn("getParenthesisValue returned NULL for expression: " + expression);
-      result = "0";
-    }
-    result = removeTrailingZeros(result);
-    return result;*/
   }
 
-  public static String removeTrailingZeros(String num) {
+  static String removeTrailingZeros(String num) {
     return !num.contains(AppConstants.DOT)
         ? num
         : num.replaceAll("0*$", AppConstants.EMPTY).replaceAll("\\.$", AppConstants.EMPTY);
   }
 
-  private static String replaceLinks(
+  private String replaceLinks(
       QueryRequestModel request,
       List<String> headings,
       List<String> row,
-      final String val,
-      ICallistoFunction linkFunction)
+      final String val)
       throws CallistoException {
     String result = val;
     try {
@@ -186,8 +182,40 @@ public class MathFunction implements ICallistoFunction {
     return result;
   }
 
-  private static String replaceConstants(
-      String userId, String val, IConstantService constantService) throws CallistoException {
+  private String replacePrevFunction(
+      QueryRequestModel request,
+      List<String> headings,
+      List<String> row,
+      final String val)
+      throws CallistoException {
+    String result = val;
+    try {
+      int prevFunctionCount =
+          StringUtils.countMatches(val, prevFunction.getName() + AppConstants.OPEN_BRACKET);
+      int after = 0;
+      for (int i = 0; i < prevFunctionCount; i++) {
+        int sIndex = val.indexOf(prevFunction.getName() + AppConstants.OPEN_BRACKET, after);
+        int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
+        after = eIndex + 1;
+        String functionText = val.substring(sIndex, eIndex + 1);
+        FunctionParam prevFunctionParam =
+            new FunctionParam(
+                request,
+                headings,
+                row,
+                AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE,
+                functionParam.getResultSet()
+            );
+        result = StringUtils.replace(val, functionText, prevFunction.getResult(prevFunctionParam));
+      }
+    } catch (Exception e) {
+      logger.warn("Error while replacing links in expression :" + val, e);
+    }
+    return result;
+  }
+
+  private String replaceConstants(
+      String userId, String val) throws CallistoException {
     try {
       int constantCount =
           StringUtils.countMatches(
@@ -215,11 +243,11 @@ public class MathFunction implements ICallistoFunction {
     return val;
   }
 
-  public static BigDecimal getParenthesisValue(String expression) throws CallistoException {
+  BigDecimal getParenthesisValue(String expression) throws CallistoException {
     assert (Objects.equals(String.valueOf(expression.charAt(0)), AppConstants.OPEN_BRACKET)
         && Objects.equals(
-            String.valueOf(expression.charAt(expression.length() - 1)),
-            AppConstants.CLOSE_BRACKET));
+        String.valueOf(expression.charAt(expression.length() - 1)),
+        AppConstants.CLOSE_BRACKET));
     String substr = StringUtils.substring(expression, 1, expression.length() - 1);
     if (StringUtils.isNotEmpty(expression)) {
       if (!StringUtils.contains(substr, AppConstants.OPEN_BRACKET)
@@ -251,7 +279,7 @@ public class MathFunction implements ICallistoFunction {
   /**
    * @param val expression to be parsed for parenthesis
    * @return returns a List of Parenthesis as Pair of (startIndex, endIndex), outermost parenthesis
-   *     only and not nested ones.
+   * only and not nested ones.
    */
   public static List<Pair> getParenths(String val) {
     Deque<Integer> stack = new ArrayDeque<>();
@@ -274,11 +302,11 @@ public class MathFunction implements ICallistoFunction {
    * javax.script.ScriptEngine} can also be used.
    *
    * @param expr arithmetic expression to be parsed, should contain only numbers and operations, no
-   *     parenthesis or variables
+   *             parenthesis or variables
    * @return calculated value of expression.
    * @throws CallistoException in case Number parsing exceptions
    */
-  public static Double getExpressionValue(String expr) throws CallistoException {
+  Double getExpressionValue(String expr) throws CallistoException {
     ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
     assert (!StringUtils.contains(expr, AppConstants.OPEN_BRACKET)
         && !StringUtils.contains(expr, AppConstants.CLOSE_BRACKET)
