@@ -25,25 +25,23 @@ package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.QueryRequestModel;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.collections.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Wrapper class for holding different parameters of Functions Created by chandrakant on 25/05/17.
  */
 public class FunctionParam {
+
   private QueryRequestModel request;
   private List<String> resultHeadings;
   private List<String> resultRow;
@@ -55,7 +53,8 @@ public class FunctionParam {
   // dimension set
   private Set<String> dimensions;
 
-  public FunctionParam() {}
+  public FunctionParam() {
+  }
 
   public FunctionParam(QueryRequestModel request, String escaping, List<String> rowHeadings) {
     this.request = request;
@@ -147,11 +146,12 @@ public class FunctionParam {
           if (StringUtils.compare(row.get(finalColumnIndex), resultRow.get(finalColumnIndex)) > 0) {
             break;
           }
-          if(dimensionKeys.stream().anyMatch(dimensionKey ->
+          if (dimensionKeys.stream().anyMatch(dimensionKey ->
               StringUtils.isEmpty(resultRow.get(columnsIndices.get(dimensionKey)))
-              || StringUtils.isEmpty(row.get(columnsIndices.get(dimensionKey)))
-              || !Objects.equals(resultRow.get(columnsIndices.get(dimensionKey)), row.get(columnsIndices.get(dimensionKey))))) {
-              continue;
+                  || StringUtils.isEmpty(row.get(columnsIndices.get(dimensionKey)))
+                  || !Objects.equals(resultRow.get(columnsIndices.get(dimensionKey)),
+                  row.get(columnsIndices.get(dimensionKey))))) {
+            continue;
           }
           aggregatedColumnValues
               .entrySet()
@@ -170,6 +170,36 @@ public class FunctionParam {
     return rowCopy;
   }
 
+  Optional<String> getPreviousNonZeroValueOfColumnIfPresent(String column, String sortByColumn,
+      String sortByColumnValue) {
+    if (this.resultSet != null
+        && CollectionUtils.isNotEmpty(this.resultSet.getRows())
+        && CollectionUtils.isNotEmpty(resultHeadings)) {
+      List<List<String>> copyOfRows = new ArrayList<>(resultSet.getRows());
+
+      int columnIndex = getColumnIndex(column);
+      int sortByColumnIndex = getColumnIndex(sortByColumn);
+
+      List<String> maxSortedColumnValueRow = null;
+      if (columnIndex >= 0 && sortByColumnIndex >= 0) {
+        for (List<String> row : copyOfRows) {
+          if ((maxSortedColumnValueRow == null ||
+              StringUtils.compare(row.get(sortByColumnIndex),
+                  maxSortedColumnValueRow.get(sortByColumnIndex)) > 0)
+              && StringUtils.compare(row.get(sortByColumnIndex), sortByColumnValue) < 0
+              && StringUtils.isNoneEmpty(row.get(columnIndex))
+              && BigDecimal.ZERO.compareTo(new BigDecimal(row.get(columnIndex))) < 0) {
+            maxSortedColumnValueRow = row;
+          }
+        }
+      }
+      if (maxSortedColumnValueRow != null) {
+        return Optional.of(maxSortedColumnValueRow.get(columnIndex));
+      }
+    }
+    return Optional.empty();
+  }
+
   private int getColumnIndex(String column) {
     int columnIndex = -1;
     for (int i = 0; i < resultHeadings.size(); i++) {
@@ -184,11 +214,11 @@ public class FunctionParam {
     return resultSet;
   }
 
-    public Set<String> getDimensions() {
-        return dimensions;
-    }
+  public Set<String> getDimensions() {
+    return dimensions;
+  }
 
-    public void setDimensions(Set<String> dimensions) {
-        this.dimensions = dimensions;
-    }
+  public void setDimensions(Set<String> dimensions) {
+    this.dimensions = dimensions;
+  }
 }
