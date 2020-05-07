@@ -23,6 +23,8 @@
 
 package com.logistimo.callisto.function;
 
+import static org.apache.commons.collections4.SetUtils.emptyIfNull;
+
 import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.model.QueryRequestModel;
 import java.math.BigDecimal;
@@ -33,6 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -171,7 +174,7 @@ public class FunctionParam {
   }
 
   Optional<String> getPreviousNonZeroValueOfColumnIfPresent(String column, String sortByColumn,
-      String sortByColumnValue) {
+      String sortByColumnValue, Set<String> dimensionKeys) {
     if (this.resultSet != null
         && CollectionUtils.isNotEmpty(this.resultSet.getRows())
         && CollectionUtils.isNotEmpty(resultHeadings)) {
@@ -179,7 +182,9 @@ public class FunctionParam {
 
       int columnIndex = getColumnIndex(column);
       int sortByColumnIndex = getColumnIndex(sortByColumn);
-
+      Map<String, Integer> dimensionIndices = emptyIfNull(dimensionKeys).stream()
+          .collect(Collectors.toMap(
+              Function.identity(), this::getColumnIndex));
       List<String> maxSortedColumnValueRow = null;
       if (columnIndex >= 0 && sortByColumnIndex >= 0) {
         for (List<String> row : copyOfRows) {
@@ -188,7 +193,9 @@ public class FunctionParam {
                   maxSortedColumnValueRow.get(sortByColumnIndex)) > 0)
               && StringUtils.compare(row.get(sortByColumnIndex), sortByColumnValue) < 0
               && StringUtils.isNoneEmpty(row.get(columnIndex))
-              && BigDecimal.ZERO.compareTo(new BigDecimal(row.get(columnIndex))) < 0) {
+              && BigDecimal.ZERO.compareTo(new BigDecimal(row.get(columnIndex))) < 0
+              && dimensionIndices.entrySet().stream()
+              .allMatch(e -> Objects.equals(row.get(e.getValue()), resultRow.get(e.getValue())))) {
             maxSortedColumnValueRow = row;
           }
         }
