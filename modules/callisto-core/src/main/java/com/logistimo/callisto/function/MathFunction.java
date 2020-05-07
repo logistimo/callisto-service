@@ -206,6 +206,7 @@ public class MathFunction implements ICallistoFunction {
                 AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE,
                 functionParam.getResultSet()
             );
+        prevFunctionParam.setDimensions(this.functionParam.getDimensions());
         result = StringUtils.replace(val, functionText, prevFunction.getResult(prevFunctionParam));
       }
     } catch (Exception e) {
