@@ -62,7 +62,7 @@ public class ResultManagerTest {
 
   @Before
   public void setUp() {
-    mathFunction = new MathFunction(null, null, null);
+    mathFunction = new MathFunction();
     bottomxFunction = new BottomxFunction();
     topxFunction = new TopxFunction();
   }
