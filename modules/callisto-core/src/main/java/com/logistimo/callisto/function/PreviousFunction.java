@@ -38,7 +38,7 @@ public class PreviousFunction implements ICallistoFunction {
     if (StringUtils.isEmpty(resultRow.get(columnIndex)) || BigDecimal.ZERO
         .equals(new BigDecimal(resultRow.get(columnIndex)))) {
       return functionParam.getPreviousNonZeroValueOfColumnIfPresent(parameters[0], parameters[1],
-          resultRow.get(sortByColumnIndex)).orElse(defaultResult);
+          resultRow.get(sortByColumnIndex), functionParam.getDimensions()).orElse(defaultResult);
     }
     return defaultResult;
   }

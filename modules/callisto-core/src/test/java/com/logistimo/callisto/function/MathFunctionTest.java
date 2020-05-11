@@ -44,7 +44,9 @@ public class MathFunctionTest {
 
   @Before
   public void init() {
-    mathFunction = new MathFunction();
+    AggregateFunction aggregateFunction = new AggregateFunction();
+    mathFunction = new MathFunction(null, new PreviousFunction(), aggregateFunction);
+    aggregateFunction.setMathFunction(mathFunction);
   }
 
   @Test
@@ -162,8 +164,8 @@ public class MathFunctionTest {
     resultSet.addRow(row6);
     resultSet.addRow(row7);
     String function = "$$math(100*$abc/prev(def,t))$$";
-    mathFunction.prevFunction = new PreviousFunction();
-    FunctionParam param = new FunctionParam(new QueryRequestModel(), headings, row4, function, resultSet);
+    FunctionParam param = new FunctionParam(new QueryRequestModel(), headings, row4, function,
+        resultSet);
     String result = mathFunction.getResult(param);
     assertEquals("50", result);
 
@@ -174,5 +176,40 @@ public class MathFunctionTest {
     param = new FunctionParam(new QueryRequestModel(), headings, row6, function, resultSet);
     result = mathFunction.getResult(param);
     assertEquals("25", result);
+  }
+
+  @Test
+  public void replaceAggrFunctionTest() {
+    QueryRequestModel model = new QueryRequestModel();
+    final List<String> headings = Arrays.asList("abc", "def", "t");
+    final List<String> row1 = Arrays.asList("100", "350", "2020-01");
+    final List<String> row2 = Arrays.asList("200", "30", "2020-02");
+    final List<String> row3 = Arrays.asList("171", "0", "2020-03");
+    final List<String> row4 = Arrays.asList("100", "20", "2020-04");
+    final List<String> row5 = Arrays.asList("110", "25", "2020-05");
+    final List<String> row6 = Arrays.asList("264", "15", "2020-06");
+    final List<String> row7 = Arrays.asList("150", "5", "2020-07");
+    QueryResults resultSet = new QueryResults();
+    resultSet.setHeadings(headings);
+    resultSet.addRow(row1);
+    resultSet.addRow(row2);
+    resultSet.addRow(row3);
+    resultSet.addRow(row4);
+    resultSet.addRow(row5);
+    resultSet.addRow(row6);
+    resultSet.addRow(row7);
+    String function = "$$math(100*$abc/aggr($def,t))$$";
+    FunctionParam param = new FunctionParam(new QueryRequestModel(), headings, row4, function,
+        resultSet);
+    String result = mathFunction.getResult(param);
+    assertEquals("25", result);
+
+    param = new FunctionParam(new QueryRequestModel(), headings, row3, function, resultSet);
+    result = mathFunction.getResult(param);
+    assertEquals("45", result);
+
+    param = new FunctionParam(new QueryRequestModel(), headings, row6, function, resultSet);
+    result = mathFunction.getResult(param);
+    assertEquals("60", result);
   }
 }
