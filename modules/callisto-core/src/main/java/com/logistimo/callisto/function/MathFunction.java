@@ -63,15 +63,22 @@ public class MathFunction implements ICallistoFunction {
   @Resource
   IConstantService constantService;
 
-  @Autowired
-  @Qualifier("link")
-  ICallistoFunction linkFunction;
+  final ICallistoFunction linkFunction;
 
-  @Autowired
-  @Qualifier("prev")
-  ICallistoFunction prevFunction;
+  final ICallistoFunction prevFunction;
+
+  final ICallistoFunction aggregateFunction;
 
   private FunctionParam functionParam;
+
+  public MathFunction(
+      @Qualifier("link") ICallistoFunction linkFunction,
+      @Qualifier("prev") ICallistoFunction prevFunction,
+      @Qualifier("aggr") ICallistoFunction aggregateFunction) {
+    this.linkFunction = linkFunction;
+    this.prevFunction = prevFunction;
+    this.aggregateFunction = aggregateFunction;
+  }
 
   @Override
   public String getName() {
@@ -129,6 +136,7 @@ public class MathFunction implements ICallistoFunction {
     }
     String expression = getParameter(val);
     expression = replacePrevFunction(request, headings, row, expression);
+    expression = replaceAggrFunction(request, headings, row, expression);
     expression = FunctionUtil.replaceVariables(expression, headings, row, "null");
     if (StringUtils.isEmpty(expression)) {
       return AppConstants.EMPTY;
@@ -210,7 +218,40 @@ public class MathFunction implements ICallistoFunction {
         result = StringUtils.replace(val, functionText, prevFunction.getResult(prevFunctionParam));
       }
     } catch (Exception e) {
-      logger.warn("Error while replacing links in expression :" + val, e);
+      logger.warn("Error while replacing prev function results in expression :" + val, e);
+    }
+    return result;
+  }
+
+  private String replaceAggrFunction(
+      QueryRequestModel request,
+      List<String> headings,
+      List<String> row,
+      final String val)
+      throws CallistoException {
+    String result = val;
+    try {
+      int aggrFunctionCount =
+          StringUtils.countMatches(val, aggregateFunction.getName() + AppConstants.OPEN_BRACKET);
+      int after = 0;
+      for (int i = 0; i < aggrFunctionCount; i++) {
+        int sIndex = val.indexOf(aggregateFunction.getName() + AppConstants.OPEN_BRACKET, after);
+        int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
+        after = eIndex + 1;
+        String functionText = val.substring(sIndex, eIndex + 1);
+        FunctionParam aggrFunctionParam =
+            new FunctionParam(
+                request,
+                headings,
+                row,
+                AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE,
+                functionParam.getResultSet()
+            );
+        aggrFunctionParam.setDimensions(this.functionParam.getDimensions());
+        result = StringUtils.replace(val, functionText, aggregateFunction.getResult(aggrFunctionParam));
+      }
+    } catch (Exception e) {
+      logger.warn("Error while replacing aggr function results in expression :" + val, e);
     }
     return result;
   }
@@ -319,7 +360,7 @@ public class MathFunction implements ICallistoFunction {
       Deque<Integer> operators = stackPair.getSecond();
       return calculate(values, operators);
     } catch (NumberFormatException e) {
-      logger.warn("Invalid arithmetic expression: " + expr);
+      logger.warn("Invalid arithmetic expression: " + expr, e);
     } catch (Exception e) {
       logger.error("Exception in getExpressionValue()", e);
     }
@@ -330,8 +371,8 @@ public class MathFunction implements ICallistoFunction {
     try {
       return new BigDecimal(engine.eval(expression).toString());
     } catch (Exception e) {
-      logger.error("Exception while evaluating expression: " + expression);
-      throw new CallistoException("Invalid arithmetic expression: " + expression);
+      logger.error("Exception while evaluating expression: " + expression, e);
+      throw new CallistoException("Invalid arithmetic expression: " + expression, e);
     }
   }
 

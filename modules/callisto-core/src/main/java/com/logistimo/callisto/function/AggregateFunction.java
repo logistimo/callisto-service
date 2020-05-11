@@ -23,6 +23,8 @@
 
 package com.logistimo.callisto.function;
 
+import static org.apache.commons.collections4.SetUtils.emptyIfNull;
+
 import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
 import com.logistimo.callisto.exception.CallistoException;
@@ -37,13 +39,17 @@ import org.springframework.stereotype.Component;
 @Component("aggr")
 public class AggregateFunction implements ICallistoFunction {
 
-  @Autowired
-  @Qualifier("math")
   private ICallistoFunction mathFunction;
 
   @Override
   public String getName() {
     return "aggr";
+  }
+
+  @Autowired
+  @Qualifier("math")
+  public void setMathFunction(ICallistoFunction mathFunction) {
+    this.mathFunction = mathFunction;
   }
 
   @Override
@@ -57,7 +63,8 @@ public class AggregateFunction implements ICallistoFunction {
             .collect(Collectors.toList());
     List<String> rowsCopySortedByColumn =
         functionParam.getRowsCopySortedByColumn(
-            sortByColumn, new HashSet<>(columnsInArithmeticExpression), functionParam.getDimensions());
+            sortByColumn, new HashSet<>(columnsInArithmeticExpression),
+            emptyIfNull(functionParam.getDimensions()));
     FunctionParam mathFunctionParam =
         new FunctionParam(
             functionParam.getRequest(),
@@ -76,7 +83,7 @@ public class AggregateFunction implements ICallistoFunction {
     String sortByColumn = params.substring(StringUtils.lastIndexOf(params, AppConstants.COMMA) + 1);
     String arithmeticExpression =
         params.substring(0, StringUtils.lastIndexOf(params, AppConstants.COMMA));
-    return new String[] {sortByColumn, arithmeticExpression};
+    return new String[]{sortByColumn, arithmeticExpression};
   }
 
   private String getMathFunction(String arithmeticExpression) {
@@ -97,4 +104,5 @@ public class AggregateFunction implements ICallistoFunction {
   public int getMaxArgLength() {
     return 2;
   }
+
 }
