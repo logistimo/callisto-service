@@ -63,20 +63,29 @@ public class MathFunction implements ICallistoFunction {
   @Resource
   IConstantService constantService;
 
-  final ICallistoFunction linkFunction;
+  private ICallistoFunction linkFunction;
 
-  final ICallistoFunction prevFunction;
+  private ICallistoFunction prevFunction;
 
-  final ICallistoFunction aggregateFunction;
+  private ICallistoFunction aggregateFunction;
 
   private FunctionParam functionParam;
 
-  public MathFunction(
-      @Qualifier("link") ICallistoFunction linkFunction,
-      @Qualifier("prev") ICallistoFunction prevFunction,
-      @Qualifier("aggr") ICallistoFunction aggregateFunction) {
+  @Autowired
+  @Qualifier("link")
+  public void setLinkFunction(ICallistoFunction linkFunction) {
     this.linkFunction = linkFunction;
+  }
+
+  @Autowired
+  @Qualifier("prev")
+  public void setPrevFunction(ICallistoFunction prevFunction) {
     this.prevFunction = prevFunction;
+  }
+
+  @Autowired
+  @Qualifier("aggr")
+  public void setAggregateFunction(ICallistoFunction aggregateFunction) {
     this.aggregateFunction = aggregateFunction;
   }
 
@@ -248,7 +257,8 @@ public class MathFunction implements ICallistoFunction {
                 functionParam.getResultSet()
             );
         aggrFunctionParam.setDimensions(this.functionParam.getDimensions());
-        result = StringUtils.replace(val, functionText, aggregateFunction.getResult(aggrFunctionParam));
+        result = StringUtils
+            .replace(val, functionText, aggregateFunction.getResult(aggrFunctionParam));
       }
     } catch (Exception e) {
       logger.warn("Error while replacing aggr function results in expression :" + val, e);

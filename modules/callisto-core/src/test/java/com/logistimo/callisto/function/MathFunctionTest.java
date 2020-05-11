@@ -45,7 +45,9 @@ public class MathFunctionTest {
   @Before
   public void init() {
     AggregateFunction aggregateFunction = new AggregateFunction();
-    mathFunction = new MathFunction(null, new PreviousFunction(), aggregateFunction);
+    mathFunction = new MathFunction();
+    mathFunction.setPrevFunction(new PreviousFunction());
+    mathFunction.setAggregateFunction(aggregateFunction);
     aggregateFunction.setMathFunction(mathFunction);
   }
 
