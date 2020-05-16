@@ -25,14 +25,20 @@ package com.logistimo.callisto.function;
 
 import com.logistimo.callisto.AppConstants;
 import com.logistimo.callisto.ICallistoFunction;
+import com.logistimo.callisto.QueryResults;
 import com.logistimo.callisto.exception.CallistoException;
 import com.logistimo.callisto.model.QueryRequestModel;
 import com.logistimo.callisto.service.IConstantService;
-
 import java.math.BigDecimal;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import javax.annotation.Resource;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
-
-import java.text.DecimalFormat;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.Objects;
-
-import javax.annotation.Resource;
 
 /**
  * Created by chandrakant on 18/05/17.
@@ -68,8 +65,6 @@ public class MathFunction implements ICallistoFunction {
   private ICallistoFunction prevFunction;
 
   private ICallistoFunction aggregateFunction;
-
-  private FunctionParam functionParam;
 
   @Autowired
   @Qualifier("link")
@@ -96,12 +91,7 @@ public class MathFunction implements ICallistoFunction {
 
   @Override
   public String getResult(FunctionParam functionParam) throws CallistoException {
-    this.functionParam = functionParam;
-    return calculateExpression(
-        functionParam.getRequest(),
-        functionParam.function,
-        functionParam.getResultHeadings(),
-        functionParam.getResultRow());
+    return calculateExpression(functionParam);
   }
 
   @Override
@@ -127,33 +117,33 @@ public class MathFunction implements ICallistoFunction {
   }
 
   /**
-   * @param request request model containing userId and filters
-   * @param val     expression to be parsed, all the variables in this expressions should be numeric
-   *                otherwise returns null. Math function supports Link and ConstantText functions
-   *                as variables in the parameter.
    * @return calculated value of the expression
    */
-  String calculateExpression(
-      QueryRequestModel request,
-      String val,
-      List<String> headings,
-      List<String> row)
+  String calculateExpression(FunctionParam functionParam)
       throws CallistoException {
-    if (StringUtils.countMatches(val, AppConstants.OPEN_BRACKET)
-        != StringUtils.countMatches(val, AppConstants.CLOSE_BRACKET)) {
-      throw new CallistoException("Q101", val);
+    String function = functionParam.function;
+    if (StringUtils.countMatches(function, AppConstants.OPEN_BRACKET)
+        != StringUtils.countMatches(function, AppConstants.CLOSE_BRACKET)) {
+      throw new CallistoException("Q101", function);
     }
-    String expression = getParameter(val);
-    expression = replacePrevFunction(request, headings, row, expression);
-    expression = replaceAggrFunction(request, headings, row, expression);
-    expression = FunctionUtil.replaceVariables(expression, headings, row, "null");
+    String expression = getParameter(function);
+    QueryRequestModel request = functionParam.getRequest();
+    expression = replacePrevFunction(request, functionParam.getResultHeadings(),
+        functionParam.getResultRow(), expression, functionParam.getResultSet(),
+        functionParam.getDimensions());
+    expression = replaceAggrFunction(request, functionParam.getResultHeadings(),
+        functionParam.getResultRow(), expression, functionParam.getResultSet(),
+        functionParam.getDimensions());
+    expression = FunctionUtil.replaceVariables(expression, functionParam.getResultHeadings(),
+        functionParam.getResultRow(), "null");
     if (StringUtils.isEmpty(expression)) {
       return AppConstants.EMPTY;
     }
     if (request != null) {
       expression = replaceConstants(request.userId, expression);
     }
-    expression = replaceLinks(request, headings, row, expression);
+    expression = replaceLinks(request, functionParam.getResultHeadings(),
+        functionParam.getResultRow(), expression);
     return String.valueOf(getExpressionValueByScriptEngine(expression));
   }
 
@@ -203,7 +193,9 @@ public class MathFunction implements ICallistoFunction {
       QueryRequestModel request,
       List<String> headings,
       List<String> row,
-      final String val)
+      final String val,
+      QueryResults resultSet,
+      Set<String> dimensions)
       throws CallistoException {
     String result = val;
     try {
@@ -221,9 +213,9 @@ public class MathFunction implements ICallistoFunction {
                 headings,
                 row,
                 AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE,
-                functionParam.getResultSet()
+                resultSet
             );
-        prevFunctionParam.setDimensions(this.functionParam.getDimensions());
+        prevFunctionParam.setDimensions(dimensions);
         result = StringUtils.replace(val, functionText, prevFunction.getResult(prevFunctionParam));
       }
     } catch (Exception e) {
@@ -236,7 +228,7 @@ public class MathFunction implements ICallistoFunction {
       QueryRequestModel request,
       List<String> headings,
       List<String> row,
-      final String val)
+      final String val, QueryResults resultSet, Set<String> dimensions)
       throws CallistoException {
     String result = val;
     try {
@@ -254,9 +246,9 @@ public class MathFunction implements ICallistoFunction {
                 headings,
                 row,
                 AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE,
-                functionParam.getResultSet()
+                resultSet
             );
-        aggrFunctionParam.setDimensions(this.functionParam.getDimensions());
+        aggrFunctionParam.setDimensions(dimensions);
         result = StringUtils
             .replace(val, functionText, aggregateFunction.getResult(aggrFunctionParam));
       }

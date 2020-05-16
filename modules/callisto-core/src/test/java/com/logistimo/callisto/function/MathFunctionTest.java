@@ -107,34 +107,32 @@ public class MathFunctionTest {
     String[] headings = {"var3", "var2", "var1"};
     String[] row = {"123456", "200", "145.5"};
     String expr = "$$math(100*($var1/$var2))$$";
+    FunctionParam param = new FunctionParam();
+    param.function = expr;
+    param.setResultHeadings(Arrays.asList(headings));
+    param.setResultRow(Arrays.asList(row));
     String str =
-        mathFunction.calculateExpression(
-            null, expr, Arrays.asList(headings), Arrays.asList(row));
+        mathFunction.calculateExpression(param);
     assertEquals(72.75, Double.valueOf(str), 0.01);
-    expr = "$$math(100*($var1/$var2)*($var3/720))$$";
+    param.function = "$$math(100*($var1/$var2)*($var3/720))$$";
     str =
-        mathFunction.calculateExpression(
-            null, expr, Arrays.asList(headings), Arrays.asList(row));
+        mathFunction.calculateExpression(param);
     assertEquals(12474.2, Double.valueOf(str), 0.1);
-    expr = "$$math(100*($var1*41.2/($var3/720)))$$";
+    param.function = "$$math(100*($var1*41.2/($var3/720)))$$";
     str =
-        mathFunction.calculateExpression(
-            null, expr, Arrays.asList(headings), Arrays.asList(row));
+        mathFunction.calculateExpression(param);
     assertEquals(3496.07, Double.valueOf(str), 0.01);
-    expr = "$$math(100*(($var1+41.2)/($var3/720)))$$";
+    param.function = "$$math(100*(($var1+41.2)/($var3/720)))$$";
     str =
-        mathFunction.calculateExpression(
-            null, expr, Arrays.asList(headings), Arrays.asList(row));
+        mathFunction.calculateExpression(param);
     assertEquals(108.88, Double.valueOf(str), 0.01);
-    expr = "$$math((42.453/30*321)*(342.4*(21138.4/2493)+24))$$";
+    param.function = "$$math((42.453/30*321)*(342.4*(21138.4/2493)+24))$$";
     str =
-        mathFunction.calculateExpression(
-            null, expr, Arrays.asList(headings), Arrays.asList(row));
+        mathFunction.calculateExpression(param);
     assertEquals(1329692.25, Double.valueOf(str), 0.01);
-    expr = "$$math(((42.453/30*321)*(342.4*(21138.4/$var1)+24))/1000)$$";
+    param.function = "$$math(((42.453/30*321)*(342.4*(21138.4/$var1)+24))/1000)$$";
     str =
-        mathFunction.calculateExpression(
-            null, expr, Arrays.asList(headings), Arrays.asList(row));
+        mathFunction.calculateExpression(param);
     assertEquals(22607.08, Double.valueOf(str), 0.01);
   }
 
