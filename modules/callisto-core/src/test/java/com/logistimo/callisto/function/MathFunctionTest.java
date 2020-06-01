@@ -212,4 +212,39 @@ public class MathFunctionTest {
     result = mathFunction.getResult(param);
     assertEquals("60", result);
   }
+
+  @Test
+  public void replaceAggr2FunctionTest() {
+    QueryRequestModel model = new QueryRequestModel();
+    final List<String> headings = Arrays.asList("abc", "def", "t");
+    final List<String> row1 = Arrays.asList("100", "350", "2020-01");
+    final List<String> row2 = Arrays.asList("200", "30", "2020-02");
+    final List<String> row3 = Arrays.asList("175", "0", "2020-03");
+    final List<String> row4 = Arrays.asList("100", "20", "2020-04");
+    final List<String> row5 = Arrays.asList("110", "25", "2020-05");
+    final List<String> row6 = Arrays.asList("305", "15", "2020-06");
+    final List<String> row7 = Arrays.asList("150", "5", "2020-07");
+    QueryResults resultSet = new QueryResults();
+    resultSet.setHeadings(headings);
+    resultSet.addRow(row1);
+    resultSet.addRow(row2);
+    resultSet.addRow(row3);
+    resultSet.addRow(row4);
+    resultSet.addRow(row5);
+    resultSet.addRow(row6);
+    resultSet.addRow(row7);
+    String function = "$$math(aggr($def,t) > 0 ? ((aggr($abc,t)*100)/(aggr($def,t))) : 0)$$";
+    FunctionParam param = new FunctionParam(new QueryRequestModel(), headings, row4, function,
+        resultSet);
+    String result = mathFunction.getResult(param);
+    assertEquals("143.75", result);
+
+    param = new FunctionParam(new QueryRequestModel(), headings, row3, function, resultSet);
+    result = mathFunction.getResult(param);
+    assertEquals("125", result);
+
+    param = new FunctionParam(new QueryRequestModel(), headings, row6, function, resultSet);
+    result = mathFunction.getResult(param);
+    assertEquals("225", result);
+  }
 }
