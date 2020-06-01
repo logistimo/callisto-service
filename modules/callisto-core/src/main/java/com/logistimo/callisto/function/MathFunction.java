@@ -157,23 +157,21 @@ public class MathFunction implements ICallistoFunction {
       QueryRequestModel request,
       List<String> headings,
       List<String> row,
-      final String val)
+      String expression)
       throws CallistoException {
-    String result = val;
     try {
       int linkCount =
-          StringUtils.countMatches(val, FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET);
-      int after = 0;
+          StringUtils
+              .countMatches(expression, FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET);
       for (int i = 0; i < linkCount; i++) {
-        int sIndex = val.indexOf(FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET, after);
-        if (sIndex != 0 && val.charAt(sIndex - 1) == AppConstants.DOLLAR) {
-          throw new CallistoException("Q001", val);
+        int startIndex = expression.indexOf(FunctionType.LINK.toString() + AppConstants.OPEN_BRACKET);
+        if (startIndex != 0 && expression.charAt(startIndex - 1) == AppConstants.DOLLAR) {
+          throw new CallistoException("Q001", expression);
         }
-        // TODO if Link function supports '(' inside parameters in future then eIndex needs to be
+        // TODO if Link function supports '(' inside parameters in future then endIndex needs to be
         // changed
-        int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
-        after = eIndex + 1;
-        String functionText = val.substring(sIndex, eIndex + 1);
+        int endIndex = expression.indexOf(AppConstants.CLOSE_BRACKET, startIndex);
+        String functionText = expression.substring(startIndex, endIndex + 1);
         FunctionParam param =
             new FunctionParam(
                 request,
@@ -181,32 +179,34 @@ public class MathFunction implements ICallistoFunction {
                 row,
                 AppConstants.FN_ENCLOSE + functionText + AppConstants.FN_ENCLOSE,
                 null);
-        result = StringUtils.replace(val, functionText, linkFunction.getResult(param));
+        expression = StringUtils
+            .replace(expression, functionText, linkFunction.getResult(param), 1);
       }
     } catch (Exception e) {
-      logger.warn("Error while replacing links in expression :" + val, e);
+      logger.warn("Error while replacing links in expression :" + expression, e);
     }
-    return result;
+    return expression;
   }
 
   private String replacePrevFunction(
       QueryRequestModel request,
       List<String> headings,
       List<String> row,
-      final String val,
+      String expression,
       QueryResults resultSet,
       Set<String> dimensions)
       throws CallistoException {
-    String result = val;
     try {
       int prevFunctionCount =
-          StringUtils.countMatches(val, prevFunction.getName() + AppConstants.OPEN_BRACKET);
-      int after = 0;
+          StringUtils.countMatches(expression, prevFunction.getName() + AppConstants.OPEN_BRACKET);
       for (int i = 0; i < prevFunctionCount; i++) {
-        int sIndex = val.indexOf(prevFunction.getName() + AppConstants.OPEN_BRACKET, after);
-        int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
-        after = eIndex + 1;
-        String functionText = val.substring(sIndex, eIndex + 1);
+        int startIndex = expression.indexOf(prevFunction.getName() + AppConstants.OPEN_BRACKET);
+        if (startIndex < 0) {
+          // possible in case same function expression is present multiple times, all of those will be replaced together
+          break;
+        }
+        int endIndex = expression.indexOf(AppConstants.CLOSE_BRACKET, startIndex);
+        String functionText = expression.substring(startIndex, endIndex + 1);
         FunctionParam prevFunctionParam =
             new FunctionParam(
                 request,
@@ -216,30 +216,34 @@ public class MathFunction implements ICallistoFunction {
                 resultSet
             );
         prevFunctionParam.setDimensions(dimensions);
-        result = StringUtils.replace(val, functionText, prevFunction.getResult(prevFunctionParam));
+        expression = StringUtils
+            .replace(expression, functionText, prevFunction.getResult(prevFunctionParam));
       }
     } catch (Exception e) {
-      logger.warn("Error while replacing prev function results in expression :" + val, e);
+      logger.warn("Error while replacing prev function results in expression :" + expression, e);
     }
-    return result;
+    return expression;
   }
 
   private String replaceAggrFunction(
       QueryRequestModel request,
       List<String> headings,
       List<String> row,
-      final String val, QueryResults resultSet, Set<String> dimensions)
+      String expression,
+      QueryResults resultSet, Set<String> dimensions)
       throws CallistoException {
-    String result = val;
     try {
       int aggrFunctionCount =
-          StringUtils.countMatches(val, aggregateFunction.getName() + AppConstants.OPEN_BRACKET);
-      int after = 0;
+          StringUtils
+              .countMatches(expression, aggregateFunction.getName() + AppConstants.OPEN_BRACKET);
       for (int i = 0; i < aggrFunctionCount; i++) {
-        int sIndex = val.indexOf(aggregateFunction.getName() + AppConstants.OPEN_BRACKET, after);
-        int eIndex = val.indexOf(AppConstants.CLOSE_BRACKET, after);
-        after = eIndex + 1;
-        String functionText = val.substring(sIndex, eIndex + 1);
+        int startIndex = expression.indexOf(aggregateFunction.getName() + AppConstants.OPEN_BRACKET);
+        if (startIndex < 0) {
+          // possible in case same function expression is present multiple times, all of those will be replaced together
+          break;
+        }
+        int endIndex = expression.indexOf(AppConstants.CLOSE_BRACKET, startIndex);
+        String functionText = expression.substring(startIndex, endIndex + 1);
         FunctionParam aggrFunctionParam =
             new FunctionParam(
                 request,
@@ -249,13 +253,13 @@ public class MathFunction implements ICallistoFunction {
                 resultSet
             );
         aggrFunctionParam.setDimensions(dimensions);
-        result = StringUtils
-            .replace(val, functionText, aggregateFunction.getResult(aggrFunctionParam));
+        expression = StringUtils
+            .replace(expression, functionText, aggregateFunction.getResult(aggrFunctionParam));
       }
     } catch (Exception e) {
-      logger.warn("Error while replacing aggr function results in expression :" + val, e);
+      logger.warn("Error while replacing aggr function results in expression :" + expression, e);
     }
-    return result;
+    return expression;
   }
 
   private String replaceConstants(
