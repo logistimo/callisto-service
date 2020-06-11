@@ -14,8 +14,4 @@ exec java $JAVA_OPTS -cp $CALLISTO_HOME/*.jar \
 	-Dspring.data.mongodb.port=$MONGODB_PORT \
 	-javaagent:$CALLISTO_HOME/jmx/jmx_prometheus_javaagent-0.7.jar=$JAVA_AGENT_PORT:$CALLISTO_HOME/jmx/jmx_exporter.json \
 	-Dspring.data.mongodb.database=$CALLISTO_DATABASE \
-	-javaagent:$CALLISTO_HOME/jmx/elastic-apm-agent-0.6.0.jar \
-	-Delastic.apm.service_name=$SERVICE_NAME \
-    -Delastic.apm.application_packages=com.logistimo.callisto \
-    -Delastic.apm.server_url=http://$APM_SERVER_URL \
 	-Dloader.main=com.logistimo.callisto.CallistoApplication org.springframework.boot.loader.PropertiesLauncher
