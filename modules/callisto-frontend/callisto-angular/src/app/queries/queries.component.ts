@@ -13,7 +13,7 @@ import {QueryListingComponent} from '../query-listing/query-listing.component'
 })
 export class QueriesComponent implements OnInit {
 
-  private path: string;
+  path: string;
   constructor(private router: Router, private route: ActivatedRoute, private querySharingService : QuerySharingService) {
 
   }

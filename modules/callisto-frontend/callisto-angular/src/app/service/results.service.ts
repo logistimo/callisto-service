@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 
 import {QueryResults} from '../model/queryresult'
 import {GraphResult} from '../model/graph-result'

@@ -1,21 +1,20 @@
-import { Component, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
-import { DataService } from '../service/data.service';
-import { ResultsService } from '../service/results.service';
-import { QueryService } from '../service/query.service';
-import { QuerySharingService } from '../service/query-sharing.service';
+import {Component, OnInit} from '@angular/core';
+import {DataService} from '../service/data.service';
+import {ResultsService} from '../service/results.service';
+import {QuerySharingService} from '../service/query-sharing.service';
 import {QueryText} from '../model/querytext'
 import {GraphResult} from '../model/graph-result'
 import {QueryResults} from '../model/queryresult'
 import {Filter} from '../model/filter'
 import {FilterResult} from '../model/filter-result'
 import {QueryRequest} from '../model/queryrequest'
-import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
-import { Utils } from '../util/utils'
-import { FilterResultsAdapterUtils } from '../util/filter.results.adapter'
-import {ReactiveFormsModule, FormControl, FormsModule, FormArray, FormGroup, AbstractControl } from '@angular/forms';
-import {MatSnackBar} from '@angular/material';
-import 'rxjs/add/operator/filter'
-import { Subscription } from 'rxjs/Subscription';
+import {ActivatedRoute} from '@angular/router';
+import {Utils} from '../util/utils'
+import {FilterResultsAdapterUtils} from '../util/filter.results.adapter'
+import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import {MatSnackBar} from '@angular/material/snack-bar';
+
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-query',
@@ -25,17 +24,17 @@ import { Subscription } from 'rxjs/Subscription';
 })
 export class QueryComponent implements OnInit {
 
-  private query : QueryText;
-  private filtersMetadata;
+  query : QueryText;
+  filtersMetadata;
   private domainFilters : Filter[] = [];
   private filterResults = {};
   filterFormGroup: FormGroup;
   private filterDisplayNames;
   private filters = {};
   private columnsFilterId;
-  private showGraph;
-  private filtersListColumnSize;
-  private filtersListColumnDimensionRatio;
+  showGraph;
+  filtersListColumnSize;
+  filtersListColumnDimensionRatio;
   private subscriptions: Array<Subscription> = [];
 
   constructor(private dataService:DataService, private resultsService:ResultsService,
@@ -47,7 +46,7 @@ export class QueryComponent implements OnInit {
     this.filtersMetadata = [];
   }
 
-  private onQueryChanged(newQuery) {
+  onQueryChanged(newQuery) {
     this.query.query = newQuery;
     this.extractFiltersFromQuery(this.query.query);
     this.extractInternalFiltersFromQueriesInFunctions();

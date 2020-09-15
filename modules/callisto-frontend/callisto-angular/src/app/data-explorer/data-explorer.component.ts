@@ -2,7 +2,7 @@ import {Component, ElementRef, Inject, Input, OnInit} from '@angular/core';
 import {ResultsService} from "../service/results.service";
 import {Utils} from "../util/utils";
 import {GraphResult} from "../model/graph-result";
-import {MatTableDataSource} from "@angular/material";
+import {MatTableDataSource} from "@angular/material/table";
 
 @Component({
   selector: 'app-data-explorer',

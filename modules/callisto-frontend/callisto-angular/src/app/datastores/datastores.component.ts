@@ -1,9 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Datastore } from '../model/datastore';
-import { DataService } from '../service/data.service';
-import {Utils} from '../util/utils'
-import { QueryService } from '../service/query.service';
-import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {Datastore} from '../model/datastore';
+import {DataService} from '../service/data.service';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ApiResponse} from "../model/apiresponse";
 
 
@@ -28,7 +26,8 @@ export class DatastoresComponent implements OnInit {
     });
   }
 
-  private navigateToNewDatastore() {
+
+  navigateToNewDatastore() {
     this.router.navigate(['new'], { relativeTo: this.route });
   }
 
