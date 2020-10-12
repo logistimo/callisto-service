@@ -16,7 +16,7 @@ export class ReportsComponent implements OnInit {
 
   }
 
-  private reports: ReportModel[];
+  reports: ReportModel[];
 
   ngOnInit() {
     this.dataService.getReports()
@@ -25,7 +25,7 @@ export class ReportsComponent implements OnInit {
     });
   }
 
-  private navigateToNewReport() {
+  navigateToNewReport() {
     this.router.navigate(['../new-report'], { relativeTo: this.route });
   }
 

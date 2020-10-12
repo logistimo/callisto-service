@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Datastore } from '../model/datastore'
-import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
+import {Component, OnInit} from '@angular/core';
+import {Datastore} from '../model/datastore'
+import {FormControl} from '@angular/forms';
 import {Utils} from '../util/utils'
-import { DataService } from '../service/data.service';
-import { MatSnackBar } from '@angular/material';
+import {DataService} from '../service/data.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {debounceTime, distinctUntilChanged, filter, map} from "rxjs/operators";
 
 @Component({
   selector: 'app-new-datastore',
@@ -13,13 +14,14 @@ import { MatSnackBar } from '@angular/material';
 })
 export class NewDatastoreComponent implements OnInit {
 
-  private datastoreIdField : FormControl = new FormControl();
-  private datastoreModel : Datastore;
-  private datastoreIdUnavailable = true;
-  private searchedDatastore;
-  private _hostsCsv;
+  datastoreIdField: FormControl = new FormControl();
+  datastoreModel: Datastore;
+  datastoreIdUnavailable = true;
+  searchedDatastore;
+  _hostsCsv;
 
-  constructor(public snackBar:MatSnackBar, private dataService:DataService) { }
+  constructor(public snackBar: MatSnackBar, private dataService: DataService) {
+  }
 
   ngOnInit() {
     this.datastoreModel = new Datastore();
@@ -27,35 +29,35 @@ export class NewDatastoreComponent implements OnInit {
   }
 
   private checkDatastoreIdAvailability() {
-    this.datastoreIdField.valueChanges
-        .debounceTime(400)
-        .distinctUntilChanged()
-        .filter(term => {
-          this.datastoreIdUnavailable = Utils.checkNullEmpty(term) ? true : this.datastoreIdUnavailable;
-          if(Utils.checkNullEmpty(term)) {
-            this.updateDatastoreModel(new Datastore());
+    this.datastoreIdField.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      filter(term => {
+        this.datastoreIdUnavailable = Utils.checkNullEmpty(term) ? true : this.datastoreIdUnavailable;
+        if (Utils.checkNullEmpty(term)) {
+          this.updateDatastoreModel(new Datastore());
+        }
+        return Utils.checkNotNullEmpty(term);
+      }),
+      map(datastoreId => this.dataService.getDatastore(datastoreId)))
+      .subscribe(res => {
+        res.subscribe(datastore => {
+          if (Utils.checkNotNullEmpty(datastore)) {
+            this.datastoreIdUnavailable = true;
+            this.updateDatastoreModel(datastore);
+          } else {
+            this.datastoreIdUnavailable = false;
           }
-          return Utils.checkNotNullEmpty(term);
+          this.datastoreIdUnavailable = Utils.checkNotNullEmpty(datastore);
+          this.searchedDatastore = datastore;
         })
-        .map(datastoreId => this.dataService.getDatastore(datastoreId))
-        .subscribe(res => {
-          res.subscribe(datastore => {
-            if(Utils.checkNotNullEmpty(datastore)) {
-              this.datastoreIdUnavailable = true;
-              this.updateDatastoreModel(datastore);
-            } else {
-              this.datastoreIdUnavailable = false;
-            }
-            this.datastoreIdUnavailable = Utils.checkNotNullEmpty(datastore);
-            this.searchedDatastore = datastore;
-          })
-        });
+      });
   }
 
   private updateDatastoreModel(datastore: Datastore) {
-    if(Utils.checkNullEmpty(datastore.hosts)) {
+    if (Utils.checkNullEmpty(datastore.hosts)) {
       this._hostsCsv = '';
-    }else {
+    } else {
       this._hostsCsv = datastore.hosts.join(", ");
     }
     this.datastoreModel = datastore;
@@ -64,18 +66,18 @@ export class NewDatastoreComponent implements OnInit {
   private getHostsArrayFromCsv() {
     const hosts = [];
     this._hostsCsv.split(",").forEach(host => {
-          hosts.push(host.trim())
-        }
+        hosts.push(host.trim())
+      }
     );
     return hosts;
   }
 
-  private saveDatastore(event, datastoreModel: Datastore) {
+  saveDatastore(event, datastoreModel: Datastore) {
     datastoreModel.hosts = this.getHostsArrayFromCsv();
     this.dataService.saveDatastore(datastoreModel)
-        .subscribe(data => {
-          this.showSnackbar(data.msg);
-        });
+      .subscribe(data => {
+        this.showSnackbar(data.msg);
+      });
   }
 
   private showSnackbar(msg) {

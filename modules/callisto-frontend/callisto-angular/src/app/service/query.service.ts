@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { QueryText } from '../model/querytext';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
 export class QueryService {

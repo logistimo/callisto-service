@@ -1,25 +1,23 @@
-import { Component, OnInit, ElementRef, Inject, AfterViewInit } from '@angular/core';
-import {MatDialog, MatSnackBar, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
-import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
-import {Observable} from 'rxjs/Observable'
+import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {Component, ElementRef, Inject, OnInit} from '@angular/core';
+import {FormControl} from '@angular/forms';
 
 import {QueryText} from '../model/querytext'
-import {CallistoUser} from '../model/callistouser'
 import {Datastore} from '../model/datastore'
 import {QueryRequest} from '../model/queryrequest'
 import {Utils} from '../util/utils'
-import { DataService } from '../service/data.service';
-import { ResultsService } from '../service/results.service';
-import { QueryService } from '../service/query.service';
+import {DataService} from '../service/data.service';
+import {ResultsService} from '../service/results.service';
+import {QueryService} from '../service/query.service';
 
 import '../../../node_modules/pivottable/dist/pivot.min.js';
 import '../../../node_modules/pivottable/dist/pivot.min.css';
 
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/switchMap';
+
 import {ApiResponse} from "../model/apiresponse";
 import {GraphResult} from "../model/graph-result";
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material/dialog";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 
 @Component({
@@ -94,7 +92,7 @@ export class HomeComponent implements OnInit {
 })
 export class SaveQueryDialog {
     queryToSave: any;
-    private queryIdField: FormControl = new FormControl();
+    queryIdField: FormControl = new FormControl();
     searchedQueryText : QueryText;
     queryIdUnavailable = true;
 
@@ -105,14 +103,14 @@ export class SaveQueryDialog {
         @Inject(MAT_DIALOG_DATA) data: any) {
         this.queryToSave = data;
 
-        this.queryIdField.valueChanges
-            .debounceTime(400)
-            .distinctUntilChanged()
-            .filter(term => {
+        this.queryIdField.valueChanges.pipe(
+            debounceTime(400),
+            distinctUntilChanged(),
+            filter(term => {
                 this.queryIdUnavailable = Utils.checkNullEmpty(term) ? true : this.queryIdUnavailable;
                 return Utils.checkNotNullEmpty(term);
-            })
-            .map(queryId => this.dataService.getQuery(queryId))
+            }),
+            map(queryId => this.dataService.getQuery(queryId)))
             .subscribe(res => {
                 res.subscribe(queryResult => {
                     this.queryIdUnavailable = Utils.checkNotNullEmpty(queryResult);
@@ -125,7 +123,7 @@ export class SaveQueryDialog {
 
     }
 
-    private onCancelClick(): void {
+    onCancelClick(): void {
         this.dialogRef.close();
     }
 

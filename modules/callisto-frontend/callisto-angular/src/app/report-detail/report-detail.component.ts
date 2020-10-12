@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
-import { DataService } from '../service/data.service';
-import { ReportModel } from '../model/reportmodel'
-import { Filter } from '../model/filter'
-import { Utils } from '../util/utils'
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {DataService} from '../service/data.service';
+import {ReportModel} from '../model/reportmodel'
+import {Filter} from '../model/filter'
+import {Utils} from '../util/utils'
 
 @Component({
   selector: 'app-report-detail',
@@ -20,8 +20,8 @@ export class ReportDetailComponent implements OnInit {
   private type : string;
   private subType : string;
 
-  private report: ReportModel = new ReportModel();
-  private helpText : string;
+  report: ReportModel = new ReportModel();
+  helpText : string;
 
   ngOnInit() {
     const url = this.route.snapshot.url;

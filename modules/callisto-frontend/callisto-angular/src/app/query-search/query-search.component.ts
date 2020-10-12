@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import {ReactiveFormsModule, FormControl, FormsModule} from '@angular/forms';
+import {Component, OnInit} from '@angular/core';
+import {FormControl} from '@angular/forms';
 import {Utils} from '../util/utils'
-import { DataService } from '../service/data.service';
-import { QueryService } from '../service/query.service';
-import { QueryText } from '../model/querytext'
+import {DataService} from '../service/data.service';
+import {QueryService} from '../service/query.service';
+import {QueryText} from '../model/querytext'
+import {debounceTime, distinctUntilChanged, filter, map} from "rxjs/operators";
 
 @Component({
   selector: 'app-query-search',
@@ -12,36 +13,37 @@ import { QueryText } from '../model/querytext'
   providers: [DataService]
 })
 export class QuerySearchComponent implements OnInit {
-  private queryIdField: FormControl = new FormControl();
-  private resultQueryList;
-  private queryId : string;
-  private queryText : QueryText;
+  queryIdField: FormControl = new FormControl();
+  resultQueryList;
+  queryId: string;
+  queryText: QueryText;
 
 
   constructor(
-      private dataService:DataService,
-      private queryService:QueryService
+    private dataService: DataService,
+    private queryService: QueryService
   ) {
     this.queryIdField.valueChanges
-      .debounceTime(300)
-      .distinctUntilChanged()
-      .filter(term => Utils.checkNotNullEmpty(term))
-      .map(queryId => this.dataService.searchQueryIdLike(queryId))
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter(term => Utils.checkNotNullEmpty(term)),
+        map(queryId => this.dataService.searchQueryIdLike(queryId)))
       .subscribe(res => {
-          res.subscribe(queryIdList => {
-            this.resultQueryList = queryIdList;
-          })
-        });
+        res.subscribe(queryIdList => {
+          this.resultQueryList = queryIdList;
+        })
+      });
   }
 
-  queryIdSelected(event : any) {
+  queryIdSelected(event: any) {
     this.dataService.getQuery(this.queryId)
       .subscribe(queryText => {
-          this.queryText = queryText as QueryText;
-        })
+        this.queryText = queryText as QueryText;
+      })
   }
 
-  emitQueryText(event : any) {
+  emitQueryText(event: any) {
     this.queryService.changeState(this.queryText);
   }
 
